@@ -89,9 +89,9 @@ export function MapPanel() {
 
       <div className="mt-10 grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 border border-border rounded-xl overflow-hidden bg-card">
-          <div ref={mapEl} className="w-full h-[520px]" />
+          <div ref={mapEl} className="w-full h-[360px] sm:h-[480px] lg:h-[560px]" />
         </div>
-        <aside className="border border-border rounded-xl bg-card p-6 min-h-[520px]">
+        <aside className="border border-border rounded-xl bg-card p-5 sm:p-6 min-h-[320px] lg:min-h-[560px]">
           {loading ? (
             <div className="space-y-4 animate-pulse">
               <div className="flex items-center gap-2 text-muted-foreground">

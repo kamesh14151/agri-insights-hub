@@ -9,16 +9,16 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-40 backdrop-blur-md bg-background/80 border-b border-border">
       <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between gap-6">
-        <Link to="/" className="flex items-center gap-2 font-serif text-xl tracking-tight">
+        <Link to="/" className="flex items-center gap-2 font-serif text-lg sm:text-xl tracking-tight shrink-0">
           <Sprout className="w-5 h-5 text-primary" />
           <span>Agri AI</span>
         </Link>
-        <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
+        <nav className="hidden sm:flex items-center gap-4 md:gap-8 text-xs md:text-sm text-muted-foreground">
           <Link to="/analyze" activeProps={{ className: "text-foreground" }} className="hover:text-foreground transition">{t("nav_analyze")}</Link>
           <Link to="/map" activeProps={{ className: "text-foreground" }} className="hover:text-foreground transition">{t("nav_map")}</Link>
           <Link to="/weather" activeProps={{ className: "text-foreground" }} className="hover:text-foreground transition">{t("nav_weather")}</Link>
         </nav>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <select
             value={lang}
             onChange={(e) => {
@@ -34,12 +34,17 @@ export function Navbar() {
           </select>
           <Link
             to="/analyze"
-            className="hidden sm:inline-flex items-center px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition"
+            className="hidden md:inline-flex items-center px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition"
           >
             {t("cta_start")}
           </Link>
         </div>
       </div>
+      <nav className="sm:hidden flex items-center justify-around border-t border-border text-xs text-muted-foreground py-2.5">
+        <Link to="/analyze" activeProps={{ className: "text-foreground" }}>{t("nav_analyze")}</Link>
+        <Link to="/map" activeProps={{ className: "text-foreground" }}>{t("nav_map")}</Link>
+        <Link to="/weather" activeProps={{ className: "text-foreground" }}>{t("nav_weather")}</Link>
+      </nav>
     </header>
   );
 }
