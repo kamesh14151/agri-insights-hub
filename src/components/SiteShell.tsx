@@ -8,9 +8,8 @@ export function SiteShell({ children }: { children: ReactNode }) {
       <Navbar />
       <main>{children}</main>
       <footer className="border-t border-border mt-24">
-        <div className="max-w-[1200px] mx-auto px-6 py-10 flex flex-col sm:flex-row justify-between gap-3 text-sm text-muted-foreground">
+        <div className="max-w-[1200px] mx-auto px-6 py-10 text-sm text-muted-foreground">
           <p>© 2026 Agri AI. Built for Indian agriculture.</p>
-          <p>Powered by Lovable AI · OpenStreetMap · Open-Meteo</p>
         </div>
       </footer>
       <Chatbot />
