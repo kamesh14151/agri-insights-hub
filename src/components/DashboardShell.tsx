@@ -20,10 +20,13 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 
   const role = user?.role ?? "user";
 
+  const roleTitle = role === "admin" ? "Admin Dashboard" : role === "farmer" ? "Farmer Dashboard" : "Buyer Dashboard";
+  const roleBadge = role === "admin" ? "🛡️ Admin Dashboard" : role === "farmer" ? "🌾 Farmer Dashboard" : "🛒 Buyer Dashboard";
+
   const items = (() => {
     if (role === "admin") {
       return [
-        { to: "/app",             label: t("nav_admin_dash"),       icon: LayoutDashboard, exact: true },
+        { to: "/app",             label: "🛡️ Admin Dashboard",       icon: LayoutDashboard, exact: true },
         { to: "/app/admin",       label: t("nav_admin"),            icon: Shield },
         { to: "/app/marketplace", label: t("nav_marketplace_audit"),icon: Store },
         { to: "/app/profile",     label: t("nav_profile"),          icon: User },
@@ -32,7 +35,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
     }
     if (role === "farmer") {
       return [
-        { to: "/app",             label: t("nav_dashboard"),        icon: LayoutDashboard, exact: true },
+        { to: "/app",             label: "🌾 Farmer Dashboard",      icon: LayoutDashboard, exact: true },
         { to: "/app/disease",     label: t("nav_disease"),          icon: ScanLine },
         { to: "/app/iot",         label: t("nav_iot"),              icon: Cpu },
         { to: "/app/crops",       label: t("nav_crops"),            icon: Sprout },
@@ -46,7 +49,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
     }
     // Buyers ("user")
     return [
-      { to: "/app",             label: t("nav_dashboard"),        icon: LayoutDashboard, exact: true },
+      { to: "/app",             label: "🛒 Buyer Dashboard",       icon: LayoutDashboard, exact: true },
       { to: "/app/marketplace", label: t("nav_marketplace"),      icon: Store },
       { to: "/app/market",      label: t("nav_market"),           icon: TrendingUp },
       { to: "/app/weather",     label: t("nav_weather"),          icon: CloudSun },
@@ -120,12 +123,8 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             </span>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium">{user?.name ?? "Guest"}</p>
-              <p className="truncate text-xs text-muted-foreground">
-                {role === "admin"
-                  ? t("admin_console_eyebrow")
-                  : role === "farmer"
-                  ? t("farmer_workspace")
-                  : t("buyer_terminal")}
+              <p className="truncate text-xs font-medium text-primary">
+                {roleTitle}
               </p>
             </div>
             <button onClick={signOut} aria-label={t("sign_out")} title={t("sign_out")} className="text-muted-foreground hover:text-foreground">
@@ -144,16 +143,30 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             <button onClick={() => setOpen(true)} className="lg:hidden text-muted-foreground" aria-label="Open menu">
               <Menu className="h-5 w-5" />
             </button>
-            <p className="hidden lg:block text-sm text-muted-foreground truncate">
-              {t("welcome_back")},{" "}
-              <span className="text-foreground font-medium">{user?.name?.split(" ")[0] ?? "farmer"}</span> —{" "}
-              {role === "admin"
-                ? t("admin_intel_sub")
-                : role === "farmer"
-                ? t("field_intel_sub")
-                : t("buyer_intel_sub")}
-            </p>
-            <span className="lg:hidden font-serif text-base truncate">Agrisynapse</span>
+
+            {/* Desktop Header Title & Role Badge */}
+            <div className="hidden lg:flex items-center gap-3 min-w-0">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                {roleTitle}
+              </span>
+              <span className="text-sm text-muted-foreground truncate">
+                {t("welcome_back")},{" "}
+                <strong className="text-foreground font-medium">{user?.name?.split(" ")[0] ?? "User"}</strong> —{" "}
+                {role === "admin"
+                  ? t("admin_intel_sub")
+                  : role === "farmer"
+                  ? t("field_intel_sub")
+                  : t("buyer_intel_sub")}
+              </span>
+            </div>
+
+            {/* Mobile Header Title */}
+            <div className="lg:hidden flex items-center gap-2 min-w-0">
+              <span className="font-serif text-sm font-semibold text-primary truncate">
+                {roleBadge}
+              </span>
+            </div>
             <div className="flex items-center gap-2 justify-self-end">
               <select
                 value={lang}

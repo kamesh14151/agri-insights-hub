@@ -72,12 +72,66 @@ export type ServiceBookingRecord = {
   createdAt: string;
 };
 
+export type ShippingAddress = {
+  fullName: string;
+  phone: string;
+  street: string;
+  landmark?: string;
+  city: string;
+  state: string;
+  pincode: string;
+  addressType: "Home" | "Work" | "Farm Warehouse";
+};
+
+export type ShopOrderItem = {
+  id: string;
+  name: string;
+  qty: number;
+  price: number;
+  category?: string;
+  unit?: string;
+  sellerName?: string;
+  sellerEmail?: string;
+};
+
 export type ShopOrderRecord = {
   id: string;
-  items: { name: string; qty: number; price: number }[];
+  items: ShopOrderItem[];
+  subtotal: number;
+  deliveryFee: number;
+  discount: number;
   total: number;
+  buyerName: string;
+  buyerEmail: string;
+  buyerPhone: string;
+  shippingAddress: ShippingAddress;
+  deliverySpeed: "standard" | "express";
+  estimatedDeliveryDate: string;
+  paymentMethod: "dodo_payments" | "dodo_escrow" | "upi" | "cod";
   paymentId?: string;
-  status: "pending" | "confirmed";
+  paymentGateway: "dodo_live" | "dodo_escrow_sim";
+  status: "placed" | "packed" | "shipped" | "out_for_delivery" | "delivered" | "cancelled";
+  trackingNumber: string;
+  courierPartner: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ShopProductItem = {
+  id: string;
+  name: string;
+  category: "Seeds" | "Fertilizers" | "Pesticides" | "Tools" | "Irrigation" | "Bio-Inputs" | "Harvested Produce";
+  price: number;
+  unit: string;
+  rating: number;
+  stock: number;
+  desc: string;
+  sellerName: string;
+  sellerRole: "farmer" | "certified_vendor" | "admin";
+  sellerEmail?: string;
+  sellerPhone?: string;
+  location?: string;
+  isFarmerDirect?: boolean;
   createdAt: string;
 };
 
@@ -125,13 +179,167 @@ const globalOrders: MarketplaceOrder[] = [
   },
 ];
 
+const globalShopProducts: ShopProductItem[] = [
+  {
+    id: "p1",
+    name: "ADT 45 Paddy Seeds (High Germination Rate)",
+    category: "Seeds",
+    price: 780,
+    unit: "10 kg bag",
+    rating: 4.8,
+    stock: 45,
+    desc: "Certified high-yield short-duration paddy variety suited for Cauvery delta wetland conditions.",
+    sellerName: "Murugan Selvam",
+    sellerRole: "farmer",
+    sellerEmail: "kamesh14151@gmail.com",
+    sellerPhone: "+91 98421 12345",
+    location: "Erode, Tamil Nadu",
+    isFarmerDirect: true,
+    createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+  },
+  {
+    id: "p2",
+    name: "Hybrid Tomato Seeds (Arka Rakshak)",
+    category: "Seeds",
+    price: 340,
+    unit: "10 g packet",
+    rating: 4.9,
+    stock: 120,
+    desc: "Triple disease-resistant hybrid with 75 t/ha yield potential and deep red firm fruits.",
+    sellerName: "Lakshmi Devi",
+    sellerRole: "farmer",
+    sellerEmail: "lakshmi@agrisynapse.com",
+    sellerPhone: "+91 94432 99881",
+    location: "Madanapalle, AP",
+    isFarmerDirect: true,
+    createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
+  },
+  {
+    id: "p3",
+    name: "Organic Vermicompost & Earthworm Castings",
+    category: "Fertilizers",
+    price: 420,
+    unit: "30 kg bag",
+    rating: 4.7,
+    stock: 60,
+    desc: "100% farm-cured organic compost loaded with beneficial microbes, humic acid, and minerals.",
+    sellerName: "Sivakumar P",
+    sellerRole: "farmer",
+    sellerEmail: "sivakumar@agrisynapse.com",
+    sellerPhone: "+91 98433 11223",
+    location: "Tiruvannamalai, TN",
+    isFarmerDirect: true,
+    createdAt: new Date(Date.now() - 86400000 * 4).toISOString(),
+  },
+  {
+    id: "p4",
+    name: "Cold-Pressed Pure Neem Oil (1500 ppm Azadirachtin)",
+    category: "Pesticides",
+    price: 510,
+    unit: "1 L bottle",
+    rating: 4.6,
+    stock: 50,
+    desc: "Natural biological repellent effective against sucking pests, thrips, and mites. Eco-friendly.",
+    sellerName: "Kannan R",
+    sellerRole: "farmer",
+    sellerEmail: "kannan@agrisynapse.com",
+    sellerPhone: "+91 94888 77665",
+    location: "Salem, TN",
+    isFarmerDirect: true,
+    createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
+  },
+  {
+    id: "p5",
+    name: "Battery Knapsack Sprayer (12V / 16L)",
+    category: "Tools",
+    price: 3250,
+    unit: "unit",
+    rating: 4.5,
+    stock: 18,
+    desc: "High-pressure multi-nozzle electric backpack sprayer for effortless foliar application.",
+    sellerName: "Kisan Agro Tools Co.",
+    sellerRole: "certified_vendor",
+    sellerPhone: "+91 98940 33445",
+    location: "Coimbatore, TN",
+    isFarmerDirect: false,
+    createdAt: new Date(Date.now() - 86400000 * 10).toISOString(),
+  },
+  {
+    id: "p6",
+    name: "Inline Drip Lateral Pipe (16mm · 40cm Spacing)",
+    category: "Irrigation",
+    price: 1890,
+    unit: "400 m roll",
+    rating: 4.7,
+    stock: 30,
+    desc: "UV-stabilized virgin polymer drip laterals with pressure-compensating inline emitters.",
+    sellerName: "Cauvery Drip Tech",
+    sellerRole: "certified_vendor",
+    sellerPhone: "+91 98425 66778",
+    location: "Trichy, TN",
+    isFarmerDirect: false,
+    createdAt: new Date(Date.now() - 86400000 * 12).toISOString(),
+  },
+];
+
 export const enquiryStore: EnquiryRecord[] = [];
 export const bookingStore: ServiceBookingRecord[] = [];
-export const orderStore: ShopOrderRecord[] = [];
+export const orderStore: ShopOrderRecord[] = [
+  {
+    id: "ORD-AGRI-98421",
+    items: [
+      {
+        id: "p1",
+        name: "ADT 45 Paddy Seeds (High Germination Rate)",
+        qty: 2,
+        price: 780,
+        category: "Seeds",
+        unit: "10 kg bag",
+        sellerName: "Murugan Selvam",
+        sellerEmail: "kamesh14151@gmail.com",
+      },
+      {
+        id: "p3",
+        name: "Organic Vermicompost & Earthworm Castings",
+        qty: 1,
+        price: 420,
+        category: "Fertilizers",
+        unit: "30 kg bag",
+        sellerName: "Sivakumar P",
+        sellerEmail: "sivakumar@agrisynapse.com",
+      },
+    ],
+    subtotal: 1980,
+    deliveryFee: 0,
+    discount: 0,
+    total: 1980,
+    buyerName: "Kamesh",
+    buyerEmail: "kamesh14151@gmail.com",
+    buyerPhone: "+91 98765 43210",
+    shippingAddress: {
+      fullName: "Kamesh",
+      phone: "+91 98765 43210",
+      street: "Plot No. 14, Kaveri Mandi Complex",
+      landmark: "Near Farmer Produce Center",
+      city: "Salem",
+      state: "Tamil Nadu",
+      pincode: "636453",
+      addressType: "Farm Warehouse",
+    },
+    deliverySpeed: "standard",
+    estimatedDeliveryDate: "Thursday, Aug 6",
+    paymentMethod: "dodo_payments",
+    paymentId: "dodo_live_pay_99812",
+    paymentGateway: "dodo_live",
+    status: "shipped",
+    trackingNumber: "AGRI-DEL-984210",
+    courierPartner: "Delhivery Surface Express",
+    createdAt: new Date(Date.now() - 3600000 * 28).toISOString(),
+    updatedAt: new Date(Date.now() - 3600000 * 4).toISOString(),
+  },
+];
 
 // ── Dodo Payments Integration Engine ──
-const DODO_DEFAULT_PRODUCT_ID = "pdt_0NkaTplQ82JmIafBTeKxP";
-
 export async function createDodoSession(opts: {
   amount: number;       // total in INR
   currency?: string;
@@ -142,43 +350,65 @@ export async function createDodoSession(opts: {
   customerName?: string;
   metadata?: Record<string, string>;
 }): Promise<{ checkoutUrl: string; sessionId: string; gatewayMode: "live_redirect" | "escrow_simulation" }> {
-  const apiKey = process.env.DODO_PAYMENTS_API_KEY?.trim() || "";
+  // Support all common environment variable naming conventions
+  const apiKey = (
+    process.env.DODO_PAYMENTS_API_KEY ||
+    process.env.DODO_API_KEY ||
+    process.env.VITE_DODO_PAYMENTS_API_KEY ||
+    process.env.DODO_KEY ||
+    ""
+  ).trim();
 
   if (apiKey) {
-    const isLiveKey = !apiKey.includes("test_") && !apiKey.startsWith("test");
-    const endpoint = isLiveKey
-      ? "https://live.dodopayments.com/payments"
-      : "https://test.dodopayments.com/payments";
+    // If key has test prefix or environment is test, use test URL, otherwise live
+    const isExplicitTest =
+      apiKey.toLowerCase().startsWith("test_") ||
+      process.env.DODO_PAYMENTS_ENVIRONMENT === "test";
+
+    const baseUrl = isExplicitTest
+      ? "https://test.dodopayments.com"
+      : "https://live.dodopayments.com";
 
     try {
+      // 1. Resolve Product ID: Check env var or use merchant registered product
+      let productId = (
+        process.env.DODO_PAYMENTS_PRODUCT_ID ||
+        process.env.DODO_PRODUCT_ID ||
+        "pdt_0NkaTplQ82JmIafBTeKxP"
+      ).trim();
+
+      // 2. Create Payment / Checkout Session
       const body: Record<string, unknown> = {
         payment_link: true,
         product_cart: [
           {
-            product_id: DODO_DEFAULT_PRODUCT_ID,
-            quantity: Math.max(1, Math.round(opts.amount / 100)),
+            product_id: productId,
+            quantity: 1,
+            amount: Math.round(opts.amount * 100), // in paise
           },
         ],
         billing: {
-          city: "Chennai",
+          city: "Salem",
           country: "IN",
           state: "Tamil Nadu",
-          street: "Farm Road",
-          zipcode: "600001",
+          street: "Agro Commerce Hub",
+          zipcode: "636453",
         },
         customer: {
           create_new_customer: true,
           email: opts.customerEmail || "kamesh14151@gmail.com",
-          name: opts.customerName || "AJ STUDIOZ Farmer / Buyer",
+          name: opts.customerName || "AJ STUDIOZ Agri Buyer",
         },
         return_url: opts.successUrl,
         metadata: {
           description: opts.description,
+          platform: "Agrisynapse",
+          developer: "AJ STUDIOZ",
           ...(opts.metadata ?? {}),
         },
       };
 
-      const res = await fetch(endpoint, {
+      const res = await fetch(`${baseUrl}/payments`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${apiKey}`,
@@ -188,25 +418,25 @@ export async function createDodoSession(opts: {
       });
 
       if (res.ok) {
-        const data = await res.json() as { payment_id?: string; payment_link?: string; checkout_url?: string };
-        const checkoutUrl = data.payment_link || data.checkout_url;
-        if (checkoutUrl) {
+        const data = await res.json() as any;
+        const checkoutUrl = data?.payment_link || data?.checkout_url || data?.url;
+        if (checkoutUrl && typeof checkoutUrl === "string") {
           return {
-            sessionId: data.payment_id || `dodo_${Date.now()}`,
+            sessionId: data.payment_id || data.id || `dodo_${Date.now()}`,
             checkoutUrl,
             gatewayMode: "live_redirect",
           };
         }
       } else {
         const errText = await res.text();
-        console.warn(`[Dodo Payments Live/Test] (${res.status}): ${errText}. Seamlessly routing through Agrisynapse Production Escrow checkout.`);
+        console.warn(`[Dodo Payments] (${res.status}): ${errText}`);
       }
     } catch (err) {
       console.warn("[Dodo Payments] API call exception:", err);
     }
   }
 
-  // Production-grade instant Escrow checkout fallback
+  // Fallback direct escrow settlement URL
   const demoPaymentId = `dodo_escrow_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
   const joinChar = opts.successUrl.includes("?") ? "&" : "?";
   return {
@@ -518,22 +748,158 @@ export const confirmBooking = createServerFn({ method: "POST" })
 export const getBookings = createServerFn({ method: "GET" })
   .handler(async () => ({ bookings: [...bookingStore] }));
 
+// ── Agri Shop Server Functions ──
+
+// 1. Get all Shop Products (both Platform & Farmer Uploaded)
+export const getShopProducts = createServerFn({ method: "GET" })
+  .handler(async () => {
+    return { products: [...globalShopProducts] };
+  });
+
+// 2. Farmer Upload / List new product for sale in Agri Shop
+export const uploadShopProduct = createServerFn({ method: "POST" })
+  .validator(z.object({
+    name: z.string().min(2),
+    category: z.enum(["Seeds", "Fertilizers", "Pesticides", "Tools", "Irrigation", "Bio-Inputs", "Harvested Produce"]),
+    price: z.number().positive(),
+    unit: z.string().min(1),
+    stock: z.number().int().positive(),
+    desc: z.string().min(5),
+    sellerName: z.string().min(2),
+    sellerRole: z.enum(["farmer", "certified_vendor", "admin"]).default("farmer"),
+    sellerEmail: z.string().email().optional().default("kamesh14151@gmail.com"),
+    sellerPhone: z.string().min(10),
+    location: z.string().min(2),
+  }))
+  .handler(async ({ data }) => {
+    const id = `shop_prod_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+    const newProduct: ShopProductItem = {
+      id,
+      name: data.name,
+      category: data.category,
+      price: data.price,
+      unit: data.unit,
+      rating: 5.0,
+      stock: data.stock,
+      desc: data.desc,
+      sellerName: data.sellerName,
+      sellerRole: data.sellerRole,
+      sellerEmail: data.sellerEmail,
+      sellerPhone: data.sellerPhone,
+      location: data.location,
+      isFarmerDirect: data.sellerRole === "farmer",
+      createdAt: new Date().toISOString(),
+    };
+
+    globalShopProducts.unshift(newProduct);
+    return { success: true, product: newProduct };
+  });
+
+// 3. Delete / Remove a Shop Product (by seller or admin)
+export const deleteShopProduct = createServerFn({ method: "POST" })
+  .validator(z.object({ productId: z.string() }))
+  .handler(async ({ data }) => {
+    const idx = globalShopProducts.findIndex(p => p.id === data.productId);
+    if (idx !== -1) {
+      const removed = globalShopProducts.splice(idx, 1)[0];
+      return { success: true, removed };
+    }
+    return { success: false, error: "Product not found" };
+  });
+
+// 4. Create Shop Checkout (Dodo / Escrow / Amazon-style E-Commerce)
 export const createShopCheckout = createServerFn({ method: "POST" })
   .validator(z.object({
-    items: z.array(z.object({ id: z.string(), name: z.string(), qty: z.number(), price: z.number() })),
+    items: z.array(z.object({
+      id: z.string(),
+      name: z.string(),
+      qty: z.number().int().positive(),
+      price: z.number().positive(),
+      category: z.string().optional(),
+      unit: z.string().optional(),
+      sellerName: z.string().optional(),
+      sellerEmail: z.string().optional(),
+    })),
+    buyerName: z.string().min(1),
+    buyerEmail: z.string().email(),
+    buyerPhone: z.string().min(8),
+    shippingAddress: z.object({
+      fullName: z.string().min(1),
+      phone: z.string().min(8),
+      street: z.string().min(3),
+      landmark: z.string().optional().default(""),
+      city: z.string().min(2),
+      state: z.string().min(2),
+      pincode: z.string().min(4),
+      addressType: z.enum(["Home", "Work", "Farm Warehouse"]).default("Home"),
+    }),
+    deliverySpeed: z.enum(["standard", "express"]).default("standard"),
+    paymentMethod: z.enum(["dodo_payments", "dodo_escrow", "upi", "cod"]).default("dodo_payments"),
     baseUrl: z.string(),
   }))
   .handler(async ({ data }) => {
-    const total = data.items.reduce((s, i) => s + i.price * i.qty, 0);
-    const orderId = `ord_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+    const subtotal = data.items.reduce((s, i) => s + i.price * i.qty, 0);
+    const deliveryFee = data.deliverySpeed === "express" ? 99 : 0;
+    const discount = 0;
+    const total = subtotal + deliveryFee - discount;
 
-    orderStore.unshift({
-      id: orderId,
-      items: data.items.map(i => ({ name: i.name, qty: i.qty, price: i.price })),
-      total,
-      status: "pending",
-      createdAt: new Date().toISOString(),
+    const orderId = `ORD-AGRI-${Math.floor(10000 + Math.random() * 90000)}`;
+    const trackingNumber = `AGRI-TRK-${Math.floor(100000 + Math.random() * 900000)}`;
+    
+    // Calculate delivery date estimate
+    const now = new Date();
+    const daysToAdd = data.deliverySpeed === "express" ? 2 : 4;
+    const deliveryDate = new Date(now.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
+    const estimatedDeliveryDate = deliveryDate.toLocaleDateString("en-IN", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
     });
+
+    // Decrement stock for purchased items
+    for (const item of data.items) {
+      const prod = globalShopProducts.find(p => p.id === item.id);
+      if (prod) {
+        prod.stock = Math.max(0, prod.stock - item.qty);
+      }
+    }
+
+    const newOrder: ShopOrderRecord = {
+      id: orderId,
+      items: data.items.map(i => {
+        const prod = globalShopProducts.find(p => p.id === i.id);
+        return {
+          id: i.id,
+          name: i.name,
+          qty: i.qty,
+          price: i.price,
+          category: i.category || prod?.category || "Seeds",
+          unit: i.unit || prod?.unit || "unit",
+          sellerName: i.sellerName || prod?.sellerName || "Agri Certified Farmer",
+          sellerEmail: i.sellerEmail || prod?.sellerEmail || "farmer@agrisynapse.com",
+        };
+      }),
+      subtotal,
+      deliveryFee,
+      discount,
+      total,
+      buyerName: data.buyerName,
+      buyerEmail: data.buyerEmail,
+      buyerPhone: data.buyerPhone,
+      shippingAddress: data.shippingAddress,
+      deliverySpeed: data.deliverySpeed,
+      estimatedDeliveryDate,
+      paymentMethod: data.paymentMethod,
+      paymentId: `PAY-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
+      paymentGateway: data.paymentMethod === "dodo_payments" ? "dodo_live" : "dodo_escrow_sim",
+      status: "placed",
+      trackingNumber,
+      courierPartner: data.deliverySpeed === "express" ? "Blue Dart Express" : "Delhivery Mandi Logistics",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    orderStore.unshift(newOrder);
 
     const successUrl = `${data.baseUrl}/app/shop/success?order_id=${orderId}`;
     const cancelUrl = `${data.baseUrl}/app/shop`;
@@ -541,15 +907,70 @@ export const createShopCheckout = createServerFn({ method: "POST" })
     const session = await createDodoSession({
       amount: total,
       currency: "INR",
-      description: `Agri Shop order — ${data.items.length} item(s)`,
+      description: `Agri Shop Order #${orderId} (${data.items.length} item(s))`,
+      customerEmail: data.buyerEmail,
+      customerName: data.buyerName,
       successUrl,
       cancelUrl,
-      metadata: { orderId },
+      metadata: {
+        orderId,
+        buyerName: data.buyerName,
+        buyerPhone: data.buyerPhone,
+        deliveryAddress: `${data.shippingAddress.street}, ${data.shippingAddress.city}, ${data.shippingAddress.state} - ${data.shippingAddress.pincode}`,
+      },
     });
 
-    return { checkoutUrl: session.checkoutUrl, orderId, total, sessionId: session.sessionId };
+    return {
+      success: true,
+      order: newOrder,
+      checkoutUrl: session.checkoutUrl,
+      orderId,
+      total,
+      sessionId: session.sessionId,
+      gatewayMode: session.gatewayMode,
+    };
   });
 
+// 5. Update Shop Order Status (Farmer packs/dispatches order or marks delivered)
+export const updateShopOrderStatus = createServerFn({ method: "POST" })
+  .validator(z.object({
+    orderId: z.string(),
+    status: z.enum(["placed", "packed", "shipped", "out_for_delivery", "delivered", "cancelled"]),
+    courierPartner: z.string().optional(),
+    trackingNumber: z.string().optional(),
+  }))
+  .handler(async ({ data }) => {
+    const order = orderStore.find(o => o.id === data.orderId);
+    if (!order) {
+      return { success: false, error: "Order not found" };
+    }
+
+    order.status = data.status;
+    if (data.courierPartner) order.courierPartner = data.courierPartner;
+    if (data.trackingNumber) order.trackingNumber = data.trackingNumber;
+    order.updatedAt = new Date().toISOString();
+
+    return { success: true, order };
+  });
+
+// 6. Cancel Shop Order (by buyer if not yet dispatched)
+export const cancelShopOrder = createServerFn({ method: "POST" })
+  .validator(z.object({ orderId: z.string() }))
+  .handler(async ({ data }) => {
+    const order = orderStore.find(o => o.id === data.orderId);
+    if (!order) {
+      return { success: false, error: "Order not found" };
+    }
+    if (order.status === "shipped" || order.status === "delivered") {
+      return { success: false, error: "Cannot cancel order that has already been shipped." };
+    }
+
+    order.status = "cancelled";
+    order.updatedAt = new Date().toISOString();
+    return { success: true, order };
+  });
+
+// 7. Confirm Order Callback
 export const confirmOrder = createServerFn({ method: "POST" })
   .validator(z.object({ orderId: z.string(), paymentId: z.string().optional() }))
   .handler(async ({ data }) => {
@@ -557,19 +978,56 @@ export const confirmOrder = createServerFn({ method: "POST" })
     if (!order) {
       order = {
         id: data.orderId,
-        items: [{ name: "Organic Inputs & Bio-Fertilizers", qty: 1, price: 1200 }],
-        total: 1200,
-        status: "confirmed",
-        paymentId: data.paymentId ?? `dodo_${Date.now()}`,
+        items: [
+          {
+            id: "p1",
+            name: "ADT 45 Paddy Seeds (High Germination Rate)",
+            qty: 1,
+            price: 780,
+            category: "Seeds",
+            unit: "10 kg bag",
+            sellerName: "Murugan Selvam",
+          },
+        ],
+        subtotal: 780,
+        deliveryFee: 0,
+        discount: 0,
+        total: 780,
+        buyerName: "Kamesh",
+        buyerEmail: "kamesh14151@gmail.com",
+        buyerPhone: "+91 98765 43210",
+        shippingAddress: {
+          fullName: "Kamesh",
+          phone: "+91 98765 43210",
+          street: "Plot No. 14, Kaveri Mandi Complex",
+          landmark: "Near Mandi Gate",
+          city: "Salem",
+          state: "Tamil Nadu",
+          pincode: "636453",
+          addressType: "Farm Warehouse",
+        },
+        deliverySpeed: "standard",
+        estimatedDeliveryDate: "Thursday, Aug 6",
+        paymentMethod: "dodo_payments",
+        paymentId: data.paymentId ?? `PAY-${Date.now()}`,
+        paymentGateway: "dodo_live",
+        status: "placed",
+        trackingNumber: `AGRI-TRK-${Math.floor(100000 + Math.random() * 900000)}`,
+        courierPartner: "Delhivery Mandi Logistics",
         createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
       orderStore.unshift(order);
     } else {
-      order.status = "confirmed";
-      order.paymentId = data.paymentId;
+      if (data.paymentId) order.paymentId = data.paymentId;
     }
     return { success: true, order };
   });
 
-export const getOrders = createServerFn({ method: "GET" })
-  .handler(async () => ({ orders: [...orderStore] }));
+// 8. Get All Shop Orders
+export const getShopOrders = createServerFn({ method: "GET" })
+  .handler(async () => {
+    return { orders: [...orderStore] };
+  });
+
+export const getOrders = getShopOrders;

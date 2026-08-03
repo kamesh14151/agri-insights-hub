@@ -287,10 +287,10 @@ function BuyNowCheckoutModal({
       });
 
       if (res.success && res.order) {
-        toast.success(`Payment & Escrow Funded for ${listing.crop}!`);
+        toast.success(`Payment & Escrow Initiated for ${listing.crop}!`);
         onSuccess(res.order);
 
-        if (res.gatewayMode === "live_redirect" && res.checkoutUrl && !res.checkoutUrl.includes("gateway=dodo_escrow")) {
+        if (res.checkoutUrl && (res.checkoutUrl.startsWith("http://") || res.checkoutUrl.startsWith("https://"))) {
           window.location.href = res.checkoutUrl;
         } else {
           onClose();
@@ -663,14 +663,14 @@ function MarketplacePage() {
 
       {/* Action Header & Tabs */}
       <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-card border border-border text-xs">
+        <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-card border border-border text-xs">
           <button
             onClick={() => setActiveTab("browse")}
             className={`px-3 py-1.5 rounded-lg font-medium transition ${
               activeTab === "browse" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            🌾 Available Harvests ({filteredListings.length})
+            {role === "farmer" ? "🌾 Marketplace Lots" : "🌾 Available Harvests"} ({filteredListings.length})
           </button>
           <button
             onClick={() => setActiveTab("my_orders")}
@@ -678,7 +678,7 @@ function MarketplacePage() {
               activeTab === "my_orders" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            📦 My Orders & Escrows ({myPurchases.length})
+            {role === "farmer" ? "📦 Incoming Buyer Orders" : "📦 My Purchases & Escrows"} ({myPurchases.length})
           </button>
           {(role === "farmer" || role === "admin") && (
             <button
@@ -692,13 +692,33 @@ function MarketplacePage() {
           )}
         </div>
 
-        <button
-          onClick={() => setPublishModalOpen(true)}
-          className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700 transition"
-        >
-          <PlusCircle className="h-4 w-4" />
-          Publish Produce for Sale
-        </button>
+        {/* ONLY Farmers & Admin can publish produce */}
+        {(role === "farmer" || role === "admin") && (
+          <button
+            onClick={() => setPublishModalOpen(true)}
+            className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700 transition"
+          >
+            <PlusCircle className="h-4 w-4" />
+            Publish Produce for Sale
+          </button>
+        )}
+      </div>
+
+      {/* Role Informational Notification */}
+      <div className="mb-6 rounded-xl border border-primary/20 bg-primary/5 px-4 py-2.5 flex items-center justify-between text-xs">
+        <div className="flex items-center gap-2">
+          <span className="font-bold text-primary">
+            {role === "farmer" ? "🌾 Farmer Seller Terminal" : role === "admin" ? "🛡️ Admin Operations" : "🛒 Buyer Terminal"}
+          </span>
+          <span className="text-muted-foreground hidden sm:inline">—</span>
+          <span className="text-muted-foreground">
+            {role === "farmer"
+              ? "Farmers publish harvest lots for sale & fulfill incoming buyer orders."
+              : role === "admin"
+              ? "Admin mode: Audit marketplace lots, monitor escrow settlements and manage orders."
+              : "Buyers browse direct farmer harvests & purchase securely via Dodo Payments Escrow."}
+          </span>
+        </div>
       </div>
 
       {/* Tab 1: Browse Listings */}
@@ -729,68 +749,84 @@ function MarketplacePage() {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {filteredListings.map(l => (
-              <Panel key={l.id} className="relative flex flex-col justify-between transition hover:-translate-y-0.5 hover:shadow-md border border-border/80">
-                <div>
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <h3 className="font-serif text-xl font-semibold tracking-tight">{l.crop}</h3>
-                      <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <MapPin className="h-3.5 w-3.5 shrink-0 text-primary" />
-                        <span>{l.location} · {l.farmer}</span>
-                      </p>
-                    </div>
-                    <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
-                      l.grade === "Premium" ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20" : "bg-primary/10 text-primary"
-                    }`}>
-                      Grade {l.grade}
-                    </span>
-                  </div>
+            {filteredListings.map(l => {
+              const isOwnListing = l.farmerEmail === user?.email || l.farmer.toLowerCase().includes((user?.name || "").toLowerCase());
+              const canBuy = role !== "farmer";
 
-                  <div className="mt-4 grid grid-cols-2 gap-3 rounded-xl bg-muted/40 p-3 text-xs">
-                    <div>
-                      <p className="uppercase tracking-wider text-[10px] text-muted-foreground">Available Quantity</p>
-                      <p className="font-semibold text-foreground mt-0.5">{l.quantity}</p>
+              return (
+                <Panel key={l.id} className="relative flex flex-col justify-between transition hover:-translate-y-0.5 hover:shadow-md border border-border/80">
+                  <div>
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <h3 className="font-serif text-xl font-semibold tracking-tight">{l.crop}</h3>
+                        <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <MapPin className="h-3.5 w-3.5 shrink-0 text-primary" />
+                          <span>{l.location} · {l.farmer}</span>
+                        </p>
+                      </div>
+                      <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
+                        l.grade === "Premium" ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20" : "bg-primary/10 text-primary"
+                      }`}>
+                        Grade {l.grade}
+                      </span>
                     </div>
-                    <div>
-                      <p className="uppercase tracking-wider text-[10px] text-muted-foreground">Harvest Timeline</p>
-                      <p className="font-semibold text-foreground mt-0.5">{l.harvested}</p>
-                    </div>
-                  </div>
-                </div>
 
-                <div className="mt-5 border-t border-border pt-4">
-                  <div className="flex items-center justify-between gap-2 mb-3">
-                    <div>
-                      <span className="text-[10px] uppercase text-muted-foreground block">Asking Rate</span>
-                      <p className="font-serif text-2xl font-bold text-foreground">
-                        ₹{l.price.toLocaleString("en-IN")}
-                        <span className="ml-1 text-xs font-sans font-normal text-muted-foreground">/ {l.unit}</span>
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
-                      <ShieldCheck className="h-4 w-4" />
-                      <span>Escrow Guard</span>
+                    <div className="mt-4 grid grid-cols-2 gap-3 rounded-xl bg-muted/40 p-3 text-xs">
+                      <div>
+                        <p className="uppercase tracking-wider text-[10px] text-muted-foreground">Available Quantity</p>
+                        <p className="font-semibold text-foreground mt-0.5">{l.quantity}</p>
+                      </div>
+                      <div>
+                        <p className="uppercase tracking-wider text-[10px] text-muted-foreground">Harvest Timeline</p>
+                        <p className="font-semibold text-foreground mt-0.5">{l.harvested}</p>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      onClick={() => setEnquireListing(l)}
-                      className="rounded-lg border border-border py-2 text-xs font-medium hover:bg-muted transition"
-                    >
-                      Make Offer
-                    </button>
-                    <button
-                      onClick={() => setBuyNowListing(l)}
-                      className="rounded-lg bg-primary py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90 transition shadow-sm"
-                    >
-                      Buy Now
-                    </button>
+                  <div className="mt-5 border-t border-border pt-4">
+                    <div className="flex items-center justify-between gap-2 mb-3">
+                      <div>
+                        <span className="text-[10px] uppercase text-muted-foreground block">Asking Rate</span>
+                        <p className="font-serif text-2xl font-bold text-foreground">
+                          ₹{l.price.toLocaleString("en-IN")}
+                          <span className="ml-1 text-xs font-sans font-normal text-muted-foreground">/ {l.unit}</span>
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+                        <ShieldCheck className="h-4 w-4" />
+                        <span>Escrow Guard</span>
+                      </div>
+                    </div>
+
+                    {/* Role-Specific Action Buttons */}
+                    {canBuy ? (
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          onClick={() => setEnquireListing(l)}
+                          className="rounded-lg border border-border py-2 text-xs font-medium hover:bg-muted transition"
+                        >
+                          Make Offer
+                        </button>
+                        <button
+                          onClick={() => setBuyNowListing(l)}
+                          className="rounded-lg bg-primary py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90 transition shadow-sm"
+                        >
+                          Buy Now
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="rounded-lg bg-muted/60 p-2 text-center text-xs text-muted-foreground">
+                        {isOwnListing ? (
+                          <span className="font-medium text-primary">🌱 Your Listed Produce Lot (Active)</span>
+                        ) : (
+                          <span className="text-[11px]">🌾 Farmer Seller Mode · Switch to Buyer to purchase</span>
+                        )}
+                      </div>
+                    )}
                   </div>
-                </div>
-              </Panel>
-            ))}
+                </Panel>
+              );
+            })}
             {filteredListings.length === 0 && (
               <div className="col-span-full rounded-2xl border border-dashed border-border p-12 text-center">
                 <Sprout className="mx-auto h-8 w-8 text-muted-foreground" />

@@ -91,15 +91,27 @@ function DashboardHome() {
   return (
     <>
       <PageIntro
-        index="01 / Home"
-        eyebrow={role === "admin" ? t("admin_console_eyebrow") : role === "farmer" ? t("farmer_workspace") : t("buyer_terminal")}
-        title={`${t("welcome_back")}, ${user?.name ?? "User"}`}
+        index="01 / Dashboard"
+        eyebrow={
+          role === "admin"
+            ? "🛡️ Admin Operations · Agrisynapse Hub"
+            : role === "farmer"
+            ? "🌾 Field Intelligence · Agrisynapse Hub"
+            : "🛒 Trade Terminal · Agrisynapse Hub"
+        }
+        title={
+          role === "admin"
+            ? "Admin Dashboard"
+            : role === "farmer"
+            ? "Farmer Dashboard"
+            : "Buyer Dashboard"
+        }
         subtitle={
           role === "farmer"
-            ? "Your fields, quietly explained. Live sensor telemetry, disease alerts, price updates, and equipment bookings."
+            ? `Welcome back, ${user?.name ?? "Farmer"}. Live sensor telemetry, disease alerts, crop recommendations, price trends, and machinery bookings.`
             : role === "admin"
-            ? "Platform operations, user growth, sensor fleet health, and system analytics in one command view."
-            : "Direct agricultural trade. Browse crop listings, monitor market trends, and purchase certified inputs."
+            ? `Welcome back, ${user?.name ?? "Administrator"}. Platform operations, user growth, sensor fleet health, and system analytics in one command view.`
+            : `Welcome back, ${user?.name ?? "Buyer"}. Direct agricultural trade, verified crop listings, mandi price intelligence, and certified farm supplies.`
         }
       />
 
