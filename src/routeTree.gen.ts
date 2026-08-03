@@ -9,11 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as WeatherRouteImport } from './routes/weather'
-import { Route as MapRouteImport } from './routes/map'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/app'
-import { Route as AnalyzeRouteImport } from './routes/analyze'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppWeatherRouteImport } from './routes/app.weather'
@@ -30,16 +27,6 @@ import { Route as AppChatbotRouteImport } from './routes/app.chatbot'
 import { Route as AppBookingRouteImport } from './routes/app.booking'
 import { Route as AppAdminRouteImport } from './routes/app.admin'
 
-const WeatherRoute = WeatherRouteImport.update({
-  id: '/weather',
-  path: '/weather',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MapRoute = MapRouteImport.update({
-  id: '/map',
-  path: '/map',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -48,11 +35,6 @@ const LoginRoute = LoginRouteImport.update({
 const AppRoute = AppRouteImport.update({
   id: '/app',
   path: '/app',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AnalyzeRoute = AnalyzeRouteImport.update({
-  id: '/analyze',
-  path: '/analyze',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -133,11 +115,8 @@ const AppAdminRoute = AppAdminRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/analyze': typeof AnalyzeRoute
   '/app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
-  '/map': typeof MapRoute
-  '/weather': typeof WeatherRoute
   '/app/admin': typeof AppAdminRoute
   '/app/booking': typeof AppBookingRoute
   '/app/chatbot': typeof AppChatbotRoute
@@ -155,10 +134,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/analyze': typeof AnalyzeRoute
   '/login': typeof LoginRoute
-  '/map': typeof MapRoute
-  '/weather': typeof WeatherRoute
   '/app/admin': typeof AppAdminRoute
   '/app/booking': typeof AppBookingRoute
   '/app/chatbot': typeof AppChatbotRoute
@@ -177,11 +153,8 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/analyze': typeof AnalyzeRoute
   '/app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
-  '/map': typeof MapRoute
-  '/weather': typeof WeatherRoute
   '/app/admin': typeof AppAdminRoute
   '/app/booking': typeof AppBookingRoute
   '/app/chatbot': typeof AppChatbotRoute
@@ -201,11 +174,8 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/analyze'
     | '/app'
     | '/login'
-    | '/map'
-    | '/weather'
     | '/app/admin'
     | '/app/booking'
     | '/app/chatbot'
@@ -223,10 +193,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/analyze'
     | '/login'
-    | '/map'
-    | '/weather'
     | '/app/admin'
     | '/app/booking'
     | '/app/chatbot'
@@ -244,11 +211,8 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/analyze'
     | '/app'
     | '/login'
-    | '/map'
-    | '/weather'
     | '/app/admin'
     | '/app/booking'
     | '/app/chatbot'
@@ -267,29 +231,12 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AnalyzeRoute: typeof AnalyzeRoute
   AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
-  MapRoute: typeof MapRoute
-  WeatherRoute: typeof WeatherRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/weather': {
-      id: '/weather'
-      path: '/weather'
-      fullPath: '/weather'
-      preLoaderRoute: typeof WeatherRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/map': {
-      id: '/map'
-      path: '/map'
-      fullPath: '/map'
-      preLoaderRoute: typeof MapRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -302,13 +249,6 @@ declare module '@tanstack/react-router' {
       path: '/app'
       fullPath: '/app'
       preLoaderRoute: typeof AppRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/analyze': {
-      id: '/analyze'
-      path: '/analyze'
-      fullPath: '/analyze'
-      preLoaderRoute: typeof AnalyzeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -457,11 +397,8 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AnalyzeRoute: AnalyzeRoute,
   AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
-  MapRoute: MapRoute,
-  WeatherRoute: WeatherRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
