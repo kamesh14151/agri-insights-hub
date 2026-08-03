@@ -24,7 +24,7 @@ Agrisynapse is an end-to-end full-stack Agricultural Intelligence Platform desig
 - **Framework**: [TanStack Start](https://tanstack.com/start) (Full-stack SSR with React 19)
 - **Routing**: TanStack Router (Type-safe file-based routing)
 - **Styling**: Tailwind CSS v4 + Vanilla CSS Design System
-- **Icons**: Lucide React & Flaticon (by RanuKumbolo.lab)
+- **Icons**: Lucide React & Custom SVG Assets
 - **Maps**: Leaflet.js & Leaflet.draw
 - **State Management**: TanStack Query & React Context
 - **Payments**: Dodo Payments Gateway & Escrow Simulator
