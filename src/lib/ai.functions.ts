@@ -98,6 +98,30 @@ export const chatWithAgriAi = createServerFn({ method: "POST" })
     return { reply: text };
   });
 
+/* ---------------- Floating Chatbot via OpenRouter ---------------- */
+
+const GOOGLE_API_KEY = "AQ.Ab8RN6INkrdRf8-Coh8Wi7X5gkGH49esMAFEBIwcI1kr4TkDEg";
+const GEMINI_MODEL = "gemini-2.5-flash-lite";
+
+export const chatWithOpenRouter = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => ChatInput.parse(d))
+  .handler(async ({ data }) => {
+    const { createOpenAICompatible } = await import("@ai-sdk/openai-compatible");
+    const google = createOpenAICompatible({
+      name: "google-gemini",
+      baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
+      headers: {
+        Authorization: `Bearer ${GOOGLE_API_KEY}`,
+      },
+    });
+    const { text } = await generateText({
+      model: google(GEMINI_MODEL),
+      system: `You are Agri AI, a friendly expert agricultural advisor for farmers. Give concise, practical advice on crops, pests, soil, irrigation, and weather. Use real crop names and farming practices. Always respond in ${data.language}. Keep replies under 150 words.`,
+      messages: data.messages.map((m) => ({ role: m.role, content: m.content })),
+    });
+    return { reply: text };
+  });
+
 function parseJson(text: string) {
   const cleaned = text
     .trim()

@@ -2,27 +2,26 @@ import { useState, type ReactNode } from "react";
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard, ScanLine, Cpu, Sprout, CloudSun, TrendingUp, Store, CalendarCheck,
-  ShoppingBag, MessageCircle, Mic, User, Settings, Shield, Menu, X, Moon, Sun, LogOut, Leaf,
+  ShoppingBag, User, Settings, Shield, Menu, X, Moon, Sun, LogOut, Leaf,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useTheme } from "@/lib/theme";
 import { useI18n, LANGUAGES, type Lang } from "@/lib/i18n";
 import { toast } from "sonner";
+import { FloatingWidgets } from "@/components/FloatingWidgets";
 
 const NAV = [
-  { to: "/app", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { to: "/app/disease", label: "Disease Detection", icon: ScanLine },
-  { to: "/app/iot", label: "IoT Monitoring", icon: Cpu },
-  { to: "/app/crops", label: "Crop Recommendation", icon: Sprout },
-  { to: "/app/weather", label: "Weather Intelligence", icon: CloudSun },
-  { to: "/app/market", label: "Market Demand", icon: TrendingUp },
-  { to: "/app/marketplace", label: "Marketplace", icon: Store },
-  { to: "/app/booking", label: "Service Booking", icon: CalendarCheck },
-  { to: "/app/shop", label: "Agri Shop", icon: ShoppingBag },
-  { to: "/app/chatbot", label: "AI Chatbot", icon: MessageCircle },
-  { to: "/app/voice", label: "Voice Assistant", icon: Mic },
-  { to: "/app/profile", label: "Profile", icon: User },
-  { to: "/app/settings", label: "Settings", icon: Settings },
+  { to: "/app",            label: "Dashboard",        icon: LayoutDashboard, exact: true },
+  { to: "/app/disease",   label: "Disease Detection", icon: ScanLine },
+  { to: "/app/iot",       label: "IoT Monitoring",    icon: Cpu },
+  { to: "/app/crops",     label: "Crop Recommendation", icon: Sprout },
+  { to: "/app/weather",   label: "Weather Intelligence", icon: CloudSun },
+  { to: "/app/market",    label: "Market Demand",     icon: TrendingUp },
+  { to: "/app/marketplace", label: "Marketplace",     icon: Store },
+  { to: "/app/booking",   label: "Service Booking",   icon: CalendarCheck },
+  { to: "/app/shop",      label: "Agri Shop",         icon: ShoppingBag },
+  { to: "/app/profile",   label: "Profile",           icon: User },
+  { to: "/app/settings",  label: "Settings",          icon: Settings },
 ] as const;
 
 export function DashboardShell({ children }: { children: ReactNode }) {
@@ -145,6 +144,9 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 
         <main className="px-4 sm:px-6 lg:px-10 py-8 max-w-[1400px] mx-auto">{children}</main>
       </div>
+
+      {/* Floating Widgets — chat + voice, mutually exclusive */}
+      <FloatingWidgets />
     </div>
   );
 }
