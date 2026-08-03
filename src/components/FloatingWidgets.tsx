@@ -357,7 +357,7 @@ export function FloatingWidgets() {
           aria-label="Open voice assistant"
           className="fixed z-50 flex h-12 w-12 items-center justify-center rounded-full shadow-xl transition-all duration-300 hover:scale-110 active:scale-95"
           style={{
-            bottom: "88px",
+            bottom: "98px",
             right: "24px",
             background: "linear-gradient(135deg,#4f46e5,#7c3aed)",
           }}
