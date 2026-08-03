@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#15803d" />
+      <stop offset="100%" stop-color="#166534" />
+    </linearGradient>
+    <linearGradient id="sunGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde047" />
+      <stop offset="100%" stop-color="#eab308" />
+    </linearGradient>
+    <linearGradient id="leafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4ade80" />
+      <stop offset="100%" stop-color="#22c55e" />
+    </linearGradient>
+    <linearGradient id="leafGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#86efac" />
+      <stop offset="100%" stop-color="#16a34a" />
+    </linearGradient>
+    <linearGradient id="soilGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#d97706" />
+      <stop offset="100%" stop-color="#b45309" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background rounded badge -->
+  <rect width="64" height="64" rx="16" fill="url(#skyGrad)" />
+
+  <!-- Rising Sun -->
+  <circle cx="32" cy="24" r="11" fill="url(#sunGrad)" opacity="0.95" />
+  <circle cx="32" cy="24" r="14" fill="#fef08a" opacity="0.25" />
+
+  <!-- Farmland Furrows / Soil -->
+  <path d="M6 46 C16 43, 26 43, 32 45 C38 43, 48 43, 58 46 L58 52 C58 55, 55 58, 51 58 L13 58 C9 58, 6 55, 6 52 Z" fill="url(#soilGrad)" />
+  <path d="M12 50 C22 48, 42 48, 52 50" stroke="#fef3c7" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.6" />
+  <path d="M16 54 C26 52, 38 52, 48 54" stroke="#fef3c7" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.6" />
+
+  <!-- Central Sprout Stem -->
+  <path d="M32 46 Q32 30 32 20" stroke="#bbf7d0" stroke-width="3" stroke-linecap="round" fill="none" />
+
+  <!-- Right Leaf -->
+  <path d="M32 32 C38 24, 48 24, 48 31 C48 37, 39 37, 32 35 Z" fill="url(#leafGrad)" />
+  <path d="M33 34 C39 31, 44 29, 47 31" stroke="#14532d" stroke-width="0.8" stroke-linecap="round" fill="none" opacity="0.5" />
+
+  <!-- Left Leaf -->
+  <path d="M32 27 C26 19, 16 19, 16 26 C16 32, 25 32, 32 30 Z" fill="url(#leafGrad2)" />
+  <path d="M31 29 C25 26, 20 24, 17 26" stroke="#14532d" stroke-width="0.8" stroke-linecap="round" fill="none" opacity="0.5" />
+
+  <!-- Top Sprout Bud -->
+  <path d="M32 20 C29 15, 32 10, 32 10 C32 10, 35 15, 32 20 Z" fill="#86efac" />
+
+  <!-- Morning Dew Droplet -->
+  <circle cx="43" cy="28" r="1.5" fill="#ffffff" opacity="0.85" />
+</svg>
