@@ -159,6 +159,7 @@ export function FloatingWidgets() {
   const [showPrompts,  setShowPrompts]  = useState(true);
   const [chatUnread,   setChatUnread]   = useState(0);
   const chatScrollRef = useRef<HTMLDivElement>(null);
+  const chatEndRef    = useRef<HTMLDivElement>(null);
   const chatInputRef  = useRef<HTMLInputElement>(null);
 
   /* ── voice state ── */
@@ -169,7 +170,6 @@ export function FloatingWidgets() {
   const [voiceLang,      setVoiceLang]      = useState(VOICE_LANGS[0]!);
   const [langOpen,       setLangOpen]       = useState(false);
   const [voiceUnread,    setVoiceUnread]    = useState(0);
-  const [voiceTextInput, setVoiceTextInput] = useState("");
 
   /* stable refs for voice */
   const turnsRef          = useRef<VoiceTurn[]>([]);
@@ -179,6 +179,7 @@ export function FloatingWidgets() {
   const silenceTimerRef   = useRef<any>(null);
   const idRef             = useRef(0);
   const voiceScrollRef    = useRef<HTMLDivElement>(null);
+  const voiceEndRef       = useRef<HTMLDivElement>(null);
   const langRef           = useRef(voiceLang);
   const mutedRef          = useRef(muted);
   const autoListenRef     = useRef(autoListen);
@@ -204,16 +205,52 @@ export function FloatingWidgets() {
     setVoiceTurns(prev => { const next = updater(prev); turnsRef.current = next; return next; });
   }, []);
 
-  /* ── scrolling ── */
+  /* ── auto-scrolling with multi-phase layout correction ── */
+  const scrollChatToBottom = useCallback((smooth = true) => {
+    requestAnimationFrame(() => {
+      if (chatScrollRef.current) {
+        chatScrollRef.current.scrollTo({
+          top: chatScrollRef.current.scrollHeight,
+          behavior: smooth ? "smooth" : "auto",
+        });
+      }
+      chatEndRef.current?.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: "end" });
+    });
+  }, []);
+
+  const scrollVoiceToBottom = useCallback((smooth = true) => {
+    requestAnimationFrame(() => {
+      if (voiceScrollRef.current) {
+        voiceScrollRef.current.scrollTo({
+          top: voiceScrollRef.current.scrollHeight,
+          behavior: smooth ? "smooth" : "auto",
+        });
+      }
+      voiceEndRef.current?.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: "end" });
+    });
+  }, []);
+
   useEffect(() => {
-    if (chatOpen && !chatMinimized) chatScrollRef.current?.scrollTo({top:99999, behavior:"smooth"});
-  }, [chatMsgs, chatBusy, chatOpen, chatMinimized]);
+    if (chatOpen && !chatMinimized) {
+      scrollChatToBottom(true);
+      const t1 = setTimeout(() => scrollChatToBottom(true), 60);
+      const t2 = setTimeout(() => scrollChatToBottom(true), 180);
+      return () => { clearTimeout(t1); clearTimeout(t2); };
+    }
+  }, [chatMsgs, chatBusy, chatOpen, chatMinimized, scrollChatToBottom]);
+
   useEffect(() => {
-    if (chatOpen && !chatMinimized) setTimeout(()=>chatInputRef.current?.focus(), 300);
+    if (chatOpen && !chatMinimized) setTimeout(() => chatInputRef.current?.focus(), 300);
   }, [chatOpen, chatMinimized]);
+
   useEffect(() => {
-    if (voiceOpen) setTimeout(()=>voiceScrollRef.current?.scrollTo({top:99999,behavior:"smooth"}), 60);
-  }, [voiceTurns, voiceOpen]);
+    if (voiceOpen) {
+      scrollVoiceToBottom(true);
+      const t1 = setTimeout(() => scrollVoiceToBottom(true), 60);
+      const t2 = setTimeout(() => scrollVoiceToBottom(true), 180);
+      return () => { clearTimeout(t1); clearTimeout(t2); };
+    }
+  }, [voiceTurns, phase, voiceOpen, scrollVoiceToBottom]);
 
   /* ── unread badges ── */
   const prevChatLen = useRef(chatMsgs.length);
@@ -439,14 +476,6 @@ export function FloatingWidgets() {
     void respondVoice(q);
   };
 
-  const handleVoiceTextSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!voiceTextInput.trim()) return;
-    const text = voiceTextInput.trim();
-    setVoiceTextInput("");
-    fireVoiceQuick(text);
-  };
-
   /* ── mutual exclusivity & auto-start ── */
   const openChat = () => {
     setChatOpen(true);
@@ -505,17 +534,19 @@ export function FloatingWidgets() {
     extra?: React.ReactNode,
     onMinimize?: () => void,
   ) => (
-    <div className="flex h-14 shrink-0 items-center gap-3 px-4 border-b border-white/10"
+    <div className="flex h-14 shrink-0 items-center justify-between gap-3 px-4 border-b border-white/10"
       style={{background:accent, backdropFilter:"blur(12px)"}}>
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/20">
-        <Sprout className="h-4 w-4 text-white"/>
+      <div className="flex items-center gap-2.5 min-w-0 flex-1">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/20">
+          <Sprout className="h-4 w-4 text-white"/>
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold text-white truncate">{title}</p>
+          <p className="text-[11px] text-white/75 truncate">{subtitle}</p>
+        </div>
       </div>
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold text-white truncate">{title}</p>
-        <p className="text-[11px] text-white/75 truncate">{subtitle}</p>
-      </div>
-      {extra}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1.5 shrink-0">
+        {extra}
         <button onClick={onReset} title="Clear conversation" className="grid h-7 w-7 place-items-center rounded-lg text-white/70 hover:bg-white/15 hover:text-white transition"><RotateCcw className="h-3.5 w-3.5"/></button>
         {onMinimize && <button onClick={onMinimize} title="Minimize" className="grid h-7 w-7 place-items-center rounded-lg text-white/70 hover:bg-white/15 hover:text-white transition"><Minimize2 className="h-3.5 w-3.5"/></button>}
         <button onClick={onClose} title="Close" className="grid h-7 w-7 place-items-center rounded-lg text-white/70 hover:bg-white/15 hover:text-white transition"><X className="h-3.5 w-3.5"/></button>
@@ -534,40 +565,89 @@ export function FloatingWidgets() {
         phase === "thinking" ? "h-2 w-2 rounded-full bg-amber-400 animate-pulse" :
         "h-2 w-2 rounded-full bg-green-400"
       }/>
-      {phase === "idle" ? "Ready · tap mic" : phase === "listening" ? "Listening... speak now" : phase === "thinking" ? "Thinking..." : "Speaking response..."}
+      {phase === "idle" ? "Ready" : phase === "listening" ? "Listening..." : phase === "thinking" ? "Thinking..." : "Speaking..."}
     </span>
   );
 
-  const voiceExtraControls = (
-    <div className="flex items-center gap-1.5 mr-1">
-      <button
-        onClick={() => setAutoListen(v => !v)}
-        title={autoListen ? "Auto-listen ON (hands-free dialogue)" : "Auto-listen OFF (single shot)"}
-        className={autoListen ? "flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium transition bg-white/25 text-white ring-1 ring-white/40" : "flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium transition bg-white/10 text-white/60 hover:bg-white/15"}
-      >
-        <Radio className="h-3 w-3"/>
-        <span>Auto</span>
-      </button>
-
-      <div className="relative">
-        <button onClick={() => setLangOpen(v => !v)} className="flex items-center gap-1 rounded-full bg-white/15 px-2 py-0.5 text-[11px] text-white/90 hover:bg-white/25 transition">
-          {voiceLang.label}<ChevronDown className="h-3 w-3"/>
-        </button>
-        {langOpen && (
-          <div className="absolute right-0 top-full z-30 mt-1.5 w-36 rounded-xl overflow-hidden shadow-2xl" style={{background:"rgba(15,15,25,.98)",backdropFilter:"blur(16px)",border:"1px solid rgba(255,255,255,.15)"}}>
-            {VOICE_LANGS.map(l => (
-              <button key={l.code} onClick={() => { setVoiceLang(l); setLangOpen(false); }} className={`flex w-full items-center gap-2 px-3 py-2 text-[11px] text-white/85 hover:bg-white/15 transition ${voiceLang.code === l.code ? "text-violet-300 font-semibold bg-white/10" : ""}`}>
-                {l.label}<span className="ml-auto text-white/45">{l.name}</span>
-              </button>
-            ))}
-          </div>
-        )}
+  const voiceSubBar = (
+    <div className="flex items-center justify-between px-3.5 py-2 border-b border-white/10 bg-black/25 backdrop-blur-md shrink-0 text-xs">
+      <div className="flex items-center gap-1.5 font-medium text-white/90">
+        <span className={
+          phase === "listening" ? "h-2 w-2 rounded-full bg-red-400 animate-ping" :
+          phase === "speaking" ? "h-2 w-2 rounded-full bg-violet-400 animate-pulse" :
+          phase === "thinking" ? "h-2 w-2 rounded-full bg-amber-400 animate-pulse" :
+          "h-2 w-2 rounded-full bg-green-400"
+        }/>
+        <span className="text-[11px]">
+          {phase === "idle" ? "Ready · tap mic" : phase === "listening" ? "Listening... speak now" : phase === "thinking" ? "Gemini thinking..." : "Speaking response"}
+        </span>
       </div>
 
-      <button onClick={() => { setMuted(v => !v); window.speechSynthesis?.cancel(); }} title={muted ? "Unmute audio" : "Mute audio"} className={`grid h-7 w-7 place-items-center rounded-lg transition ${muted ? "bg-red-500/30 text-red-300" : "text-white/70 hover:bg-white/15 hover:text-white"}`}>
-        {muted ? <VolumeX className="h-3.5 w-3.5"/> : <Volume2 className="h-3.5 w-3.5"/>}
-      </button>
+      <div className="flex items-center gap-2">
+        {/* Auto Listen Toggle */}
+        <button
+          onClick={() => setAutoListen(v => !v)}
+          title={autoListen ? "Auto-listen ON (hands-free dialogue)" : "Auto-listen OFF (single shot)"}
+          className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold transition ${
+            autoListen ? "bg-violet-500/30 text-violet-200 ring-1 ring-violet-400/50" : "bg-white/10 text-white/50 hover:bg-white/15"
+          }`}
+        >
+          <Radio className="h-2.5 w-2.5"/>
+          <span>Auto: {autoListen ? "ON" : "OFF"}</span>
+        </button>
+
+        {/* Language selector */}
+        <div className="relative">
+          <button
+            onClick={() => setLangOpen(v => !v)}
+            className="flex items-center gap-1 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-medium text-white hover:bg-white/25 transition border border-white/20"
+          >
+            <span>{voiceLang.label}</span>
+            <ChevronDown className="h-3 w-3 opacity-70"/>
+          </button>
+
+          {langOpen && (
+            <>
+              {/* Click outside backdrop */}
+              <div className="fixed inset-0 z-40" onClick={() => setLangOpen(false)} />
+              <div
+                className="absolute right-0 top-full z-50 mt-1.5 w-40 rounded-xl overflow-hidden shadow-2xl border border-white/20"
+                style={{ background: "rgba(18, 18, 30, 0.98)", backdropFilter: "blur(20px)" }}
+              >
+                <div className="p-1">
+                  {VOICE_LANGS.map(l => (
+                    <button
+                      key={l.code}
+                      onClick={() => { setVoiceLang(l); setLangOpen(false); }}
+                      className={`flex w-full items-center justify-between px-3 py-2 text-[11px] rounded-lg transition ${
+                        voiceLang.code === l.code
+                          ? "bg-violet-600/40 text-violet-200 font-semibold"
+                          : "text-white/80 hover:bg-white/10 hover:text-white"
+                      }`}
+                    >
+                      <span>{l.label}</span>
+                      <span className="text-[10px] text-white/45">{l.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
     </div>
+  );
+
+  const voiceHeaderExtra = (
+    <button
+      onClick={() => { setMuted(v => !v); window.speechSynthesis?.cancel(); }}
+      title={muted ? "Unmute audio" : "Mute audio"}
+      className={`grid h-7 w-7 place-items-center rounded-lg transition ${
+        muted ? "bg-red-500/30 text-red-300" : "text-white/70 hover:bg-white/15 hover:text-white"
+      }`}
+    >
+      {muted ? <VolumeX className="h-3.5 w-3.5"/> : <Volume2 className="h-3.5 w-3.5"/>}
+    </button>
   );
 
   /* ════════════════════════════════════ RENDER ════════════════════════════════════ */
@@ -641,6 +721,7 @@ export function FloatingWidgets() {
                       </div>
                     </div>
                   )}
+                  <div ref={chatEndRef} className="h-0.5 w-full shrink-0" />
                 </div>
                 {showPrompts && (
                   <div className="flex flex-wrap gap-1.5 px-4 pb-2">
@@ -713,18 +794,19 @@ export function FloatingWidgets() {
 
       {/* ═══════════ VOICE PANEL — desktop ═══════════ */}
       {voiceOpen && (
-        <div className="hidden sm:flex fixed bottom-6 right-6 z-50 flex-col rounded-2xl overflow-hidden"
-          style={{width:380,height:560,boxShadow:"0 25px 60px rgba(0,0,0,0.65)",backdropFilter:"blur(4px)",animation:"fwSlide .25s ease-out"}}>
+        <div className="hidden sm:flex fixed bottom-6 right-6 z-50 flex-col rounded-2xl overflow-hidden shadow-2xl"
+          style={{width:410,height:580,boxShadow:"0 25px 60px rgba(0,0,0,0.65)",backdropFilter:"blur(4px)",animation:"fwSlide .25s ease-out"}}>
           <BG/>
           <div className="relative z-10 flex flex-col h-full">
             {panelHeader(
-              "Agri Voice",
-              voiceStatusSubtitle,
-              "linear-gradient(135deg,rgba(79,70,229,0.92),rgba(124,58,237,0.88))",
+              "Agri Voice Assistant",
+              "Live voice conversation",
+              "linear-gradient(135deg,rgba(79,70,229,0.95),rgba(124,58,237,0.90))",
               resetVoice,
               closeVoice,
-              voiceExtraControls,
+              voiceHeaderExtra,
             )}
+            {voiceSubBar}
 
             {/* Conversation turns */}
             <div ref={voiceScrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3" style={{scrollbarWidth:"thin"}}>
@@ -767,28 +849,9 @@ export function FloatingWidgets() {
                       </div>
                     </div>
                   )}
+                  <div ref={voiceEndRef} className="h-0.5 w-full shrink-0" />
                 </>
               )}
-            </div>
-
-            {/* Quick text input fallback */}
-            <div className="px-4 pb-1">
-              <form onSubmit={handleVoiceTextSubmit} className="flex items-center gap-2 rounded-full px-3 py-1.5" style={{background:"rgba(255,255,255,0.12)",border:"1px solid rgba(255,255,255,0.18)"}}>
-                <input
-                  value={voiceTextInput}
-                  onChange={e => setVoiceTextInput(e.target.value)}
-                  placeholder="Or type here to hear answer..."
-                  className="min-w-0 flex-1 bg-transparent py-0.5 text-xs text-white placeholder:text-white/45 focus:outline-none"
-                />
-                <button
-                  type="submit"
-                  disabled={!voiceTextInput.trim() || phase === "thinking"}
-                  aria-label="Send text to voice assistant"
-                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-violet-600 hover:bg-violet-500 text-white transition disabled:opacity-40"
-                >
-                  <Send className="h-3 w-3"/>
-                </button>
-              </form>
             </div>
 
             {/* Voice Orb and status */}
@@ -799,7 +862,7 @@ export function FloatingWidgets() {
               </div>
               <p className="mt-2 text-center text-[10px] text-white/50">
                 <Sparkles className="mr-1 inline h-2.5 w-2.5 text-violet-300"/>
-                {phase === "listening" ? "Listening... click orb to send" : phase === "speaking" ? "Speaking... click orb to pause" : phase === "thinking" ? "Analyzing with Gemini..." : "Tap mic to speak"}
+                {phase === "listening" ? "Listening... speak now" : phase === "speaking" ? "Speaking... tap orb to pause" : phase === "thinking" ? "Analyzing with Gemini..." : "Tap mic to speak"}
               </p>
             </div>
           </div>
@@ -816,10 +879,11 @@ export function FloatingWidgets() {
             <div className="relative z-10 flex flex-col h-full">
               <div className="flex justify-center pt-3 pb-1 shrink-0"><div className="h-1 w-10 rounded-full bg-white/30"/></div>
               {panelHeader("Agri Voice",
-                phase==="listening" ? "Listening... speak now" : phase==="speaking" ? "Speaking..." : "Ready · tap mic",
+                "Live voice assistant",
                 "linear-gradient(135deg,rgba(79,70,229,.92),rgba(124,58,237,.88))",
-                resetVoice, closeVoice
+                resetVoice, closeVoice, voiceHeaderExtra
               )}
+              {voiceSubBar}
               <div ref={voiceScrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3" style={{scrollbarWidth:"thin"}}>
                 {voiceTurns.length===0?(
                   <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
@@ -849,19 +913,6 @@ export function FloatingWidgets() {
                     ))}
                   </>
                 )}
-              </div>
-
-              {/* Mobile text fallback */}
-              <div className="px-4 pb-1">
-                <form onSubmit={handleVoiceTextSubmit} className="flex items-center gap-2 rounded-full px-3 py-1.5" style={{background:"rgba(255,255,255,0.12)",border:"1px solid rgba(255,255,255,0.18)"}}>
-                  <input
-                    value={voiceTextInput}
-                    onChange={e => setVoiceTextInput(e.target.value)}
-                    placeholder="Or type here..."
-                    className="min-w-0 flex-1 bg-transparent py-0.5 text-xs text-white placeholder:text-white/45 focus:outline-none"
-                  />
-                  <button type="submit" disabled={!voiceTextInput.trim() || phase === "thinking"} className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-violet-600 text-white"><Send className="h-3 w-3"/></button>
-                </form>
               </div>
 
               <div className="shrink-0 pb-4 pt-1">
