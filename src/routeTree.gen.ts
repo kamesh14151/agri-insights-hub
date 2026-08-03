@@ -11,8 +11,24 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WeatherRouteImport } from './routes/weather'
 import { Route as MapRouteImport } from './routes/map'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as AppRouteImport } from './routes/app'
 import { Route as AnalyzeRouteImport } from './routes/analyze'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppWeatherRouteImport } from './routes/app.weather'
+import { Route as AppVoiceRouteImport } from './routes/app.voice'
+import { Route as AppShopRouteImport } from './routes/app.shop'
+import { Route as AppSettingsRouteImport } from './routes/app.settings'
+import { Route as AppProfileRouteImport } from './routes/app.profile'
+import { Route as AppMarketplaceRouteImport } from './routes/app.marketplace'
+import { Route as AppMarketRouteImport } from './routes/app.market'
+import { Route as AppIotRouteImport } from './routes/app.iot'
+import { Route as AppDiseaseRouteImport } from './routes/app.disease'
+import { Route as AppCropsRouteImport } from './routes/app.crops'
+import { Route as AppChatbotRouteImport } from './routes/app.chatbot'
+import { Route as AppBookingRouteImport } from './routes/app.booking'
+import { Route as AppAdminRouteImport } from './routes/app.admin'
 
 const WeatherRoute = WeatherRouteImport.update({
   id: '/weather',
@@ -22,6 +38,16 @@ const WeatherRoute = WeatherRouteImport.update({
 const MapRoute = MapRouteImport.update({
   id: '/map',
   path: '/map',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AnalyzeRoute = AnalyzeRouteImport.update({
@@ -34,37 +60,216 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppWeatherRoute = AppWeatherRouteImport.update({
+  id: '/weather',
+  path: '/weather',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppVoiceRoute = AppVoiceRouteImport.update({
+  id: '/voice',
+  path: '/voice',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppShopRoute = AppShopRouteImport.update({
+  id: '/shop',
+  path: '/shop',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProfileRoute = AppProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMarketplaceRoute = AppMarketplaceRouteImport.update({
+  id: '/marketplace',
+  path: '/marketplace',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMarketRoute = AppMarketRouteImport.update({
+  id: '/market',
+  path: '/market',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppIotRoute = AppIotRouteImport.update({
+  id: '/iot',
+  path: '/iot',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDiseaseRoute = AppDiseaseRouteImport.update({
+  id: '/disease',
+  path: '/disease',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCropsRoute = AppCropsRouteImport.update({
+  id: '/crops',
+  path: '/crops',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppChatbotRoute = AppChatbotRouteImport.update({
+  id: '/chatbot',
+  path: '/chatbot',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppBookingRoute = AppBookingRouteImport.update({
+  id: '/booking',
+  path: '/booking',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAdminRoute = AppAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analyze': typeof AnalyzeRoute
+  '/app': typeof AppRouteWithChildren
+  '/login': typeof LoginRoute
   '/map': typeof MapRoute
   '/weather': typeof WeatherRoute
+  '/app/admin': typeof AppAdminRoute
+  '/app/booking': typeof AppBookingRoute
+  '/app/chatbot': typeof AppChatbotRoute
+  '/app/crops': typeof AppCropsRoute
+  '/app/disease': typeof AppDiseaseRoute
+  '/app/iot': typeof AppIotRoute
+  '/app/market': typeof AppMarketRoute
+  '/app/marketplace': typeof AppMarketplaceRoute
+  '/app/profile': typeof AppProfileRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/app/shop': typeof AppShopRoute
+  '/app/voice': typeof AppVoiceRoute
+  '/app/weather': typeof AppWeatherRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analyze': typeof AnalyzeRoute
+  '/login': typeof LoginRoute
   '/map': typeof MapRoute
   '/weather': typeof WeatherRoute
+  '/app/admin': typeof AppAdminRoute
+  '/app/booking': typeof AppBookingRoute
+  '/app/chatbot': typeof AppChatbotRoute
+  '/app/crops': typeof AppCropsRoute
+  '/app/disease': typeof AppDiseaseRoute
+  '/app/iot': typeof AppIotRoute
+  '/app/market': typeof AppMarketRoute
+  '/app/marketplace': typeof AppMarketplaceRoute
+  '/app/profile': typeof AppProfileRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/app/shop': typeof AppShopRoute
+  '/app/voice': typeof AppVoiceRoute
+  '/app/weather': typeof AppWeatherRoute
+  '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/analyze': typeof AnalyzeRoute
+  '/app': typeof AppRouteWithChildren
+  '/login': typeof LoginRoute
   '/map': typeof MapRoute
   '/weather': typeof WeatherRoute
+  '/app/admin': typeof AppAdminRoute
+  '/app/booking': typeof AppBookingRoute
+  '/app/chatbot': typeof AppChatbotRoute
+  '/app/crops': typeof AppCropsRoute
+  '/app/disease': typeof AppDiseaseRoute
+  '/app/iot': typeof AppIotRoute
+  '/app/market': typeof AppMarketRoute
+  '/app/marketplace': typeof AppMarketplaceRoute
+  '/app/profile': typeof AppProfileRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/app/shop': typeof AppShopRoute
+  '/app/voice': typeof AppVoiceRoute
+  '/app/weather': typeof AppWeatherRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/analyze' | '/map' | '/weather'
+  fullPaths:
+    | '/'
+    | '/analyze'
+    | '/app'
+    | '/login'
+    | '/map'
+    | '/weather'
+    | '/app/admin'
+    | '/app/booking'
+    | '/app/chatbot'
+    | '/app/crops'
+    | '/app/disease'
+    | '/app/iot'
+    | '/app/market'
+    | '/app/marketplace'
+    | '/app/profile'
+    | '/app/settings'
+    | '/app/shop'
+    | '/app/voice'
+    | '/app/weather'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/analyze' | '/map' | '/weather'
-  id: '__root__' | '/' | '/analyze' | '/map' | '/weather'
+  to:
+    | '/'
+    | '/analyze'
+    | '/login'
+    | '/map'
+    | '/weather'
+    | '/app/admin'
+    | '/app/booking'
+    | '/app/chatbot'
+    | '/app/crops'
+    | '/app/disease'
+    | '/app/iot'
+    | '/app/market'
+    | '/app/marketplace'
+    | '/app/profile'
+    | '/app/settings'
+    | '/app/shop'
+    | '/app/voice'
+    | '/app/weather'
+    | '/app'
+  id:
+    | '__root__'
+    | '/'
+    | '/analyze'
+    | '/app'
+    | '/login'
+    | '/map'
+    | '/weather'
+    | '/app/admin'
+    | '/app/booking'
+    | '/app/chatbot'
+    | '/app/crops'
+    | '/app/disease'
+    | '/app/iot'
+    | '/app/market'
+    | '/app/marketplace'
+    | '/app/profile'
+    | '/app/settings'
+    | '/app/shop'
+    | '/app/voice'
+    | '/app/weather'
+    | '/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnalyzeRoute: typeof AnalyzeRoute
+  AppRoute: typeof AppRouteWithChildren
+  LoginRoute: typeof LoginRoute
   MapRoute: typeof MapRoute
   WeatherRoute: typeof WeatherRoute
 }
@@ -85,6 +290,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MapRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/analyze': {
       id: '/analyze'
       path: '/analyze'
@@ -99,12 +318,148 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/weather': {
+      id: '/app/weather'
+      path: '/weather'
+      fullPath: '/app/weather'
+      preLoaderRoute: typeof AppWeatherRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/voice': {
+      id: '/app/voice'
+      path: '/voice'
+      fullPath: '/app/voice'
+      preLoaderRoute: typeof AppVoiceRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/shop': {
+      id: '/app/shop'
+      path: '/shop'
+      fullPath: '/app/shop'
+      preLoaderRoute: typeof AppShopRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/settings': {
+      id: '/app/settings'
+      path: '/settings'
+      fullPath: '/app/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/profile': {
+      id: '/app/profile'
+      path: '/profile'
+      fullPath: '/app/profile'
+      preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/marketplace': {
+      id: '/app/marketplace'
+      path: '/marketplace'
+      fullPath: '/app/marketplace'
+      preLoaderRoute: typeof AppMarketplaceRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/market': {
+      id: '/app/market'
+      path: '/market'
+      fullPath: '/app/market'
+      preLoaderRoute: typeof AppMarketRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/iot': {
+      id: '/app/iot'
+      path: '/iot'
+      fullPath: '/app/iot'
+      preLoaderRoute: typeof AppIotRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/disease': {
+      id: '/app/disease'
+      path: '/disease'
+      fullPath: '/app/disease'
+      preLoaderRoute: typeof AppDiseaseRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/crops': {
+      id: '/app/crops'
+      path: '/crops'
+      fullPath: '/app/crops'
+      preLoaderRoute: typeof AppCropsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/chatbot': {
+      id: '/app/chatbot'
+      path: '/chatbot'
+      fullPath: '/app/chatbot'
+      preLoaderRoute: typeof AppChatbotRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/booking': {
+      id: '/app/booking'
+      path: '/booking'
+      fullPath: '/app/booking'
+      preLoaderRoute: typeof AppBookingRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/admin': {
+      id: '/app/admin'
+      path: '/admin'
+      fullPath: '/app/admin'
+      preLoaderRoute: typeof AppAdminRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
+
+interface AppRouteChildren {
+  AppAdminRoute: typeof AppAdminRoute
+  AppBookingRoute: typeof AppBookingRoute
+  AppChatbotRoute: typeof AppChatbotRoute
+  AppCropsRoute: typeof AppCropsRoute
+  AppDiseaseRoute: typeof AppDiseaseRoute
+  AppIotRoute: typeof AppIotRoute
+  AppMarketRoute: typeof AppMarketRoute
+  AppMarketplaceRoute: typeof AppMarketplaceRoute
+  AppProfileRoute: typeof AppProfileRoute
+  AppSettingsRoute: typeof AppSettingsRoute
+  AppShopRoute: typeof AppShopRoute
+  AppVoiceRoute: typeof AppVoiceRoute
+  AppWeatherRoute: typeof AppWeatherRoute
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppAdminRoute: AppAdminRoute,
+  AppBookingRoute: AppBookingRoute,
+  AppChatbotRoute: AppChatbotRoute,
+  AppCropsRoute: AppCropsRoute,
+  AppDiseaseRoute: AppDiseaseRoute,
+  AppIotRoute: AppIotRoute,
+  AppMarketRoute: AppMarketRoute,
+  AppMarketplaceRoute: AppMarketplaceRoute,
+  AppProfileRoute: AppProfileRoute,
+  AppSettingsRoute: AppSettingsRoute,
+  AppShopRoute: AppShopRoute,
+  AppVoiceRoute: AppVoiceRoute,
+  AppWeatherRoute: AppWeatherRoute,
+  AppIndexRoute: AppIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnalyzeRoute: AnalyzeRoute,
+  AppRoute: AppRouteWithChildren,
+  LoginRoute: LoginRoute,
   MapRoute: MapRoute,
   WeatherRoute: WeatherRoute,
 }

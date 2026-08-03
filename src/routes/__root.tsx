@@ -12,6 +12,8 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { I18nProvider } from "@/lib/i18n";
+import { ThemeProvider } from "@/lib/theme";
+import { AuthProvider } from "@/lib/auth";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -79,11 +81,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Agri AI — Agricultural Intelligence Platform" },
-      { name: "description", content: "Diagnose plant disease, map your land, read live weather and consult an AI agronomist. Built for Indian agriculture." },
-      { name: "author", content: "Agri AI" },
-      { property: "og:title", content: "Agri AI — Agricultural Intelligence Platform" },
-      { property: "og:description", content: "Diagnose plant disease, map your land, read live weather and consult an AI agronomist." },
+      { title: "Agrisynapse — Agricultural Intelligence Platform" },
+      { name: "description", content: "Disease detection, IoT field monitoring, crop and market intelligence, marketplace and services for Indian farmers." },
+      { name: "author", content: "Agrisynapse" },
+      { property: "og:title", content: "Agrisynapse — Agricultural Intelligence Platform" },
+      { property: "og:description", content: "Disease detection, IoT monitoring, crop and market intelligence, marketplace and services for Indian farmers." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
@@ -122,11 +124,15 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <I18nProvider>
-        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-        <Outlet />
-        <Toaster richColors position="top-right" />
-      </I18nProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <I18nProvider>
+            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+            <Outlet />
+            <Toaster richColors position="top-right" />
+          </I18nProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
