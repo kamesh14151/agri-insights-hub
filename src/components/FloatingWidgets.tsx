@@ -3,33 +3,87 @@ import { useServerFn } from "@tanstack/react-start";
 import {
   MessageCircle, Mic, MicOff, X, Send, Sprout,
   Minimize2, RotateCcw, Volume2, VolumeX, ChevronDown,
-  Sparkles, Radio
+  Sparkles, Radio, Globe, Check
 } from "lucide-react";
 import { toast } from "sonner";
 import { chatWithOpenRouter } from "@/lib/ai.functions";
 import { useI18n } from "@/lib/i18n";
 
-/* ─────────────────────────────────── shared types ─── */
+/* ─────────────────────────────────── shared types & languages ─── */
 type ChatMsg  = { role: "user" | "assistant"; content: string };
 type VoiceTurn = { role: "user" | "assistant"; text: string; id: number };
 type Phase    = "idle" | "listening" | "thinking" | "speaking";
 
-const VOICE_LANGS = [
-  { code: "ta-IN", label: "தமிழ்",   name: "Tamil",     appLang: "ta" },
-  { code: "en-IN", label: "English", name: "English",   appLang: "en" },
-  { code: "hi-IN", label: "हिन्दी",   name: "Hindi",     appLang: "hi" },
-  { code: "te-IN", label: "తెలుగు",   name: "Telugu",    appLang: "te" },
-  { code: "pa-IN", label: "ਪੰਜਾਬੀ",   name: "Punjabi",   appLang: "pa" },
-  { code: "mr-IN", label: "मराठी",   name: "Marathi",   appLang: "mr" },
+export const AI_LANGUAGES = [
+  { code: "en-IN", label: "English", name: "English", appLang: "en" },
+  { code: "ta-IN", label: "தமிழ்",   name: "Tamil",   appLang: "ta" },
+  { code: "hi-IN", label: "हिन्दी",   name: "Hindi",   appLang: "hi" },
+  { code: "te-IN", label: "తెలుగు",   name: "Telugu",  appLang: "te" },
+  { code: "pa-IN", label: "ਪੰਜਾਬੀ",   name: "Punjabi", appLang: "pa" },
+  { code: "mr-IN", label: "मराठी",   name: "Marathi", appLang: "mr" },
 ];
 
-const CHAT_PROMPTS  = ["Yellow leaves on paddy?", "Best fertilizer for banana", "Control whitefly organically", "When to sell turmeric?"];
-const VOICE_PROMPTS = [
-  "What causes yellow leaves on paddy?",
-  "Best organic pesticide for tomato leaf curl",
-  "Current market price forecast for paddy",
-  "How to improve soil nitrogen naturally?",
-];
+const LOCALIZED_DATA: Record<string, { welcome: string; prompts: string[]; placeholder: string }> = {
+  English: {
+    welcome: "👋 Hi! I'm your Agri AI by AJ STUDIOZ. Ask me anything about crops, pests, fertilizers, soil health, weather, or mandi prices!",
+    prompts: [
+      "Yellow leaves on paddy?",
+      "Best fertilizer for banana",
+      "Control whitefly organically",
+      "Current weather in Mecheri",
+      "When to sell turmeric?",
+    ],
+    placeholder: "Ask about crops, pests, soil, mandi...",
+  },
+  Tamil: {
+    welcome: "👋 வணக்கம்! நான் உங்கள் அக்ரி AI ஆலோசகர். பயிர் மேலாண்மை, உரம், பூச்சி தாக்குதல், வானிலை அல்லது மண்டி சந்தை விலை பற்றி என்னிடம் கேளுங்கள்!",
+    prompts: [
+      "நெல் இலை மஞ்சள் நிறம்?",
+      "வாழைக்கு சிறந்த உரம்",
+      "மேச்சேரி இன்றைய வானிலை",
+      "மஞ்சள் சந்தை விலை",
+      "வெள்ளை ஈ கட்டுப்பாடு",
+    ],
+    placeholder: "பயிர், உரம், நோய் பற்றி கேளுங்கள்...",
+  },
+  Hindi: {
+    welcome: "👋 नमस्ते! मैं आपका एग्री AI सलाहकार हूँ। फसल, कीट, खाद, मौसम या मंडी भाव के बारे में पूछें!",
+    prompts: [
+      "धान की पत्तियां पीली क्यों?",
+      "केले के लिए सर्वोत्तम खाद",
+      "टमाटर मरोड़िया रोग उपचार",
+      "आज का मंडी भाव",
+    ],
+    placeholder: "फसल, खाद, कीट के बारे में पूछें...",
+  },
+  Telugu: {
+    welcome: "👋 నమస్కారం! నేను మీ అగ్రి AI సలహాదారుని. పంటలు, తెగుళ్లు, ఎరువులు, వాతావరణం లేదా మార్కెట్ ధరల గురించి అడగండి!",
+    prompts: [
+      "వరి ఆకులు పసుపు రంగులోకి మారడం",
+      "అరటి పంటకు ఎరువులు",
+      "మార్కెట్ ధరల వివరాలు",
+    ],
+    placeholder: "పంటలు, ఎరువుల గురించి అడగండి...",
+  },
+  Punjabi: {
+    welcome: "👋 ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ! ਮੈਂ ਤੁਹਾਡਾ ਐਗਰੀ AI ਸਲਾਹਕਾਰ ਹਾਂ। ਫਸਲਾਂ, ਖਾਦਾਂ ਅਤੇ ਮੰਡੀ ਭਾਵ ਬਾਰੇ ਪੁੱਛੋ!",
+    prompts: [
+      "ਝੋਨੇ ਦੇ ਪੀਲੇ ਪੱਤੇ?",
+      "ਕਣਕ ਲਈ ਖਾਦ ਦੀ ਸਿਫਾਰਸ਼",
+      "ਅੱਜ ਦਾ ਮੰਡੀ ਭਾਵ",
+    ],
+    placeholder: "ਫਸਲ ਜਾਂ ਖਾਦ ਬਾਰੇ ਪੁੱਛੋ...",
+  },
+  Marathi: {
+    welcome: "👋 नमस्कार! मी तुमचा अग्री AI सल्लागार आहे. पिके, खते, रोग नियंत्रण आणि बाजारभावाबद्दल विचारा!",
+    prompts: [
+      "भाताची पाने पिवळी पडणे",
+      "केळीसाठी योग्य खत",
+      "आजचे बाजारभाव",
+    ],
+    placeholder: "पिके, खते किंवा बाजाराबद्दल विचारा...",
+  },
+};
 
 function cleanForTTS(text: string) {
   return text
@@ -135,7 +189,7 @@ function Waveform({ phase }: { phase: Phase }) {
 const BG = () => (
   <>
     <div aria-hidden style={{position:"absolute",inset:0,backgroundImage:"url('/schwoaze-nature-3526840_1920.jpg')",backgroundSize:"cover",backgroundPosition:"center",opacity:1,zIndex:0}}/>
-    <div aria-hidden style={{position:"absolute",inset:0,background:"rgba(10,12,18,0.72)",backdropFilter:"blur(12px)",zIndex:1}}/>
+    <div aria-hidden style={{position:"absolute",inset:0,background:"rgba(10,12,18,0.75)",backdropFilter:"blur(14px)",zIndex:1}}/>
   </>
 );
 
@@ -143,7 +197,7 @@ const BG = () => (
    Main wrapper — owns both open states, ensures mutual exclusivity
 ═══════════════════════════════════════════════════════════════════════ */
 export function FloatingWidgets() {
-  const { lang: appLang, fullName } = useI18n();
+  const { lang: appLang } = useI18n();
   const ask = useServerFn(chatWithOpenRouter);
 
   /* open/minimized state for each widget */
@@ -151,9 +205,16 @@ export function FloatingWidgets() {
   const [chatMinimized, setChatMinimized] = useState(false);
   const [voiceOpen,     setVoiceOpen]     = useState(false);
 
+  /* ── Language state (DEFAULT: ENGLISH) ── */
+  const [selectedLang, setSelectedLang] = useState(AI_LANGUAGES[0]!); // Default English
+  const [langDropdownOpen, setLangDropdownOpen] = useState(false);
+
+  const loc = LOCALIZED_DATA[selectedLang.name] || LOCALIZED_DATA.English;
+
   /* ── chat state ── */
-  const INIT_MSG: ChatMsg = { role:"assistant", content:"👋 Hi! I'm your Agri AI. Ask me anything about crops, pests, soil or market timing!" };
-  const [chatMsgs,     setChatMsgs]     = useState<ChatMsg[]>([INIT_MSG]);
+  const [chatMsgs,     setChatMsgs]     = useState<ChatMsg[]>([
+    { role: "assistant", content: loc.welcome }
+  ]);
   const [chatInput,    setChatInput]    = useState("");
   const [chatBusy,     setChatBusy]     = useState(false);
   const [showPrompts,  setShowPrompts]  = useState(true);
@@ -167,11 +228,9 @@ export function FloatingWidgets() {
   const [voiceTurns,     setVoiceTurns]     = useState<VoiceTurn[]>([]);
   const [muted,          setMuted]          = useState(false);
   const [autoListen,     setAutoListen]     = useState(true);
-  const [voiceLang,      setVoiceLang]      = useState(VOICE_LANGS[0]!);
-  const [langOpen,       setLangOpen]       = useState(false);
   const [voiceUnread,    setVoiceUnread]    = useState(0);
 
-  /* stable refs for voice */
+  /* stable refs */
   const turnsRef          = useRef<VoiceTurn[]>([]);
   const liveRef           = useRef("");
   const isRespondingRef   = useRef(false);
@@ -180,22 +239,31 @@ export function FloatingWidgets() {
   const idRef             = useRef(0);
   const voiceScrollRef    = useRef<HTMLDivElement>(null);
   const voiceEndRef       = useRef<HTMLDivElement>(null);
-  const langRef           = useRef(voiceLang);
+  const langRef           = useRef(selectedLang);
   const mutedRef          = useRef(muted);
   const autoListenRef     = useRef(autoListen);
   const phaseRef          = useRef<Phase>("idle");
   const voiceOpenRef      = useRef(false);
 
-  /* Sync app language changes into voice assistant */
-  useEffect(() => {
-    const matched = VOICE_LANGS.find(l => l.appLang === appLang);
-    if (matched) {
-      setVoiceLang(matched);
-      langRef.current = matched;
-    }
-  }, [appLang]);
+  /* Handle Language Switch */
+  const switchLanguage = (langObj: typeof AI_LANGUAGES[0]) => {
+    setSelectedLang(langObj);
+    langRef.current = langObj;
+    setLangDropdownOpen(false);
 
-  useEffect(() => { langRef.current = voiceLang; }, [voiceLang]);
+    // If chat only has initial welcome message, adapt it
+    setChatMsgs(prev => {
+      if (prev.length <= 1) {
+        const nextLoc = LOCALIZED_DATA[langObj.name] || LOCALIZED_DATA.English;
+        return [{ role: "assistant", content: nextLoc.welcome }];
+      }
+      return prev;
+    });
+
+    toast.success(`Language set to ${langObj.label} (${langObj.name})`);
+  };
+
+  useEffect(() => { langRef.current = selectedLang; }, [selectedLang]);
   useEffect(() => { mutedRef.current = muted; }, [muted]);
   useEffect(() => { autoListenRef.current = autoListen; }, [autoListen]);
   useEffect(() => { phaseRef.current = phase; }, [phase]);
@@ -271,12 +339,17 @@ export function FloatingWidgets() {
     const next: ChatMsg[] = [...chatMsgs, {role:"user", content:text.trim()}];
     setChatMsgs(next); setChatInput(""); setChatBusy(true);
     try {
-      const res = await ask({ data: { messages: next, language: fullName } });
+      const res = await ask({ data: { messages: next, language: selectedLang.name } });
       setChatMsgs([...next, {role:"assistant", content:res.reply}]);
     } catch { toast.error("Couldn't reach the assistant"); }
     finally { setChatBusy(false); }
   };
-  const resetChat = () => { setChatMsgs([INIT_MSG]); setShowPrompts(true); setChatInput(""); };
+  const resetChat = () => {
+    const nextLoc = LOCALIZED_DATA[selectedLang.name] || LOCALIZED_DATA.English;
+    setChatMsgs([{ role: "assistant", content: nextLoc.welcome }]);
+    setShowPrompts(true);
+    setChatInput("");
+  };
 
   /* ────────── VOICE logic ────────── */
   const startListening = useCallback(() => {
@@ -343,7 +416,7 @@ export function FloatingWidgets() {
           return [...prev, { role: "user", text: combined, id: -1 }];
         });
 
-        // Reset silence debounce timer: send after 1.5 seconds of user silence
+        // Send after 1.5s of user silence
         if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
         silenceTimerRef.current = setTimeout(() => {
           commitAndSend();
@@ -414,7 +487,6 @@ export function FloatingWidgets() {
     u.onend = () => {
       setPhase("idle");
       phaseRef.current = "idle";
-      // Auto-listen for next user question after natural pause
       if (autoListenRef.current && voiceOpenRef.current) {
         setTimeout(() => {
           if (phaseRef.current === "idle" && voiceOpenRef.current) {
@@ -492,8 +564,6 @@ export function FloatingWidgets() {
     voiceOpenRef.current = true;
     setChatOpen(false);
     setVoiceUnread(0);
-
-    // Auto-start listening immediately upon clicking voice assistant button!
     setTimeout(() => {
       startListening();
     }, 250);
@@ -524,6 +594,54 @@ export function FloatingWidgets() {
     phaseRef.current = "idle";
   };
 
+  /* ── Language Dropdown Component ── */
+  const LanguageSelector = () => (
+    <div className="relative">
+      <button
+        onClick={() => setLangDropdownOpen(v => !v)}
+        className="flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-white/25 transition border border-white/20 shadow-sm"
+        title="Select AI Language (Default: English)"
+      >
+        <Globe className="h-3 w-3 text-emerald-300" />
+        <span>{selectedLang.label}</span>
+        <ChevronDown className="h-3 w-3 opacity-70" />
+      </button>
+
+      {langDropdownOpen && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setLangDropdownOpen(false)} />
+          <div
+            className="absolute right-0 top-full z-50 mt-1.5 w-44 rounded-xl overflow-hidden shadow-2xl border border-white/20"
+            style={{ background: "rgba(18, 22, 32, 0.98)", backdropFilter: "blur(20px)" }}
+          >
+            <div className="p-1.5 space-y-0.5">
+              <p className="px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold text-white/50">
+                Choose Language
+              </p>
+              {AI_LANGUAGES.map(l => (
+                <button
+                  key={l.code}
+                  onClick={() => switchLanguage(l)}
+                  className={`flex w-full items-center justify-between px-2.5 py-1.5 text-xs rounded-lg transition ${
+                    selectedLang.code === l.code
+                      ? "bg-primary/40 text-primary-foreground font-bold"
+                      : "text-white/80 hover:bg-white/10 hover:text-white"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold">{l.label}</span>
+                    <span className="text-[10px] text-white/40">({l.name})</span>
+                  </div>
+                  {selectedLang.code === l.code && <Check className="h-3.5 w-3.5 text-emerald-400" />}
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+
   /* ── helper: panel header ── */
   const panelHeader = (
     title: string,
@@ -534,9 +652,9 @@ export function FloatingWidgets() {
     extra?: React.ReactNode,
     onMinimize?: () => void,
   ) => (
-    <div className="flex h-14 shrink-0 items-center justify-between gap-3 px-4 border-b border-white/10"
+    <div className="flex h-14 shrink-0 items-center justify-between gap-2 px-3.5 border-b border-white/10"
       style={{background:accent, backdropFilter:"blur(12px)"}}>
-      <div className="flex items-center gap-2.5 min-w-0 flex-1">
+      <div className="flex items-center gap-2 min-w-0 flex-1">
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/20">
           <Sprout className="h-4 w-4 text-white"/>
         </div>
@@ -546,6 +664,7 @@ export function FloatingWidgets() {
         </div>
       </div>
       <div className="flex items-center gap-1.5 shrink-0">
+        <LanguageSelector />
         {extra}
         <button onClick={onReset} title="Clear conversation" className="grid h-7 w-7 place-items-center rounded-lg text-white/70 hover:bg-white/15 hover:text-white transition"><RotateCcw className="h-3.5 w-3.5"/></button>
         {onMinimize && <button onClick={onMinimize} title="Minimize" className="grid h-7 w-7 place-items-center rounded-lg text-white/70 hover:bg-white/15 hover:text-white transition"><Minimize2 className="h-3.5 w-3.5"/></button>}
@@ -557,20 +676,8 @@ export function FloatingWidgets() {
   const showChatFAB  = !chatOpen  && !voiceOpen;
   const showVoiceFAB = !voiceOpen && !chatOpen;
 
-  const voiceStatusSubtitle = (
-    <span className="flex items-center gap-1.5 font-medium">
-      <span className={
-        phase === "listening" ? "h-2 w-2 rounded-full bg-red-400 animate-ping" :
-        phase === "speaking" ? "h-2 w-2 rounded-full bg-violet-400 animate-pulse" :
-        phase === "thinking" ? "h-2 w-2 rounded-full bg-amber-400 animate-pulse" :
-        "h-2 w-2 rounded-full bg-green-400"
-      }/>
-      {phase === "idle" ? "Ready" : phase === "listening" ? "Listening..." : phase === "thinking" ? "Thinking..." : "Speaking..."}
-    </span>
-  );
-
   const voiceSubBar = (
-    <div className="flex items-center justify-between px-3.5 py-2 border-b border-white/10 bg-black/25 backdrop-blur-md shrink-0 text-xs">
+    <div className="flex items-center justify-between px-3.5 py-2 border-b border-white/10 bg-black/30 backdrop-blur-md shrink-0 text-xs">
       <div className="flex items-center gap-1.5 font-medium text-white/90">
         <span className={
           phase === "listening" ? "h-2 w-2 rounded-full bg-red-400 animate-ping" :
@@ -579,61 +686,21 @@ export function FloatingWidgets() {
           "h-2 w-2 rounded-full bg-green-400"
         }/>
         <span className="text-[11px]">
-          {phase === "idle" ? "Ready · tap mic" : phase === "listening" ? "Listening... speak now" : phase === "thinking" ? "Gemini thinking..." : "Speaking response"}
+          {phase === "idle" ? `Ready in ${selectedLang.label} · tap mic` : phase === "listening" ? "Listening... speak now" : phase === "thinking" ? "Gemini 2.5 thinking..." : "Speaking response"}
         </span>
       </div>
 
       <div className="flex items-center gap-2">
-        {/* Auto Listen Toggle */}
         <button
           onClick={() => setAutoListen(v => !v)}
           title={autoListen ? "Auto-listen ON (hands-free dialogue)" : "Auto-listen OFF (single shot)"}
-          className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold transition ${
+          className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold transition ${
             autoListen ? "bg-violet-500/30 text-violet-200 ring-1 ring-violet-400/50" : "bg-white/10 text-white/50 hover:bg-white/15"
           }`}
         >
           <Radio className="h-2.5 w-2.5"/>
           <span>Auto: {autoListen ? "ON" : "OFF"}</span>
         </button>
-
-        {/* Language selector */}
-        <div className="relative">
-          <button
-            onClick={() => setLangOpen(v => !v)}
-            className="flex items-center gap-1 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-medium text-white hover:bg-white/25 transition border border-white/20"
-          >
-            <span>{voiceLang.label}</span>
-            <ChevronDown className="h-3 w-3 opacity-70"/>
-          </button>
-
-          {langOpen && (
-            <>
-              {/* Click outside backdrop */}
-              <div className="fixed inset-0 z-40" onClick={() => setLangOpen(false)} />
-              <div
-                className="absolute right-0 top-full z-50 mt-1.5 w-40 rounded-xl overflow-hidden shadow-2xl border border-white/20"
-                style={{ background: "rgba(18, 18, 30, 0.98)", backdropFilter: "blur(20px)" }}
-              >
-                <div className="p-1">
-                  {VOICE_LANGS.map(l => (
-                    <button
-                      key={l.code}
-                      onClick={() => { setVoiceLang(l); setLangOpen(false); }}
-                      className={`flex w-full items-center justify-between px-3 py-2 text-[11px] rounded-lg transition ${
-                        voiceLang.code === l.code
-                          ? "bg-violet-600/40 text-violet-200 font-semibold"
-                          : "text-white/80 hover:bg-white/10 hover:text-white"
-                      }`}
-                    >
-                      <span>{l.label}</span>
-                      <span className="text-[10px] text-white/45">{l.name}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </>
-          )}
-        </div>
       </div>
     </div>
   );
@@ -664,7 +731,7 @@ export function FloatingWidgets() {
         </button>
       )}
 
-      {/* ── VOICE FAB ── slightly moved upward ── */}
+      {/* ── VOICE FAB ── */}
       {showVoiceFAB && (
         <button
           onClick={openVoice}
@@ -690,19 +757,37 @@ export function FloatingWidgets() {
 
       {/* ═══════════ CHAT PANEL — desktop ═══════════ */}
       {chatOpen && (
-        <div className={`hidden sm:flex fixed bottom-6 right-6 z-50 flex-col rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 ${chatMinimized?"h-14 w-72":"h-[580px] w-[380px] lg:w-[420px]"}`}
+        <div className={`hidden sm:flex fixed bottom-6 right-6 z-50 flex-col rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 ${chatMinimized?"h-14 w-72":"h-[580px] w-[390px] lg:w-[430px]"}`}
           style={{boxShadow:"0 25px 60px rgba(0,0,0,0.5)", backdropFilter:"blur(2px)", animation:"fwSlide .25s ease-out"}}>
           <BG/>
           <div className="relative z-10 flex flex-col h-full">
             {panelHeader(
               "Agri AI",
-              <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-green-300 animate-pulse"/> Online · crop expert</span>,
+              <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-green-300 animate-pulse"/> {selectedLang.label} ({selectedLang.name})</span>,
               "linear-gradient(135deg,rgba(22,101,52,0.9),rgba(21,128,61,0.85))",
               resetChat, closeChat, undefined,
               ()=>setChatMinimized(v=>!v),
             )}
             {!chatMinimized && (
               <>
+                {/* Language pill bar */}
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-black/20 border-b border-white/5 overflow-x-auto text-[11px]">
+                  <span className="text-[10px] text-white/50 uppercase font-semibold shrink-0">Lang:</span>
+                  {AI_LANGUAGES.map(l => (
+                    <button
+                      key={l.code}
+                      onClick={() => switchLanguage(l)}
+                      className={`px-2 py-0.5 rounded-full shrink-0 font-medium transition ${
+                        selectedLang.code === l.code
+                          ? "bg-emerald-500 text-white font-bold shadow-sm"
+                          : "bg-white/10 text-white/70 hover:bg-white/20 hover:text-white"
+                      }`}
+                    >
+                      {l.label}
+                    </button>
+                  ))}
+                </div>
+
                 <div ref={chatScrollRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-3" style={{scrollbarWidth:"thin"}}>
                   {chatMsgs.map((m,i)=>(
                     <div key={i} className={`flex ${m.role==="user"?"justify-end":"justify-start"}`}>
@@ -723,16 +808,18 @@ export function FloatingWidgets() {
                   )}
                   <div ref={chatEndRef} className="h-0.5 w-full shrink-0" />
                 </div>
+
                 {showPrompts && (
                   <div className="flex flex-wrap gap-1.5 px-4 pb-2">
-                    {CHAT_PROMPTS.map(p=><button key={p} onClick={()=>sendChat(p)} className="rounded-full border border-white/30 px-2.5 py-1 text-[11px] text-white/80 backdrop-blur-sm transition hover:bg-white/20 hover:text-white active:scale-95">{p}</button>)}
+                    {loc.prompts.map(p=><button key={p} onClick={()=>sendChat(p)} className="rounded-full border border-white/30 px-2.5 py-1 text-[11px] text-white/80 backdrop-blur-sm transition hover:bg-white/20 hover:text-white active:scale-95">{p}</button>)}
                   </div>
                 )}
+
                 <div className="px-3 pb-3">
                   <form onSubmit={e=>{e.preventDefault();sendChat(chatInput);}} className="flex items-center gap-2 rounded-full px-4 py-2" style={{background:"rgba(255,255,255,0.15)",backdropFilter:"blur(16px)",border:"1px solid rgba(255,255,255,0.25)"}}>
                     <input ref={chatInputRef} value={chatInput} onChange={e=>setChatInput(e.target.value)}
                       onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendChat(chatInput);}}}
-                      placeholder="Ask about crops, pests, soil…"
+                      placeholder={loc.placeholder}
                       className="min-w-0 flex-1 bg-transparent py-1 text-sm text-white placeholder:text-white/50 focus:outline-none"/>
                     <button type="submit" disabled={chatBusy||!chatInput.trim()} aria-label="Send"
                       className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all hover:scale-110 active:scale-95 disabled:opacity-40"
@@ -740,7 +827,7 @@ export function FloatingWidgets() {
                       <Send className="h-3.5 w-3.5 text-white"/>
                     </button>
                   </form>
-                  <p className="mt-1.5 text-center text-[10px] text-white/40"><Sprout className="mr-1 inline h-2.5 w-2.5"/>Gemini 2.5 Flash · AI guidance only</p>
+                  <p className="mt-1.5 text-center text-[10px] text-white/40"><Sprout className="mr-1 inline h-2.5 w-2.5"/>Gemini 2.5 Flash Lite · Precision Agronomy</p>
                 </div>
               </>
             )}
@@ -757,7 +844,25 @@ export function FloatingWidgets() {
             <BG/>
             <div className="relative z-10 flex flex-col h-full">
               <div className="flex justify-center pt-3 pb-1 shrink-0"><div className="h-1 w-10 rounded-full bg-white/30"/></div>
-              {panelHeader("Agri AI","Online · crop expert","linear-gradient(135deg,rgba(22,101,52,0.9),rgba(21,128,61,0.85))",resetChat,closeChat)}
+              {panelHeader("Agri AI", `${selectedLang.label} · crop expert`, "linear-gradient(135deg,rgba(22,101,52,0.9),rgba(21,128,61,0.85))", resetChat, closeChat)}
+
+              {/* Language pill bar */}
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-black/20 border-b border-white/5 overflow-x-auto text-[11px]">
+                {AI_LANGUAGES.map(l => (
+                  <button
+                    key={l.code}
+                    onClick={() => switchLanguage(l)}
+                    className={`px-2.5 py-0.5 rounded-full shrink-0 font-medium transition ${
+                      selectedLang.code === l.code
+                        ? "bg-emerald-500 text-white font-bold"
+                        : "bg-white/10 text-white/70 hover:bg-white/20"
+                    }`}
+                  >
+                    {l.label}
+                  </button>
+                ))}
+              </div>
+
               <div ref={chatScrollRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-3" style={{scrollbarWidth:"thin"}}>
                 {chatMsgs.map((m,i)=>(
                   <div key={i} className={m.role === "user" ? "flex justify-end" : "flex justify-start"}>
@@ -779,13 +884,13 @@ export function FloatingWidgets() {
                   </div>
                 )}
               </div>
-              {showPrompts&&<div className="flex flex-wrap gap-1.5 px-4 pb-2">{CHAT_PROMPTS.map(p=><button key={p} onClick={()=>sendChat(p)} className="rounded-full border border-white/30 px-2.5 py-1 text-[11px] text-white/80 backdrop-blur-sm transition hover:bg-white/20 active:scale-95">{p}</button>)}</div>}
+              {showPrompts&&<div className="flex flex-wrap gap-1.5 px-4 pb-2">{loc.prompts.map(p=><button key={p} onClick={()=>sendChat(p)} className="rounded-full border border-white/30 px-2.5 py-1 text-[11px] text-white/80 backdrop-blur-sm transition hover:bg-white/20 active:scale-95">{p}</button>)}</div>}
               <div className="px-3 pb-3">
                 <form onSubmit={e=>{e.preventDefault();sendChat(chatInput);}} className="flex items-center gap-2 rounded-full px-4 py-2" style={{background:"rgba(255,255,255,.15)",backdropFilter:"blur(16px)",border:"1px solid rgba(255,255,255,.25)"}}>
-                  <input ref={chatInputRef} value={chatInput} onChange={e=>setChatInput(e.target.value)} placeholder="Ask about crops, pests, soil…" className="min-w-0 flex-1 bg-transparent py-1 text-sm text-white placeholder:text-white/50 focus:outline-none"/>
+                  <input ref={chatInputRef} value={chatInput} onChange={e=>setChatInput(e.target.value)} placeholder={loc.placeholder} className="min-w-0 flex-1 bg-transparent py-1 text-sm text-white placeholder:text-white/50 focus:outline-none"/>
                   <button type="submit" disabled={chatBusy||!chatInput.trim()} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all hover:scale-110 disabled:opacity-40" style={{background:chatInput.trim()?"linear-gradient(135deg,var(--primary),#16a34a)":"rgba(255,255,255,.2)"}}><Send className="h-3.5 w-3.5 text-white"/></button>
                 </form>
-                <p className="mt-1.5 text-center text-[10px] text-white/40"><Sprout className="mr-1 inline h-2.5 w-2.5"/>Gemini 2.5 Flash · AI guidance only</p>
+                <p className="mt-1.5 text-center text-[10px] text-white/40"><Sprout className="mr-1 inline h-2.5 w-2.5"/>Gemini 2.5 Flash Lite</p>
               </div>
             </div>
           </div>
@@ -800,7 +905,7 @@ export function FloatingWidgets() {
           <div className="relative z-10 flex flex-col h-full">
             {panelHeader(
               "Agri Voice Assistant",
-              "Live voice conversation",
+              `Language: ${selectedLang.label}`,
               "linear-gradient(135deg,rgba(79,70,229,0.95),rgba(124,58,237,0.90))",
               resetVoice,
               closeVoice,
@@ -816,11 +921,11 @@ export function FloatingWidgets() {
                     <Mic className="h-6 w-6 animate-pulse"/>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-white/90">Listening automatically...</p>
+                    <p className="text-sm font-medium text-white/90">Listening in {selectedLang.label}...</p>
                     <p className="mt-1 text-xs text-white/60">Speak your question or choose a prompt below</p>
                   </div>
                   <div className="flex flex-wrap justify-center gap-1.5 mt-2">
-                    {VOICE_PROMPTS.map(q=><button key={q} onClick={()=>void fireVoiceQuick(q)} className="rounded-full border border-white/20 px-2.5 py-1 text-[11px] text-white/80 hover:bg-white/20 hover:text-white transition active:scale-95">{q}</button>)}
+                    {loc.prompts.map(q=><button key={q} onClick={()=>void fireVoiceQuick(q)} className="rounded-full border border-white/20 px-2.5 py-1 text-[11px] text-white/80 hover:bg-white/20 hover:text-white transition active:scale-95">{q}</button>)}
                   </div>
                 </div>
               ):(
@@ -862,7 +967,7 @@ export function FloatingWidgets() {
               </div>
               <p className="mt-2 text-center text-[10px] text-white/50">
                 <Sparkles className="mr-1 inline h-2.5 w-2.5 text-violet-300"/>
-                {phase === "listening" ? "Listening... speak now" : phase === "speaking" ? "Speaking... tap orb to pause" : phase === "thinking" ? "Analyzing with Gemini..." : "Tap mic to speak"}
+                {phase === "listening" ? `Listening in ${selectedLang.label}... speak now` : phase === "speaking" ? "Speaking... tap orb to pause" : phase === "thinking" ? "Analyzing with Gemini 2.5..." : `Tap mic to speak (${selectedLang.label})`}
               </p>
             </div>
           </div>
@@ -879,7 +984,7 @@ export function FloatingWidgets() {
             <div className="relative z-10 flex flex-col h-full">
               <div className="flex justify-center pt-3 pb-1 shrink-0"><div className="h-1 w-10 rounded-full bg-white/30"/></div>
               {panelHeader("Agri Voice",
-                "Live voice assistant",
+                `${selectedLang.label} voice assistant`,
                 "linear-gradient(135deg,rgba(79,70,229,.92),rgba(124,58,237,.88))",
                 resetVoice, closeVoice, voiceHeaderExtra
               )}
@@ -887,10 +992,10 @@ export function FloatingWidgets() {
               <div ref={voiceScrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3" style={{scrollbarWidth:"thin"}}>
                 {voiceTurns.length===0?(
                   <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
-                    <p className="text-sm font-medium text-white/90">Listening automatically...</p>
+                    <p className="text-sm font-medium text-white/90">Listening in {selectedLang.label}...</p>
                     <p className="text-xs text-white/60">Speak your question or tap below</p>
                     <div className="flex flex-wrap justify-center gap-1.5 mt-2">
-                      {VOICE_PROMPTS.map(q=><button key={q} onClick={()=>void fireVoiceQuick(q)} className="rounded-full border border-white/20 px-3 py-1 text-[11px] text-white/80 hover:bg-white/20 transition">{q}</button>)}
+                      {loc.prompts.map(q=><button key={q} onClick={()=>void fireVoiceQuick(q)} className="rounded-full border border-white/20 px-3 py-1 text-[11px] text-white/80 hover:bg-white/20 transition">{q}</button>)}
                     </div>
                   </div>
                 ):(
