@@ -132,10 +132,13 @@ export function DashboardShell({ children }: { children: ReactNode }) {
               <LogOut className="h-4 w-4" />
             </button>
           </div>
-          <div className="mt-1 px-2 pt-1 text-[10px] text-muted-foreground/60 leading-tight">
-            <a href="https://www.flaticon.com/free-icons/agriculture" title="agriculture icons" target="_blank" rel="noopener noreferrer" className="hover:underline hover:text-foreground transition-colors">
-              Agriculture icons by RanuKumbolo.lab
-            </a>
+          <div className="mt-2 space-y-1 border-t border-border/50 px-2 pt-2 text-[10px] text-muted-foreground/70">
+            <p className="font-medium text-foreground/80">Developed by AJ STUDIOZ</p>
+            <p>
+              <a href="https://www.flaticon.com/free-icons/agriculture" title="agriculture icons" target="_blank" rel="noopener noreferrer" className="hover:underline hover:text-foreground transition-colors">
+                Icons by RanuKumbolo.lab (Flaticon)
+              </a>
+            </p>
           </div>
         </div>
       </aside>

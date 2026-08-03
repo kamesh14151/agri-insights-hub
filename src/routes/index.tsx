@@ -85,10 +85,19 @@ function Landing() {
         </div>
       </section>
 
-      <footer className="border-t border-border">
-        <div className="mx-auto grid max-w-[1200px] grid-cols-[minmax(0,1fr)_auto] gap-4 px-5 py-10 text-sm text-muted-foreground sm:px-6">
-          <p>© 2026 Agrisynapse. Built for Indian agriculture.</p>
-          <Link to="/login" className="shrink-0 hover:text-foreground">Sign in</Link>
+      <footer className="border-t border-border bg-card/40">
+        <div className="mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 max-w-[1200px] px-5 py-8 text-xs text-muted-foreground sm:px-6">
+          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-center sm:text-left">
+            <p>© 2026 Agrisynapse. Built with passion by <span className="font-semibold text-foreground">AJ STUDIOZ</span>.</p>
+            <span className="hidden sm:inline text-border">|</span>
+            <a href="https://www.flaticon.com/free-icons/agriculture" title="agriculture icons" target="_blank" rel="noopener noreferrer" className="hover:underline hover:text-foreground">
+              Icons by RanuKumbolo.lab (Flaticon)
+            </a>
+          </div>
+          <div className="flex items-center gap-4">
+            <Link to="/login" className="hover:text-foreground">Sign in</Link>
+            <Link to="/app" className="font-medium text-primary hover:underline">Launch App →</Link>
+          </div>
         </div>
       </footer>
 

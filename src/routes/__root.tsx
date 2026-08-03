@@ -10,7 +10,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
+import { reportAppError } from "../lib/error-reporting";
 import { I18nProvider } from "@/lib/i18n";
 import { ThemeProvider } from "@/lib/theme";
 import { AuthProvider } from "@/lib/auth";
@@ -42,7 +42,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
   useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
+    reportAppError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
 
   return (
@@ -81,14 +81,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Agrisynapse — Agricultural Intelligence Platform" },
+      { title: "Agrisynapse — Agricultural Intelligence Platform | AJ STUDIOZ" },
       { name: "description", content: "Disease detection, IoT field monitoring, crop and market intelligence, marketplace and services for Indian farmers." },
-      { name: "author", content: "Agrisynapse" },
-      { property: "og:title", content: "Agrisynapse — Agricultural Intelligence Platform" },
+      { name: "author", content: "AJ STUDIOZ" },
+      { property: "og:title", content: "Agrisynapse — Agricultural Intelligence Platform | AJ STUDIOZ" },
       { property: "og:description", content: "Disease detection, IoT monitoring, crop and market intelligence, marketplace and services for Indian farmers." },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:site", content: "@AJ_STUDIOZ" },
+      { name: "twitter:creator", content: "@AJ_STUDIOZ" },
     ],
     links: [
       { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },

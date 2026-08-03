@@ -1,6 +1,8 @@
 {
-  "name": "tanstack_start_ts",
+  "name": "agrisynapse",
   "version": "1.0.0",
+  "description": "Full-Stack Agricultural Intelligence Platform by AJ STUDIOZ",
+  "author": "AJ STUDIOZ",
   "private": true,
   "sideEffects": false,
   "type": "module",
