@@ -1,12 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, Line, LineChart } from "recharts";
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import {
-  ArrowUpRight, Droplets, ScanLine, Sprout, ThermometerSun, TrendingUp,
-  ShoppingBag, Shield, Users, Layers, Activity as ActivityIcon, CheckCircle
+  ArrowUpRight, Droplets, ScanLine, ThermometerSun, TrendingUp,
+  ShoppingBag, Shield, Users, Layers, Activity as ActivityIcon, CheckCircle, User
 } from "lucide-react";
 import { PageIntro, Panel } from "@/components/DashboardShell";
 import { IOT_TIMESERIES, MARKET_TREND } from "@/lib/mock";
 import { useAuth } from "@/lib/auth";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/app/")({
   head: () => ({
@@ -18,86 +19,86 @@ export const Route = createFileRoute("/app/")({
   component: DashboardHome,
 });
 
-/* ── MOCK DATA FOR ROLES ── */
-const FARMER_STATS = [
-  { label: "Soil moisture", value: "62%", note: "Optimal band", icon: Droplets },
-  { label: "Field temp", value: "31.4°C", note: "+1.8° vs yesterday", icon: ThermometerSun },
-  { label: "Scans this week", value: "18", note: "2 need action", icon: ScanLine },
-  { label: "Paddy price", value: "₹2,380", note: "+2.1% this month", icon: TrendingUp },
-];
-
-const FARMER_QUICK = [
-  { to: "/app/disease" as const, label: "Scan a leaf", desc: "Upload a photo for instant diagnosis" },
-  { to: "/app/crops" as const, label: "Plan next crop", desc: "Soil and climate matched picks" },
-  { to: "/app/marketplace" as const, label: "List produce", desc: "Reach verified buyers directly" },
-  { to: "/app/booking" as const, label: "Book a tractor", desc: "Equipment, labour and transport" },
-];
-
-const FARMER_ACTIVITY = [
-  { title: "Soil Moisture Alert", detail: "Moisture dropped in Sector 4B. Recommended drip irrigation for 30 mins.", time: "10 mins ago" },
-  { title: "Crop Analysis Complete", detail: "Gemini diagnosed Paddy Blast disease in Scan #402. Treatment recommended.", time: "2 hours ago" },
-  { title: "Service Booking Confirmed", detail: "Tractor with Rotavator from Kisan Agro Rentals scheduled for tomorrow.", time: "Yesterday" },
-];
-
-const BUYER_STATS = [
-  { label: "Paddy Market Price", value: "₹2,380/q", note: "+2.1% this month", icon: TrendingUp },
-  { label: "Tomato Market Price", value: "₹1,900/q", note: "-3.5% this week", icon: TrendingUp },
-  { label: "Active Orders", value: "3", note: "1 shipped, 2 packing", icon: ShoppingBag },
-  { label: "Marketplace Offers", value: "12", note: "4 new listings today", icon: Layers },
-];
-
-const BUYER_QUICK = [
-  { to: "/app/marketplace" as const, label: "Explore Marketplace", desc: "Enquire and trade directly with farmers" },
-  { to: "/app/shop" as const, label: "Order Seeds & Tools", desc: "High quality inputs, direct delivery" },
-  { to: "/app/market" as const, label: "Check Market Demand", desc: "Regional demand and price forecasting" },
-  { to: "/app/weather" as const, label: "Weather Forecast", desc: "Plan logistics around local climate" },
-];
-
-const BUYER_ACTIVITY = [
-  { title: "Order Shipped", detail: "Order #8491 (NPK Fertilizer & Drip pipes) has been dispatched.", time: "30 mins ago" },
-  { title: "New Listing Match", detail: "Farmer Murugan posted 2.5 tonnes of Premium Turmeric.", time: "4 hours ago" },
-  { title: "Price Drop Alert", detail: "Regional tomato prices down to ₹1,900 per quintal.", time: "1 day ago" },
-];
-
-const ADMIN_STATS = [
-  { label: "Total Active Users", value: "152", note: "+12 register today", icon: Users },
-  { label: "Monthly Trade Volume", value: "₹3.42L", note: "+14.8% vs last month", icon: TrendingUp },
-  { label: "Live Service Bookings", value: "48", note: "98% completion rate", icon: Layers },
-  { label: "System Status", value: "99.98%", note: "All services healthy", icon: Shield },
-];
-
-const ADMIN_QUICK = [
-  { to: "/app/admin" as const, label: "Admin Console", desc: "Manage accounts, service bookings & payouts" },
-  { to: "/app/marketplace" as const, label: "Review Listings", desc: "Audit and verify agricultural trade listings" },
-  { to: "/app/market" as const, label: "System Analytics", desc: "Review platform usage, trades and pricing data" },
-  { to: "/app/settings" as const, label: "Global Settings", desc: "Configure system constraints and configurations" },
-];
-
-const ADMIN_ACTIVITY = [
-  { title: "Payout Processed", detail: "₹1,950 paid to Kisan Agro Rentals for Completed Booking #291", time: "1 hour ago" },
-  { title: "System Check Complete", detail: "AI endpoints and database clusters reported 100% operational.", time: "3 hours ago" },
-  { title: "Flagged Listing Reviewed", detail: "Admin approved listing #843 after verification of certificates.", time: "5 hours ago" },
-];
-
 function DashboardHome() {
   const { user } = useAuth();
+  const { t } = useI18n();
   const role = user?.role ?? "user";
 
-  const currentStats = role === "admin" ? ADMIN_STATS : role === "farmer" ? FARMER_STATS : BUYER_STATS;
-  const currentQuick = role === "admin" ? ADMIN_QUICK : role === "farmer" ? FARMER_QUICK : BUYER_QUICK;
-  const currentActivity = role === "admin" ? ADMIN_ACTIVITY : role === "farmer" ? FARMER_ACTIVITY : BUYER_ACTIVITY;
+  const farmerStats = [
+    { label: t("soil_moisture"), value: "62%", note: t("optimal_band"), icon: Droplets },
+    { label: t("field_temp"), value: "31.4°C", note: t("temp_note"), icon: ThermometerSun },
+    { label: t("scans_week"), value: "18", note: t("action_needed"), icon: ScanLine },
+    { label: t("paddy_price"), value: "₹2,380", note: t("month_increase"), icon: TrendingUp },
+  ];
+
+  const farmerQuick = [
+    { to: "/app/disease" as const, label: t("scan_leaf"), desc: t("scan_leaf_desc") },
+    { to: "/app/crops" as const, label: t("plan_crop"), desc: t("plan_crop_desc") },
+    { to: "/app/marketplace" as const, label: t("list_produce"), desc: t("list_produce_desc") },
+    { to: "/app/booking" as const, label: t("book_service"), desc: t("book_service_desc") },
+  ];
+
+  const farmerActivity = [
+    { title: "Soil Moisture Alert", detail: "Moisture dropped in Sector 4B. Recommended drip irrigation for 30 mins.", time: "10 mins ago" },
+    { title: "Crop Analysis Complete", detail: "Gemini diagnosed Paddy Blast disease in Scan #402. Treatment recommended.", time: "2 hours ago" },
+    { title: "Service Booking Confirmed", detail: "Tractor with Rotavator from Kisan Agro Rentals scheduled for tomorrow.", time: "Yesterday" },
+  ];
+
+  const buyerStats = [
+    { label: "Paddy Market Price", value: "₹2,380/q", note: "+2.1% this month", icon: TrendingUp },
+    { label: "Tomato Market Price", value: "₹1,900/q", note: "-3.5% this week", icon: TrendingUp },
+    { label: "Active Orders", value: "3", note: "1 shipped, 2 packing", icon: ShoppingBag },
+    { label: "Marketplace Offers", value: "12", note: "4 new listings today", icon: Layers },
+  ];
+
+  const buyerQuick = [
+    { to: "/app/marketplace" as const, label: t("explore_marketplace"), desc: t("explore_marketplace_desc") },
+    { to: "/app/shop" as const, label: t("order_seeds"), desc: t("order_seeds_desc") },
+    { to: "/app/market" as const, label: t("check_demand"), desc: t("check_demand_desc") },
+    { to: "/app/weather" as const, label: t("weather_forecast"), desc: t("weather_forecast_desc") },
+  ];
+
+  const buyerActivity = [
+    { title: "Order Shipped", detail: "Order #8491 (NPK Fertilizer & Drip pipes) has been dispatched.", time: "30 mins ago" },
+    { title: "New Listing Match", detail: "Farmer Murugan posted 2.5 tonnes of Premium Turmeric.", time: "4 hours ago" },
+    { title: "Price Drop Alert", detail: "Regional tomato prices down to ₹1,900 per quintal.", time: "1 day ago" },
+  ];
+
+  const adminStats = [
+    { label: "Total Active Users", value: "152", note: "+12 registered today", icon: Users },
+    { label: "Monthly Trade Volume", value: "₹3.42L", note: "+14.8% vs last month", icon: TrendingUp },
+    { label: "Live Service Bookings", value: "48", note: "98% completion rate", icon: Layers },
+    { label: "System Status", value: "99.98%", note: "All services healthy", icon: Shield },
+  ];
+
+  const adminQuick = [
+    { to: "/app/admin" as const, label: t("nav_admin"), desc: "Manage accounts, platform health & operations" },
+    { to: "/app/marketplace" as const, label: t("nav_marketplace_audit"), desc: t("review_listings_desc") },
+    { to: "/app/profile" as const, label: t("nav_profile"), desc: "Administrative credentials and identity" },
+    { to: "/app/settings" as const, label: t("global_settings"), desc: t("global_settings_desc") },
+  ];
+
+  const adminActivity = [
+    { title: "Payout Processed", detail: "₹1,950 paid to Kisan Agro Rentals for Completed Booking #291", time: "1 hour ago" },
+    { title: "System Check Complete", detail: "AI endpoints and database clusters reported 100% operational.", time: "3 hours ago" },
+    { title: "Flagged Listing Reviewed", detail: "Admin approved listing #843 after verification of certificates.", time: "5 hours ago" },
+  ];
+
+  const currentStats = role === "admin" ? adminStats : role === "farmer" ? farmerStats : buyerStats;
+  const currentQuick = role === "admin" ? adminQuick : role === "farmer" ? farmerQuick : buyerQuick;
+  const currentActivity = role === "admin" ? adminActivity : role === "farmer" ? farmerActivity : buyerActivity;
 
   return (
     <>
       <PageIntro
         index="01 / Home"
-        eyebrow={`${role === "admin" ? "Admin Console" : role === "farmer" ? "Farmer Workspace" : "Buyer Terminal"}`}
-        title={`Welcome back, ${user?.name ?? "Murugan"}`}
+        eyebrow={role === "admin" ? t("admin_console_eyebrow") : role === "farmer" ? t("farmer_workspace") : t("buyer_terminal")}
+        title={`${t("welcome_back")}, ${user?.name ?? "User"}`}
         subtitle={
           role === "farmer"
             ? "Your fields, quietly explained. Live sensor telemetry, disease alerts, price updates, and equipment bookings."
             : role === "admin"
-            ? "Platform health, system audits, user analytics, trade volumes, and administrative alerts in one dashboard."
+            ? "Platform operations, user growth, sensor fleet health, and system analytics in one command view."
             : "Direct agricultural trade. Browse crop listings, monitor market trends, and purchase certified inputs."
         }
       />
@@ -140,7 +141,7 @@ function DashboardHome() {
             </div>
           </Panel>
         ) : role === "admin" ? (
-          <Panel title="Trade Volume & User registrations" className="lg:col-span-2">
+          <Panel title="Platform Trade Volume & User Registrations" className="lg:col-span-2">
             <div className="h-[280px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={MARKET_TREND}>
@@ -178,7 +179,7 @@ function DashboardHome() {
         )}
 
         {/* Activity feed */}
-        <Panel title={role === "admin" ? "System Audit Log" : role === "farmer" ? "Recent Alerts" : "Recent Activity"}>
+        <Panel title={role === "admin" ? t("system_audit_log") : role === "farmer" ? t("recent_alerts") : t("recent_activity")}>
           <ul className="space-y-4">
             {currentActivity.map((a) => (
               <li key={a.title} className="border-l-2 border-primary/40 pl-4">
@@ -193,27 +194,26 @@ function DashboardHome() {
 
       {/* Quick actions panel */}
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
-        {/* Placeholder/Extra detail panel */}
         {role === "farmer" ? (
-          <Panel title="Soil Sensor Status" className="lg:col-span-2">
+          <Panel title={t("soil_sensor_status")} className="lg:col-span-2">
             <div className="flex flex-col sm:flex-row items-center gap-6 py-4">
               <div className="relative flex h-24 w-24 shrink-0 items-center justify-center rounded-full border-4 border-primary bg-primary/10">
                 <span className="text-2xl font-serif text-primary">3</span>
                 <span className="absolute bottom-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-green-500 text-[10px] text-white">✓</span>
               </div>
               <div>
-                <h4 className="text-sm font-medium">All soil sensor nodes connected</h4>
+                <h4 className="text-sm font-medium">{t("sensor_connected")}</h4>
                 <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                  Nodes are telemetry-bound and report data every 15 minutes. Soil salinity, nitrogen levels, and moisture ranges are in the optimal band.
+                  {t("sensor_connected_desc")}
                 </p>
                 <Link to="/app/iot" className="mt-3.5 inline-flex items-center gap-1.5 text-xs text-primary font-medium">
-                  Inspect sensor telemetry <ArrowUpRight className="h-3.5 w-3.5" />
+                  {t("inspect_telemetry")} <ArrowUpRight className="h-3.5 w-3.5" />
                 </Link>
               </div>
             </div>
           </Panel>
         ) : role === "admin" ? (
-          <Panel title="Administrative Summary" className="lg:col-span-2">
+          <Panel title={t("admin_summary")} className="lg:col-span-2">
             <div className="grid grid-cols-2 gap-4 py-3">
               <div className="rounded-xl border border-border p-4">
                 <p className="text-xs text-muted-foreground uppercase tracking-wider">KYC Audits pending</p>
@@ -226,7 +226,7 @@ function DashboardHome() {
             </div>
           </Panel>
         ) : (
-          <Panel title="Consumer Buyer Guarantees" className="lg:col-span-2">
+          <Panel title={t("buyer_guarantees")} className="lg:col-span-2">
             <div className="flex flex-col sm:flex-row items-center gap-6 py-4">
               <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-primary/10">
                 <CheckCircle className="h-8 w-8 text-primary" />
@@ -234,17 +234,17 @@ function DashboardHome() {
               <div>
                 <h4 className="text-sm font-medium">Agrisynapse Trade Protection Enabled</h4>
                 <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                  Your payments are held securely via Dodo Payments until delivery confirmation. Full refund in case of product damage or delivery failure.
+                  {t("buyer_guarantees_desc")}
                 </p>
                 <Link to="/app/marketplace" className="mt-3.5 inline-flex items-center gap-1.5 text-xs text-primary font-medium">
-                  Browse marketplace <ArrowUpRight className="h-3.5 w-3.5" />
+                  {t("browse_marketplace")} <ArrowUpRight className="h-3.5 w-3.5" />
                 </Link>
               </div>
             </div>
           </Panel>
         )}
 
-        <Panel title="Quick actions">
+        <Panel title={t("quick_actions")}>
           <div className="space-y-2">
             {currentQuick.map((q) => (
               <Link

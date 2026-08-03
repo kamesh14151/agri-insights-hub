@@ -10,20 +10,6 @@ import { useI18n, LANGUAGES, type Lang } from "@/lib/i18n";
 import { toast } from "sonner";
 import { FloatingWidgets } from "@/components/FloatingWidgets";
 
-const NAV = [
-  { to: "/app",            label: "Dashboard",        icon: LayoutDashboard, exact: true },
-  { to: "/app/disease",   label: "Disease Detection", icon: ScanLine },
-  { to: "/app/iot",       label: "IoT Monitoring",    icon: Cpu },
-  { to: "/app/crops",     label: "Crop Recommendation", icon: Sprout },
-  { to: "/app/weather",   label: "Weather Intelligence", icon: CloudSun },
-  { to: "/app/market",    label: "Market Demand",     icon: TrendingUp },
-  { to: "/app/marketplace", label: "Marketplace",     icon: Store },
-  { to: "/app/booking",   label: "Service Booking",   icon: CalendarCheck },
-  { to: "/app/shop",      label: "Agri Shop",         icon: ShoppingBag },
-  { to: "/app/profile",   label: "Profile",           icon: User },
-  { to: "/app/settings",  label: "Settings",          icon: Settings },
-] as const;
-
 export function DashboardShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const { user, logout } = useAuth();
@@ -32,34 +18,42 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
+  const role = user?.role ?? "user";
+
   const items = (() => {
-    const role = user?.role ?? "user";
     if (role === "admin") {
-      return [...NAV, { to: "/app/admin", label: "Admin Console", icon: Shield }];
+      return [
+        { to: "/app",             label: t("nav_admin_dash"),       icon: LayoutDashboard, exact: true },
+        { to: "/app/admin",       label: t("nav_admin"),            icon: Shield },
+        { to: "/app/marketplace", label: t("nav_marketplace_audit"),icon: Store },
+        { to: "/app/profile",     label: t("nav_profile"),          icon: User },
+        { to: "/app/settings",    label: t("nav_settings"),         icon: Settings },
+      ];
     }
     if (role === "farmer") {
-      return NAV.filter(i =>
-        i.to === "/app" ||
-        i.to === "/app/disease" ||
-        i.to === "/app/iot" ||
-        i.to === "/app/crops" ||
-        i.to === "/app/weather" ||
-        i.to === "/app/marketplace" ||
-        i.to === "/app/booking" ||
-        i.to === "/app/profile" ||
-        i.to === "/app/settings"
-      );
+      return [
+        { to: "/app",             label: t("nav_dashboard"),        icon: LayoutDashboard, exact: true },
+        { to: "/app/disease",     label: t("nav_disease"),          icon: ScanLine },
+        { to: "/app/iot",         label: t("nav_iot"),              icon: Cpu },
+        { to: "/app/crops",       label: t("nav_crops"),            icon: Sprout },
+        { to: "/app/weather",     label: t("nav_weather"),          icon: CloudSun },
+        { to: "/app/marketplace", label: t("nav_marketplace"),      icon: Store },
+        { to: "/app/booking",     label: t("nav_booking"),          icon: CalendarCheck },
+        { to: "/app/shop",        label: t("nav_shop"),             icon: ShoppingBag },
+        { to: "/app/profile",     label: t("nav_profile"),          icon: User },
+        { to: "/app/settings",    label: t("nav_settings"),         icon: Settings },
+      ];
     }
     // Buyers ("user")
-    return NAV.filter(i =>
-      i.to === "/app" ||
-      i.to === "/app/weather" ||
-      i.to === "/app/market" ||
-      i.to === "/app/marketplace" ||
-      i.to === "/app/shop" ||
-      i.to === "/app/profile" ||
-      i.to === "/app/settings"
-    );
+    return [
+      { to: "/app",             label: t("nav_dashboard"),        icon: LayoutDashboard, exact: true },
+      { to: "/app/marketplace", label: t("nav_marketplace"),      icon: Store },
+      { to: "/app/market",      label: t("nav_market"),           icon: TrendingUp },
+      { to: "/app/weather",     label: t("nav_weather"),          icon: CloudSun },
+      { to: "/app/shop",        label: t("nav_shop"),             icon: ShoppingBag },
+      { to: "/app/profile",     label: t("nav_profile"),          icon: User },
+      { to: "/app/settings",    label: t("nav_settings"),         icon: Settings },
+    ];
   })();
 
   const isActive = (to: string, exact?: boolean) =>
@@ -67,7 +61,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 
   const signOut = () => {
     logout();
-    toast.success("Signed out");
+    toast.success(t("sign_out"));
     navigate({ to: "/", replace: true });
   };
 
@@ -126,9 +120,15 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             </span>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium">{user?.name ?? "Guest"}</p>
-              <p className="truncate text-xs capitalize text-muted-foreground">{user?.role ?? "visitor"}</p>
+              <p className="truncate text-xs text-muted-foreground">
+                {role === "admin"
+                  ? t("admin_console_eyebrow")
+                  : role === "farmer"
+                  ? t("farmer_workspace")
+                  : t("buyer_terminal")}
+              </p>
             </div>
-            <button onClick={signOut} aria-label="Sign out" className="text-muted-foreground hover:text-foreground">
+            <button onClick={signOut} aria-label={t("sign_out")} title={t("sign_out")} className="text-muted-foreground hover:text-foreground">
               <LogOut className="h-4 w-4" />
             </button>
           </div>
@@ -142,7 +142,13 @@ export function DashboardShell({ children }: { children: ReactNode }) {
               <Menu className="h-5 w-5" />
             </button>
             <p className="hidden lg:block text-sm text-muted-foreground truncate">
-              {t("nav_weather") ? "" : ""}Welcome back, <span className="text-foreground">{user?.name?.split(" ")[0] ?? "farmer"}</span> — here is your field intelligence.
+              {t("welcome_back")},{" "}
+              <span className="text-foreground font-medium">{user?.name?.split(" ")[0] ?? "farmer"}</span> —{" "}
+              {role === "admin"
+                ? t("admin_intel_sub")
+                : role === "farmer"
+                ? t("field_intel_sub")
+                : t("buyer_intel_sub")}
             </p>
             <span className="lg:hidden font-serif text-base truncate">Agrisynapse</span>
             <div className="flex items-center gap-2 justify-self-end">
@@ -153,7 +159,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                   toast.success(t("toast_lang"));
                 }}
                 aria-label="Language"
-                className="hidden sm:block rounded-md border border-border bg-transparent px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-ring"
+                className="rounded-md border border-border bg-transparent px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 {LANGUAGES.map((l) => (
                   <option key={l.code} value={l.code}>{l.full}</option>
@@ -192,9 +198,9 @@ export function PageIntro({ index, eyebrow, title, subtitle }: { index: string; 
   );
 }
 
-export function Panel({ title, action, children, className = "" }: { title?: string; action?: ReactNode; children: ReactNode; className?: string }) {
+export function Panel({ title, action, children, className = "", onClick }: { title?: string; action?: ReactNode; children: ReactNode; className?: string; onClick?: () => void }) {
   return (
-    <section className={`rounded-2xl border border-border bg-card p-5 sm:p-6 ${className}`}>
+    <section onClick={onClick} className={`rounded-2xl border border-border bg-card p-5 sm:p-6 ${className}`}>
       {(title || action) && (
         <div className="mb-5 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
           <h2 className="font-serif text-lg sm:text-xl truncate">{title}</h2>
