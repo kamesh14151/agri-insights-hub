@@ -32,7 +32,35 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
-  const items = user?.role === "admin" ? [...NAV, { to: "/app/admin", label: "Admin Console", icon: Shield }] : NAV;
+  const items = (() => {
+    const role = user?.role ?? "user";
+    if (role === "admin") {
+      return [...NAV, { to: "/app/admin", label: "Admin Console", icon: Shield }];
+    }
+    if (role === "farmer") {
+      return NAV.filter(i =>
+        i.to === "/app" ||
+        i.to === "/app/disease" ||
+        i.to === "/app/iot" ||
+        i.to === "/app/crops" ||
+        i.to === "/app/weather" ||
+        i.to === "/app/marketplace" ||
+        i.to === "/app/booking" ||
+        i.to === "/app/profile" ||
+        i.to === "/app/settings"
+      );
+    }
+    // Buyers ("user")
+    return NAV.filter(i =>
+      i.to === "/app" ||
+      i.to === "/app/weather" ||
+      i.to === "/app/market" ||
+      i.to === "/app/marketplace" ||
+      i.to === "/app/shop" ||
+      i.to === "/app/profile" ||
+      i.to === "/app/settings"
+    );
+  })();
 
   const isActive = (to: string, exact?: boolean) =>
     exact ? pathname === to || pathname === `${to}/` : pathname.startsWith(to);
