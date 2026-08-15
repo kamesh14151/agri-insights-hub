@@ -1268,6 +1268,8 @@ function AmazonCheckoutModal({
         await new Promise(r => setTimeout(r, 600));
         toast.success(`🎉 Order #${res.order.id} placed successfully!`);
         onSuccess(res.order);
+      } else {
+        throw new Error(res.error || "Payment gateway connection failed.");
       }
     } catch (err: any) {
       toast.error(err?.message || "Order placement failed. Please try again.");

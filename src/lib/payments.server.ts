@@ -446,7 +446,33 @@ export const deleteShopProduct = createServerFn({ method: "POST" })
 // We map shop checkouts & orders to simple arrays for now, or just return empty to simplify.
 export const createShopCheckout = createServerFn({ method: "POST" })
   .validator(z.any())
-  .handler(async () => { return { success: false, error: "Not implemented in DB yet" }; });
+  .handler(async ({ data }) => {
+    try {
+      const items = data.items || [];
+      const totalAmount = items.reduce((sum: number, item: any) => sum + (item.price * item.qty), 0) + (data.deliverySpeed === "express" ? 99 : 0);
+      const desc = items.map((i: any) => `${i.qty}x ${i.name}`).join(", ");
+      
+      const session = await createDodoSession({
+        amount: totalAmount,
+        currency: "INR",
+        description: `Agri Shop Order: ${desc.substring(0, 100)}`,
+        successUrl: `${data.baseUrl}/app/shop?order_success=true`,
+        cancelUrl: `${data.baseUrl}/app/shop`,
+        customerEmail: data.buyerEmail,
+        customerName: data.buyerName,
+      });
+
+      return {
+        success: true,
+        order: { id: `SHP_${Date.now()}` },
+        checkoutUrl: session.checkoutUrl,
+        sessionId: session.sessionId,
+        gatewayMode: session.gatewayMode
+      };
+    } catch (err: any) {
+      return { success: false, error: err.message || "Failed to initiate checkout" };
+    }
+  });
 
 export const updateShopOrderStatus = createServerFn({ method: "POST" })
   .validator(z.any())
