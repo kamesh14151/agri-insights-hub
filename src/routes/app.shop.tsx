@@ -2081,7 +2081,16 @@ function UploadProductModal({
         onSuccess(res.product);
       }
     } catch (err: any) {
-      toast.error(err?.message || "Failed to publish product. Please try again.");
+      let msg = err?.message || "Failed to publish product. Please try again.";
+      try {
+        const parsed = JSON.parse(msg);
+        if (Array.isArray(parsed) && parsed[0]?.message) {
+          msg = `Validation Error: ${parsed[0].message} (Field: ${parsed[0].path?.join('.')})`;
+        }
+      } catch {
+        // Not a JSON error string, keep as is
+      }
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }
