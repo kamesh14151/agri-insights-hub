@@ -43,13 +43,29 @@ export function Weather() {
     }
   }
 
+  async function fetchLocationName(lat: number, lng: number) {
+    try {
+      const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`);
+      const geo = await res.json();
+      return geo.city || geo.locality || geo.principalSubdivision || `${lat.toFixed(2)}, ${lng.toFixed(2)}`;
+    } catch {
+      return `${lat.toFixed(2)}, ${lng.toFixed(2)}`;
+    }
+  }
+
+  const handleGeolocation = async (pos: GeolocationPosition) => {
+    const lat = pos.coords.latitude;
+    const lng = pos.coords.longitude;
+    setPlace("Locating...");
+    const name = await fetchLocationName(lat, lng);
+    setPlace(name);
+    load(lat, lng);
+  };
+
   useEffect(() => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setPlace(`${pos.coords.latitude.toFixed(2)}, ${pos.coords.longitude.toFixed(2)}`);
-          load(pos.coords.latitude, pos.coords.longitude);
-        },
+        handleGeolocation,
         () => load(28.6139, 77.209),
         { timeout: 5000 },
       );
@@ -94,10 +110,7 @@ export function Weather() {
   const useMyLocation = () => {
     if (!("geolocation" in navigator)) return;
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setPlace("My location");
-        load(pos.coords.latitude, pos.coords.longitude);
-      },
+      handleGeolocation,
       () => toast.error("Location permission denied"),
     );
   };

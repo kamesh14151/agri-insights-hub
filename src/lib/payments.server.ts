@@ -429,7 +429,10 @@ export const uploadShopProduct = createServerFn({ method: "POST" })
       seller_email: data.sellerEmail, seller_phone: data.sellerPhone, location: data.location,
       is_farmer_direct: data.sellerRole === "farmer", rating: 5.0
     };
-    const { data: inserted } = await supabase.from("shop_products").insert([newProd]).select().single();
+    const { data: inserted, error } = await supabase.from("shop_products").insert([newProd]).select().single();
+    if (error || !inserted) {
+      throw new Error(error?.message || "Failed to insert product into database");
+    }
     return { success: true, product: mapShopProduct(inserted) };
   });
 
