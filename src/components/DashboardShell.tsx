@@ -85,9 +85,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
       >
         <div className="h-16 px-5 flex items-center justify-between border-b border-border shrink-0">
           <Link to="/app" className="flex items-center gap-2 min-w-0">
-            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground">
-              <Leaf className="h-4 w-4" />
-            </span>
+            <img src="/logo.png" alt="Agrisynapse Logo" className="h-8 w-8 object-contain shrink-0" />
             <span className="font-serif text-lg tracking-tight truncate">Agrisynapse</span>
           </Link>
           <button onClick={() => setOpen(false)} className="lg:hidden text-muted-foreground" aria-label="Close">

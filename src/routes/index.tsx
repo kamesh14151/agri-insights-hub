@@ -28,9 +28,7 @@ function Landing() {
       <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-md">
         <div className="mx-auto grid h-16 max-w-[1200px] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 sm:px-6">
           <Link to="/" className="flex min-w-0 items-center gap-2 font-serif text-lg tracking-tight">
-            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground">
-              <Leaf className="h-4 w-4" />
-            </span>
+            <img src="/logo.png" alt="Agrisynapse Logo" className="h-8 w-8 object-contain shrink-0" />
             <span className="truncate">Agrisynapse</span>
           </Link>
           <Link to="/login" className="shrink-0 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 transition">

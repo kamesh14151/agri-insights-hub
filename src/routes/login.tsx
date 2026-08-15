@@ -66,9 +66,7 @@ function LoginPage() {
     <div className="min-h-screen bg-background text-foreground font-sans antialiased grid lg:grid-cols-2">
       <div className="hidden lg:flex flex-col justify-between border-r border-border p-12">
         <Link to="/" className="flex items-center gap-2 font-serif text-xl">
-          <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">
-            <Leaf className="h-4 w-4" />
-          </span>
+          <img src="/logo.png" alt="Agrisynapse Logo" className="h-8 w-8 object-contain shrink-0" />
           Agrisynapse
         </Link>
         <div>
@@ -92,9 +90,7 @@ function LoginPage() {
       <div className="flex items-center justify-center px-5 py-12 sm:px-10">
         <div className="w-full max-w-md">
           <Link to="/" className="lg:hidden mb-8 flex items-center gap-2 font-serif text-lg">
-            <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">
-              <Leaf className="h-4 w-4" />
-            </span>
+            <img src="/logo.png" alt="Agrisynapse Logo" className="h-8 w-8 object-contain shrink-0" />
             Agrisynapse
           </Link>
 
