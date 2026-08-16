@@ -503,6 +503,33 @@ export const createShopCheckout = createServerFn({ method: "POST" })
         updatedAt: new Date().toISOString(),
       };
 
+      try {
+        await supabase.from("shop_orders").insert([{
+          id: fullOrder.id,
+          items: fullOrder.items,
+          subtotal: fullOrder.subtotal,
+          delivery_fee: fullOrder.deliveryFee,
+          discount: fullOrder.discount,
+          total: fullOrder.total,
+          buyer_name: fullOrder.buyerName,
+          buyer_email: fullOrder.buyerEmail,
+          buyer_phone: fullOrder.buyerPhone,
+          shipping_address: fullOrder.shippingAddress,
+          delivery_speed: fullOrder.deliverySpeed,
+          estimated_delivery_date: fullOrder.estimatedDeliveryDate,
+          payment_method: fullOrder.paymentMethod,
+          payment_id: fullOrder.paymentId,
+          payment_gateway: fullOrder.paymentGateway,
+          status: fullOrder.status,
+          tracking_number: fullOrder.trackingNumber,
+          courier_partner: fullOrder.courierPartner,
+          created_at: fullOrder.createdAt,
+          updated_at: fullOrder.updatedAt
+        }]);
+      } catch (e) {
+        console.warn("Failed to insert shop order into Supabase:", e);
+      }
+
       return {
         success: true,
         order: fullOrder,
@@ -515,64 +542,37 @@ export const createShopCheckout = createServerFn({ method: "POST" })
     }
   });
 
-export const updateShopOrderStatus = createServerFn({ method: "POST" })
-  .validator(z.any())
-  .handler(async () => { return { success: false }; });
-
-export const cancelShopOrder = createServerFn({ method: "POST" })
-  .validator(z.any())
-  .handler(async () => { return { success: false }; });
-
-export const confirmOrder = createServerFn({ method: "POST" })
-  .validator(z.any())
-  .handler(async ({ data }) => {
-    const orderId = data?.orderId || `SHP_${Date.now()}`;
-    const dummyOrder: ShopOrderRecord = {
-      id: orderId,
-      items: [
-        {
-          id: "item_1",
-          name: "High Yield Hybrid Seeds & Fertilizers",
-          qty: 1,
-          price: 450,
-          category: "Seeds",
-          unit: "10 kg bag",
-          sellerName: "Murugan Selvam",
-          sellerEmail: "murugan@agrisynapse.in",
-        }
-      ],
-      subtotal: 450,
-      deliveryFee: 0,
-      discount: 0,
-      total: 450,
-      buyerName: "Priya Raman",
-      buyerEmail: "kamesh14151@gmail.com",
-      buyerPhone: "+91 98765 43210",
-      shippingAddress: {
-        fullName: "Priya Raman",
-        phone: "+91 98765 43210",
-        street: "Plot No. 14, Kaveri Mandi Complex",
-        landmark: "Salem Bypass",
-        city: "Salem",
-        state: "Tamil Nadu",
-        pincode: "636453",
-        addressType: "farm",
-      },
-      deliverySpeed: "standard",
-      estimatedDeliveryDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }),
-      paymentMethod: "dodo_payments",
-      paymentId: data?.paymentId || `dodo_${Date.now()}`,
-      paymentGateway: "dodo_escrow_sim",
-      status: "placed",
-      trackingNumber: `AGRI-LOG-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
-      courierPartner: "Mandi Express Logistics",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    return { success: true, order: dummyOrder };
-  });
+const mapShopOrderRecord = (db: any): ShopOrderRecord => ({
+  id: db.id,
+  items: db.items || [],
+  subtotal: Number(db.subtotal) || 0,
+  deliveryFee: Number(db.delivery_fee) || 0,
+  discount: Number(db.discount) || 0,
+  total: Number(db.total) || 0,
+  buyerName: db.buyer_name,
+  buyerEmail: db.buyer_email,
+  buyerPhone: db.buyer_phone,
+  shippingAddress: db.shipping_address || {},
+  deliverySpeed: db.delivery_speed || "standard",
+  estimatedDeliveryDate: db.estimated_delivery_date || "",
+  paymentMethod: db.payment_method || "dodo_payments",
+  paymentId: db.payment_id,
+  paymentGateway: db.payment_gateway || "dodo_live",
+  status: db.status || "placed",
+  trackingNumber: db.tracking_number || "",
+  courierPartner: db.courier_partner || "Mandi Express Logistics",
+  createdAt: db.created_at,
+  updatedAt: db.updated_at,
+});
 
 export const getShopOrders = createServerFn({ method: "GET" })
-  .handler(async () => { return { orders: [] }; });
+  .handler(async () => {
+    try {
+      const { data } = await supabase.from("shop_orders").select("*").order("created_at", { ascending: false });
+      return { orders: (data || []).map(mapShopOrderRecord) };
+    } catch (e) {
+      return { orders: [] };
+    }
+  });
 
 export const getOrders = getShopOrders;
