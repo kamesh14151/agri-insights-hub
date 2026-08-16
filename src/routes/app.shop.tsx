@@ -895,17 +895,17 @@ function ShopPage() {
                             <div>
                               <p className="font-serif text-sm font-semibold">{item.name}</p>
                               <p className="text-xs text-muted-foreground">
-                                Qty: <strong>{item.qty}</strong> · Price: ₹{item.price.toLocaleString("en-IN")} · Seller: <strong>{item.sellerName}</strong>
+                                Qty: <strong>{item?.qty || 1}</strong> · Price: ₹{(Number(item?.price) || 0).toLocaleString("en-IN")} · Seller: <strong>{item?.sellerName || "Farmer"}</strong>
                               </p>
                               <span className="inline-block mt-1 rounded bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">
-                                {item.category || "Agricultural Supply"}
+                                {item?.category || "Agricultural Supply"}
                               </span>
                             </div>
                           </div>
 
                           <div className="text-right sm:self-center">
                             <p className="font-serif text-base font-bold">
-                              ₹{(item.price * item.qty).toLocaleString("en-IN")}
+                              ₹{((Number(item?.price) || 0) * (Number(item?.qty) || 1)).toLocaleString("en-IN")}
                             </p>
                           </div>
                         </div>
@@ -1059,7 +1059,7 @@ function ShopPage() {
                             <span className="font-semibold">{item.name}</span>
                             <span className="text-muted-foreground ml-2">Qty: <strong>{item.qty}</strong> units</span>
                           </div>
-                          <span className="font-bold">₹{(item.price * item.qty).toLocaleString("en-IN")}</span>
+                          <span className="font-bold">₹{((Number(item?.price) || 0) * (Number(item?.qty) || 1)).toLocaleString("en-IN")}</span>
                         </div>
                       ))}
                     </div>
@@ -1991,8 +1991,8 @@ function TaxInvoiceModal({
                   <td className="py-2.5 font-medium">{item.name}</td>
                   <td className="py-2.5 text-muted-foreground">{item.category || "Seeds"}</td>
                   <td className="py-2.5 text-center">{item.qty}</td>
-                  <td className="py-2.5 text-right">₹{item.price.toLocaleString("en-IN")}</td>
-                  <td className="py-2.5 text-right font-bold">₹{(item.price * item.qty).toLocaleString("en-IN")}</td>
+                  <td className="py-2.5 text-right">₹{(Number(item?.price) || 0).toLocaleString("en-IN")}</td>
+                  <td className="py-2.5 text-right font-bold">₹{((Number(item?.price) || 0) * (Number(item?.qty) || 1)).toLocaleString("en-IN")}</td>
                 </tr>
               ))}
             </tbody>
@@ -2003,11 +2003,11 @@ function TaxInvoiceModal({
             <div className="w-64 space-y-1.5 text-right">
               <div className="flex justify-between text-muted-foreground">
                 <span>Subtotal:</span>
-                <span>₹{order.subtotal.toLocaleString("en-IN")}</span>
+                <span>₹{(Number(order?.subtotal) || 0).toLocaleString("en-IN")}</span>
               </div>
               <div className="flex justify-between text-muted-foreground">
                 <span>Delivery Fee:</span>
-                <span>{order.deliveryFee === 0 ? "FREE" : `₹${order.deliveryFee}`}</span>
+                <span>{order?.deliveryFee === 0 ? "FREE" : `₹${order?.deliveryFee || 0}`}</span>
               </div>
               <div className="flex justify-between text-muted-foreground">
                 <span>CGST (2.5%) + SGST (2.5%):</span>
@@ -2015,7 +2015,7 @@ function TaxInvoiceModal({
               </div>
               <div className="border-t border-border pt-2 flex justify-between font-bold text-base text-foreground">
                 <span>Total Paid:</span>
-                <span className="text-primary">₹{order.total.toLocaleString("en-IN")}</span>
+                <span className="text-primary">₹{(Number(order?.total) || 0).toLocaleString("en-IN")}</span>
               </div>
             </div>
           </div>

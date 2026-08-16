@@ -117,14 +117,14 @@ function ShopSuccessPage() {
                         Qty: <strong>{item.qty}</strong> · Seller: <strong>{item.sellerName || "Agri Certified Farmer"}</strong>
                       </p>
                     </div>
-                    <span className="font-bold">₹{(item.price * item.qty).toLocaleString("en-IN")}</span>
+                    <span className="font-bold">₹{((Number(item?.price) || 0) * (Number(item?.qty) || 1)).toLocaleString("en-IN")}</span>
                   </div>
                 ))}
               </div>
 
               <div className="border-t border-border pt-2.5 flex items-center justify-between text-sm font-bold">
                 <span>Total Amount Paid</span>
-                <span className="font-serif text-xl text-primary">₹{order.total.toLocaleString("en-IN")}</span>
+                <span className="font-serif text-xl text-primary">₹{(Number(order?.total) || 0).toLocaleString("en-IN")}</span>
               </div>
             </div>
 
