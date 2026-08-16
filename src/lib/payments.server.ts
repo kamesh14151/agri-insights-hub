@@ -188,45 +188,43 @@ export async function createDodoSession(opts: {
   ).trim();
 
   if (apiKey) {
-    const isExplicitTest =
-      apiKey.toLowerCase().startsWith("test_") ||
-      process.env.DODO_PAYMENTS_ENVIRONMENT === "test";
+    const urlsToTry = apiKey.toLowerCase().startsWith("live_")
+      ? ["https://live.dodopayments.com", "https://test.dodopayments.com"]
+      : ["https://test.dodopayments.com", "https://live.dodopayments.com"];
 
-    const baseUrl = isExplicitTest
-      ? "https://test.dodopayments.com"
-      : "https://live.dodopayments.com";
+    for (const baseUrl of urlsToTry) {
+      try {
+        let productId = (
+          process.env.DODO_PAYMENTS_PRODUCT_ID ||
+          process.env.DODO_PRODUCT_ID ||
+          "pdt_0NlQy9UmE6SF2n355qbdJ"
+        ).trim();
 
-    try {
-      let productId = (
-        process.env.DODO_PAYMENTS_PRODUCT_ID ||
-        process.env.DODO_PRODUCT_ID ||
-        "pdt_0NkaTplQ82JmIafBTeKxP"
-      ).trim();
+        const body: Record<string, unknown> = {
+          payment_link: true,
+          product_cart: [{ product_id: productId, quantity: 1, amount: Math.round(opts.amount * 100) }],
+          billing: { city: "Salem", country: "IN", state: "Tamil Nadu", street: "Agro Commerce Hub", zipcode: "636453" },
+          customer: { create_new_customer: true, email: opts.customerEmail || "kamesh14151@gmail.com", name: opts.customerName || "AJ STUDIOZ Agri Buyer" },
+          return_url: opts.successUrl,
+          metadata: { description: opts.description, platform: "Agrisynapse", developer: "AJ STUDIOZ", ...(opts.metadata ?? {}) },
+        };
 
-      const body: Record<string, unknown> = {
-        payment_link: true,
-        product_cart: [{ product_id: productId, quantity: 1, amount: Math.round(opts.amount * 100) }],
-        billing: { city: "Salem", country: "IN", state: "Tamil Nadu", street: "Agro Commerce Hub", zipcode: "636453" },
-        customer: { create_new_customer: true, email: opts.customerEmail || "kamesh14151@gmail.com", name: opts.customerName || "AJ STUDIOZ Agri Buyer" },
-        return_url: opts.successUrl,
-        metadata: { description: opts.description, platform: "Agrisynapse", developer: "AJ STUDIOZ", ...(opts.metadata ?? {}) },
-      };
+        const res = await fetch(`${baseUrl}/payments`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
 
-      const res = await fetch(`${baseUrl}/payments`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-
-      if (res.ok) {
-        const data = await res.json() as any;
-        const checkoutUrl = data?.payment_link || data?.checkout_url || data?.url;
-        if (checkoutUrl && typeof checkoutUrl === "string") {
-          return { sessionId: data.payment_id || data.id || `dodo_${Date.now()}`, checkoutUrl, gatewayMode: "live_redirect" };
+        if (res.ok) {
+          const data = await res.json() as any;
+          const checkoutUrl = data?.payment_link || data?.checkout_url || data?.url;
+          if (checkoutUrl && typeof checkoutUrl === "string") {
+            return { sessionId: data.payment_id || data.id || `dodo_${Date.now()}`, checkoutUrl, gatewayMode: "live_redirect" };
+          }
         }
+      } catch (err) {
+        console.warn("[Dodo Payments] API call exception on " + baseUrl, err);
       }
-    } catch (err) {
-      console.warn("[Dodo Payments] API call exception:", err);
     }
   }
 
