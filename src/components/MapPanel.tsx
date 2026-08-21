@@ -15,7 +15,11 @@ import {
   ShieldCheck,
   MapPin,
   Square,
-  Crosshair
+  Crosshair,
+  Leaf,
+  CloudSun,
+  BarChart3,
+  AlertTriangle
 } from "lucide-react";
 
 type LandResult = {
@@ -259,7 +263,6 @@ export function MapPanel() {
               range="4000"
               tilt="65"
               heading="0"
-              default-labels-disabled={false}
               style={{ width: "100%", height: "100%" }}
             >
               {isDrawing && draftCorners.length > 2 && (
@@ -269,7 +272,7 @@ export function MapPanel() {
                   fill-color="rgba(16, 185, 129, 0.4)"
                   stroke-color="rgba(16, 185, 129, 1)"
                   stroke-width="4"
-                  draws-occluded-segments={true}
+                  draws-occluded-segments="true"
                 >
                   {draftCorners.map((pt, i) => (
                     <div key={i} slot="coordinates">{pt.lat},{pt.lng},{pt.alt}</div>
@@ -284,7 +287,7 @@ export function MapPanel() {
                   fill-color="rgba(16, 185, 129, 0.35)"
                   stroke-color="rgba(16, 185, 129, 1)"
                   stroke-width="4"
-                  draws-occluded-segments={true}
+                  draws-occluded-segments="true"
                 >
                   {corners.map((pt, i) => (
                     <div key={i} slot="coordinates">{pt.lat},{pt.lng},{pt.alt}</div>
@@ -357,91 +360,103 @@ function LandTelemetryView({ r, areaHa, corners }: { r: LandResult; areaHa: numb
   const ndviPct = Math.round(Math.min(ndviScore / 0.9, 1) * 100);
 
   return (
-    <div className="space-y-3 text-xs">
+    <div className="space-y-4">
       {isWater && (
-        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 text-amber-700 dark:text-amber-300 text-[11px] flex items-start gap-2">
-          <span className="shrink-0 text-base">⚠️</span>
-          <span className="leading-snug">Open Water / Marine Body detected. No agricultural land at these coordinates.</span>
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3.5 text-amber-700 dark:text-amber-400 text-xs flex items-start gap-2.5 shadow-sm">
+          <span className="shrink-0 text-lg">⚠️</span>
+          <span className="leading-relaxed font-medium">Open Water / Marine Body detected. The selected coordinates do not appear to contain cultivable agricultural land.</span>
         </div>
       )}
 
-      <div className="rounded-xl border border-border bg-muted/30 p-3 space-y-1.5">
-        <div className="flex items-center justify-between">
-          <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-            <TrendingUp className="w-3 h-3 text-emerald-500" />
-            NDVI Vegetation Health
-          </span>
-          <span className={`text-base font-serif font-bold ${
-            ndviColor === "emerald" ? "text-emerald-600 dark:text-emerald-400"
-            : ndviColor === "amber" ? "text-amber-600 dark:text-amber-400"
-            : "text-red-500"
-          }`}>{ndviScore.toFixed(2)}</span>
+      {/* Main NDVI Hero */}
+      <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-muted/50 to-muted/10 p-4 shadow-sm">
+        <div className="absolute -right-6 -top-6 text-emerald-500/5 rotate-12 pointer-events-none">
+          <Leaf className="w-32 h-32" />
         </div>
-        <div className="h-1.5 w-full rounded-full bg-border overflow-hidden">
+        <div className="relative z-10 flex items-start justify-between mb-3">
+          <div>
+            <h4 className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
+              Vegetation Health (NDVI)
+            </h4>
+            <p className="text-sm font-medium mt-1 text-foreground">{r.ndviStatus || ndviLabel}</p>
+          </div>
+          <div className={`flex items-baseline gap-0.5 font-serif text-3xl font-bold tracking-tight ${
+            ndviColor === "emerald" ? "text-emerald-500 drop-shadow-[0_0_12px_rgba(16,185,129,0.2)]"
+            : ndviColor === "amber" ? "text-amber-500 drop-shadow-[0_0_12px_rgba(245,158,11,0.2)]"
+            : "text-red-500 drop-shadow-[0_0_12px_rgba(239,68,68,0.2)]"
+          }`}>
+            {ndviScore.toFixed(2)}
+          </div>
+        </div>
+        <div className="relative h-2 w-full rounded-full bg-border/50 overflow-hidden isolate">
           <div
-            className={`h-full rounded-full transition-all ${
-              ndviColor === "emerald" ? "bg-emerald-500"
-              : ndviColor === "amber" ? "bg-amber-400"
-              : "bg-red-500"
+            className={`absolute left-0 top-0 h-full rounded-full transition-all duration-1000 ease-out ${
+              ndviColor === "emerald" ? "bg-gradient-to-r from-emerald-600 to-emerald-400"
+              : ndviColor === "amber" ? "bg-gradient-to-r from-amber-600 to-amber-400"
+              : "bg-gradient-to-r from-red-600 to-red-400"
             }`}
             style={{ width: `${ndviPct}%` }}
           />
         </div>
-        <p className="text-[10px] text-muted-foreground truncate">{r.ndviStatus || ndviLabel}</p>
       </div>
 
-      <div className="grid grid-cols-3 gap-2">
-        <div className="rounded-xl border border-border bg-muted/30 p-2 space-y-0.5">
-          <div className="flex items-center gap-1 text-[9px] uppercase tracking-wider text-muted-foreground font-medium">
-            <Droplets className="w-2.5 h-2.5 text-blue-400" /> Moisture
-          </div>
-          <p className="text-sm font-bold text-blue-600 dark:text-blue-400 leading-tight truncate">
-            {(r.ndwi || "64%").toString().split(" ")[0]}
-          </p>
+      {/* Mini Metrics Grid */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="rounded-xl border border-border/60 bg-muted/20 p-3 flex flex-col items-center justify-center text-center shadow-sm">
+          <Droplets className="w-4 h-4 text-blue-500 mb-1.5 opacity-80" />
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-0.5">Moisture</p>
+          <p className="text-sm font-bold text-foreground">{(r.ndwi || "64%").toString().split(" ")[0]}</p>
         </div>
-        <div className="rounded-xl border border-border bg-muted/30 p-2 space-y-0.5">
-          <div className="flex items-center gap-1 text-[9px] uppercase tracking-wider text-muted-foreground font-medium">
-            <Thermometer className="w-2.5 h-2.5 text-amber-400" /> Temp
-          </div>
-          <p className="text-sm font-bold leading-tight truncate">{r.landSurfaceTemp || "29.4°C"}</p>
+        <div className="rounded-xl border border-border/60 bg-muted/20 p-3 flex flex-col items-center justify-center text-center shadow-sm">
+          <Thermometer className="w-4 h-4 text-amber-500 mb-1.5 opacity-80" />
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-0.5">Surface Temp</p>
+          <p className="text-sm font-bold text-foreground">{r.landSurfaceTemp || "29.4°C"}</p>
         </div>
-        <div className="rounded-xl border border-border bg-muted/30 p-2 space-y-0.5">
-          <div className="flex items-center gap-1 text-[9px] uppercase tracking-wider text-muted-foreground font-medium">
-            <Mountain className="w-2.5 h-2.5 text-purple-400" /> Elev
-          </div>
-          <p className="text-sm font-bold leading-tight">{r.elevationMeters ?? 312}m</p>
+        <div className="rounded-xl border border-border/60 bg-muted/20 p-3 flex flex-col items-center justify-center text-center shadow-sm">
+          <Mountain className="w-4 h-4 text-purple-500 mb-1.5 opacity-80" />
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-0.5">Elevation</p>
+          <p className="text-sm font-bold text-foreground">{r.elevationMeters ?? 312}m</p>
         </div>
       </div>
 
       {!isWater && (
-        <div className="rounded-xl border border-border bg-muted/20 p-3 space-y-2">
+        <div className="grid grid-cols-2 gap-3">
           {r.soilType && (
-            <div>
-              <p className="text-[9px] uppercase tracking-widest text-muted-foreground font-semibold mb-0.5">🪨 Soil Profile</p>
-              <p className="text-[11px] text-foreground leading-snug font-medium">{r.soilType}</p>
+            <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold flex items-center gap-1.5 mb-1">
+                <Square className="w-3 h-3 text-stone-400" /> Soil Profile
+              </p>
+              <p className="text-xs text-foreground font-medium leading-relaxed">{r.soilType}</p>
             </div>
           )}
           {r.climate && (
-            <div>
-              <p className="text-[9px] uppercase tracking-widest text-muted-foreground font-semibold mb-0.5">🌤 Agro-Climate Zone</p>
-              <p className="text-[11px] text-foreground leading-snug font-medium">{r.climate}</p>
+            <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold flex items-center gap-1.5 mb-1">
+                <CloudSun className="w-3 h-3 text-sky-400" /> Climate Zone
+              </p>
+              <p className="text-xs text-foreground font-medium leading-relaxed">{r.climate}</p>
             </div>
           )}
           {r.yieldPotential && (
-            <div>
-              <p className="text-[9px] uppercase tracking-widest text-muted-foreground font-semibold mb-0.5">📈 Yield Potential</p>
-              <p className="text-[11px] text-emerald-700 dark:text-emerald-400 leading-snug font-semibold">{r.yieldPotential}</p>
+            <div className="col-span-2 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3">
+              <p className="text-[10px] uppercase tracking-widest text-emerald-600 dark:text-emerald-500 font-bold flex items-center gap-1.5 mb-1">
+                <BarChart3 className="w-3 h-3" /> Yield Potential
+              </p>
+              <p className="text-xs text-emerald-700 dark:text-emerald-400 font-medium leading-relaxed">{r.yieldPotential}</p>
             </div>
           )}
         </div>
       )}
 
       {!isWater && r.recommendedCrops?.length ? (
-        <div>
-          <p className="text-[9px] uppercase tracking-widest text-muted-foreground font-semibold mb-1.5">🌾 Recommended Crops</p>
-          <div className="flex flex-wrap gap-1">
+        <div className="pt-1">
+          <h4 className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-2 flex items-center gap-1.5">
+            <Leaf className="w-3.5 h-3.5 text-primary" /> Recommended Crops
+          </h4>
+          <div className="flex flex-wrap gap-1.5">
             {r.recommendedCrops.map((c) => (
-              <span key={c} className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 text-[10px] font-medium whitespace-nowrap">
+              <span key={c} className="px-2.5 py-1 rounded-md bg-primary/10 text-primary border border-primary/20 text-xs font-semibold shadow-sm transition-colors hover:bg-primary/20">
                 {c}
               </span>
             ))}
@@ -450,13 +465,15 @@ function LandTelemetryView({ r, areaHa, corners }: { r: LandResult; areaHa: numb
       ) : null}
 
       {r.riskFactors?.length ? (
-        <div>
-          <p className="text-[9px] uppercase tracking-widest text-muted-foreground font-semibold mb-1">⚠️ Risk Factors</p>
-          <ul className="space-y-1">
+        <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 p-3.5">
+          <h4 className="text-[10px] uppercase tracking-widest text-rose-600 dark:text-rose-400 font-bold mb-2 flex items-center gap-1.5">
+            <AlertTriangle className="w-3.5 h-3.5" /> Risk Factors
+          </h4>
+          <ul className="space-y-1.5">
             {r.riskFactors.map((c, i) => (
-              <li key={i} className="flex items-start gap-1.5 text-[10px] text-muted-foreground leading-snug">
-                <span className="text-amber-500 shrink-0 mt-px">•</span>
-                <span>{c}</span>
+              <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
+                <span className="text-rose-500 shrink-0 mt-px text-[10px]">■</span>
+                <span className="leading-snug text-foreground/80">{c}</span>
               </li>
             ))}
           </ul>
@@ -464,19 +481,19 @@ function LandTelemetryView({ r, areaHa, corners }: { r: LandResult; areaHa: numb
       ) : null}
 
       {corners.length > 0 && (
-        <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-2.5 space-y-1.5">
-          <p className="text-[9px] uppercase tracking-widest text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
-            <MapPin className="w-2.5 h-2.5" /> 4-Corner Boundary Pins
-          </p>
-          <div className="grid grid-cols-2 gap-1">
+        <div className="pt-2">
+           <h4 className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-2 flex items-center gap-1.5">
+             <MapPin className="w-3 h-3 text-blue-500" /> GPS Boundaries
+           </h4>
+          <div className="grid grid-cols-2 gap-2">
             {corners.map((c) => (
-              <div key={c.id} className="flex items-center gap-1.5 bg-background rounded-lg px-2 py-1 border border-border/60">
-                <span className="w-4 h-4 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center text-[9px] font-extrabold shrink-0">
+              <div key={c.id} className="flex items-center gap-2 bg-muted/30 rounded-lg p-2 border border-border/50">
+                <span className="w-5 h-5 rounded bg-foreground text-background flex items-center justify-center text-[10px] font-bold shrink-0">
                   {c.id}
                 </span>
                 <div className="min-w-0">
-                  <p className="text-[10px] font-semibold text-foreground">{c.label}</p>
-                  <p className="text-[9px] text-muted-foreground font-mono truncate">{c.lat.toFixed(3)}°, {c.lng.toFixed(3)}°</p>
+                  <p className="text-[10px] font-bold text-foreground">{c.label}</p>
+                  <p className="text-[9px] text-muted-foreground font-mono truncate">{c.lat.toFixed(4)}°, {c.lng.toFixed(4)}°</p>
                 </div>
               </div>
             ))}
