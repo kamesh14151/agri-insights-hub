@@ -276,11 +276,10 @@ export function MapPanel() {
               default-labels-disabled="false"
               style={{ width: "100%", height: "100%" }}
             >
-              {isDrawing && draftCorners.length > 2 && (
+              {isDrawing && draftCorners.length > 0 && (
                 // @ts-ignore
-                <gmp-polygon-3d
+                <gmp-polyline-3d
                   altitude-mode="clamp-to-ground"
-                  fill-color="rgba(16, 185, 129, 0.4)"
                   stroke-color="rgba(16, 185, 129, 1)"
                   stroke-width="4"
                   draws-occluded-segments="true"
@@ -288,17 +287,32 @@ export function MapPanel() {
                   {draftCorners.map((pt, i) => (
                     <div key={i} slot="coordinates">{pt.lat},{pt.lng},{pt.alt}</div>
                   ))}
-                </gmp-polygon-3d>
+                </gmp-polyline-3d>
               )}
 
-              {(isDrawing ? draftCorners : corners).map((pt, i) => (
-                // @ts-ignore
-                <gmp-marker-3d
-                  key={`marker-${i}`}
-                  position={{ lat: pt.lat, lng: pt.lng, altitude: pt.alt }}
-                  label={`Corner ${i + 1}`}
-                />
-              ))}
+              {(isDrawing ? draftCorners : corners).map((pt, i) => {
+                const s = 0.0001;
+                const box = [
+                  { lat: pt.lat + s, lng: pt.lng - s },
+                  { lat: pt.lat + s, lng: pt.lng + s },
+                  { lat: pt.lat - s, lng: pt.lng + s },
+                  { lat: pt.lat - s, lng: pt.lng - s }
+                ];
+                return (
+                  // @ts-ignore
+                  <gmp-polygon-3d
+                    key={`custom-marker-${i}`}
+                    altitude-mode="clamp-to-ground"
+                    fill-color="rgba(255, 255, 255, 0.9)"
+                    stroke-color="rgba(16, 185, 129, 1)"
+                    stroke-width="3"
+                    draws-occluded-segments="true"
+                  >
+                    {box.map((c, j) => <div key={j} slot="coordinates">{c.lat},{c.lng},0</div>)}
+                    <div slot="coordinates">{box[0].lat},{box[0].lng},0</div>
+                  </gmp-polygon-3d>
+                );
+              })}
 
               {!isDrawing && corners.length === 4 && activeLayer === "satellite" && (
                 // @ts-ignore
