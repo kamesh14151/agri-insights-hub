@@ -81,7 +81,7 @@ export function MapPanel() {
       return;
     }
     const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&v=alpha&libraries=maps3d`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&v=alpha&libraries=maps3d,marker`;
     script.async = true;
     script.onload = () => setApiLoaded(true);
     document.head.appendChild(script);
@@ -198,10 +198,6 @@ export function MapPanel() {
     <section id="map" className="max-w-[1280px] mx-auto px-6 py-6 md:py-10 border-t border-border">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-semibold mb-2 border border-emerald-500/20">
-            <Sparkles className="w-3.5 h-3.5" />
-            Google Earth Photorealistic 3D &amp; Gemini AI
-          </div>
           <h2 className="font-serif text-2xl md:text-3xl tracking-tight font-bold">
             Map your land in 3D
           </h2>
@@ -260,25 +256,21 @@ export function MapPanel() {
             </form>
           </div>
 
-          <div className="absolute top-16 left-3 z-[400] pointer-events-auto bg-slate-900/90 backdrop-blur-md border border-emerald-500/30 rounded-xl shadow-lg p-1.5 flex flex-col gap-1 w-12 hover:w-44 transition-all overflow-hidden group">
-            <div className="w-9 h-9 flex items-center justify-center text-emerald-400 shrink-0">
-              <Layers className="w-5 h-5" />
-            </div>
-            <div className="flex flex-col gap-1 w-full opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-              {(["satellite", "ndvi", "ndwi"] as const).map((layer) => (
-                <button
-                  key={layer}
-                  onClick={() => setActiveLayer(layer)}
-                  className={`text-left px-3 py-2 rounded-lg text-[11px] font-bold uppercase tracking-wider transition ${
-                    activeLayer === layer 
-                      ? "bg-emerald-500/20 text-emerald-400" 
-                      : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
-                  }`}
-                >
-                  {layer === "satellite" ? "Satellite Only" : layer === "ndvi" ? "NDVI Heatmap" : "Moisture Map"}
-                </button>
-              ))}
-            </div>
+          <div className="absolute top-16 left-3 z-[400] pointer-events-auto bg-slate-900/90 backdrop-blur-md border border-emerald-500/30 rounded-xl shadow-lg p-1.5 flex flex-col gap-1.5 w-auto">
+            {(["satellite", "ndvi", "ndwi"] as const).map((layer) => (
+              <button
+                key={layer}
+                onClick={() => setActiveLayer(layer)}
+                className={`flex items-center gap-2 text-left px-3 py-2 rounded-lg text-[11px] font-bold uppercase tracking-wider transition whitespace-nowrap ${
+                  activeLayer === layer 
+                    ? "bg-emerald-500 text-slate-950 shadow-md" 
+                    : "text-slate-300 hover:bg-white/10"
+                }`}
+              >
+                <Layers className={`w-3.5 h-3.5 ${activeLayer === layer ? "text-slate-950" : "text-emerald-400"}`} />
+                {layer === "satellite" ? "Satellite Map" : layer === "ndvi" ? "NDVI Heatmap" : "Moisture Map"}
+              </button>
+            ))}
           </div>
 
           {apiLoaded ? (
@@ -306,6 +298,15 @@ export function MapPanel() {
                   ))}
                 </gmp-polygon-3d>
               )}
+
+              {(isDrawing ? draftCorners : corners).map((pt, i) => (
+                // @ts-ignore
+                <gmp-marker-3d
+                  key={`marker-${i}`}
+                  position={{ lat: pt.lat, lng: pt.lng, altitude: pt.alt }}
+                  label={`Corner ${i + 1}`}
+                />
+              ))}
 
               {!isDrawing && corners.length === 4 && activeLayer === "satellite" && (
                 // @ts-ignore
