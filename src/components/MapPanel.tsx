@@ -442,94 +442,103 @@ function LandTelemetryView({ r, areaHa, corners }: { r: LandResult; areaHa: numb
   const ndviScore = r.ndvi ?? 0.74;
   const isWater = r.soilType?.includes("Open Water") || r.soilType?.includes("Marine");
 
+  // NDVI color band
+  const ndviColor = ndviScore >= 0.6 ? "emerald" : ndviScore >= 0.35 ? "amber" : "red";
+  const ndviLabel = ndviScore >= 0.6 ? "Healthy Canopy" : ndviScore >= 0.35 ? "Moderate Vegetation" : "Sparse / Bare";
+  const ndviPct = Math.round(Math.min(ndviScore / 0.9, 1) * 100);
+
   return (
-    <div className="space-y-2.5 text-xs">
-      {/* 4 Corner Cone Points Display */}
-      {corners.length > 0 && (
-        <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-2 space-y-1">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-              <MapPin className="w-3 h-3" /> 4-Corner Boundary Cones
-            </span>
-            <span className="text-[10px] font-mono text-muted-foreground">4 Pins Set</span>
-          </div>
-          <div className="grid grid-cols-2 gap-1">
-            {corners.map((c) => (
-              <div key={c.id} className="bg-background border border-border/70 rounded-lg p-1 text-[11px]">
-                <p className="font-bold text-foreground flex items-center gap-1 text-[10px]">
-                  <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center text-[9px] font-extrabold">
-                    {c.id}
-                  </span>
-                  <span>Cone {c.id} ({c.label})</span>
-                </p>
-                <p className="text-[9px] text-muted-foreground font-mono mt-0.5 truncate">
-                  {c.lat.toFixed(4)}°, {c.lng.toFixed(4)}°
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+    <div className="space-y-3 text-xs">
 
-      {/* Water Warning Banner if over Sea */}
+      {/* ── Water Warning ── */}
       {isWater && (
-        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-2 text-amber-700 dark:text-amber-300 text-[11px] flex items-start gap-1.5">
-          <span className="font-bold shrink-0">⚠️</span>
-          <span>Open Water / Marine Body Detected. No land or agricultural soil is present at these coordinates.</span>
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 text-amber-700 dark:text-amber-300 text-[11px] flex items-start gap-2">
+          <span className="shrink-0 text-base">⚠️</span>
+          <span className="leading-snug">Open Water / Marine Body detected. No agricultural land at these coordinates.</span>
         </div>
       )}
 
-      {/* Spectral Metrics Grid */}
-      <div className="grid grid-cols-2 gap-1.5">
-        <div className="bg-muted/50 border border-border p-2 rounded-xl">
-          <div className="flex items-center justify-between">
-            <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">NDVI Health</span>
+      {/* ── NDVI Health Bar ── */}
+      <div className="rounded-xl border border-border bg-muted/30 p-3 space-y-1.5">
+        <div className="flex items-center justify-between">
+          <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
             <TrendingUp className="w-3 h-3 text-emerald-500" />
-          </div>
-          <p className="text-base font-serif mt-0.5 font-bold text-emerald-600 dark:text-emerald-400">{ndviScore}</p>
-          <p className="text-[9px] text-muted-foreground truncate">{r.ndviStatus || "Canopy Health"}</p>
+            NDVI Vegetation Health
+          </span>
+          <span className={`text-base font-serif font-bold ${
+            ndviColor === "emerald" ? "text-emerald-600 dark:text-emerald-400"
+            : ndviColor === "amber" ? "text-amber-600 dark:text-amber-400"
+            : "text-red-500"
+          }`}>{ndviScore.toFixed(2)}</span>
         </div>
-
-        <div className="bg-muted/50 border border-border p-2 rounded-xl">
-          <div className="flex items-center justify-between">
-            <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Soil Moisture</span>
-            <Droplets className="w-3 h-3 text-blue-500" />
-          </div>
-          <p className="text-base font-serif mt-0.5 font-bold text-blue-600 dark:text-blue-400">{r.ndwi || "64%"}</p>
-          <p className="text-[9px] text-muted-foreground truncate">{r.soilMoisture || "Root Hydration"}</p>
+        <div className="h-1.5 w-full rounded-full bg-border overflow-hidden">
+          <div
+            className={`h-full rounded-full transition-all ${
+              ndviColor === "emerald" ? "bg-emerald-500"
+              : ndviColor === "amber" ? "bg-amber-400"
+              : "bg-red-500"
+            }`}
+            style={{ width: `${ndviPct}%` }}
+          />
         </div>
+        <p className="text-[10px] text-muted-foreground truncate">{r.ndviStatus || ndviLabel}</p>
+      </div>
 
-        <div className="bg-muted/50 border border-border p-2 rounded-xl">
-          <div className="flex items-center justify-between">
-            <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Canopy Temp</span>
-            <Thermometer className="w-3 h-3 text-amber-500" />
+      {/* ── 4-stat grid ── */}
+      <div className="grid grid-cols-3 gap-2">
+        <div className="rounded-xl border border-border bg-muted/30 p-2 space-y-0.5">
+          <div className="flex items-center gap-1 text-[9px] uppercase tracking-wider text-muted-foreground font-medium">
+            <Droplets className="w-2.5 h-2.5 text-blue-400" /> Moisture
           </div>
-          <p className="text-sm font-serif mt-0.5 font-bold">{r.landSurfaceTemp || "29.4°C"}</p>
+          <p className="text-sm font-bold text-blue-600 dark:text-blue-400 leading-tight truncate">
+            {(r.ndwi || "64%").toString().split(" ")[0]}
+          </p>
         </div>
-
-        <div className="bg-muted/50 border border-border p-2 rounded-xl">
-          <div className="flex items-center justify-between">
-            <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Elevation</span>
-            <Mountain className="w-3 h-3 text-purple-500" />
+        <div className="rounded-xl border border-border bg-muted/30 p-2 space-y-0.5">
+          <div className="flex items-center gap-1 text-[9px] uppercase tracking-wider text-muted-foreground font-medium">
+            <Thermometer className="w-2.5 h-2.5 text-amber-400" /> Temp
           </div>
-          <p className="text-sm font-serif mt-0.5 font-bold">{r.elevationMeters || 312}m</p>
+          <p className="text-sm font-bold leading-tight truncate">{r.landSurfaceTemp || "29.4°C"}</p>
+        </div>
+        <div className="rounded-xl border border-border bg-muted/30 p-2 space-y-0.5">
+          <div className="flex items-center gap-1 text-[9px] uppercase tracking-wider text-muted-foreground font-medium">
+            <Mountain className="w-2.5 h-2.5 text-purple-400" /> Elev
+          </div>
+          <p className="text-sm font-bold leading-tight">{r.elevationMeters ?? 312}m</p>
         </div>
       </div>
 
-      {/* Soil & Climate Info */}
-      <div className="space-y-1">
-        <InfoBlock label="Soil Profile & pH" value={r.soilType} />
-        <InfoBlock label="Climate & Agro-Zone" value={r.climate} />
-        <InfoBlock label="Yield Outlook" value={r.yieldPotential} />
-      </div>
+      {/* ── Soil & Climate ── */}
+      {!isWater && (
+        <div className="rounded-xl border border-border bg-muted/20 p-3 space-y-2">
+          {r.soilType && (
+            <div>
+              <p className="text-[9px] uppercase tracking-widest text-muted-foreground font-semibold mb-0.5">🪨 Soil Profile</p>
+              <p className="text-[11px] text-foreground leading-snug font-medium">{r.soilType}</p>
+            </div>
+          )}
+          {r.climate && (
+            <div>
+              <p className="text-[9px] uppercase tracking-widest text-muted-foreground font-semibold mb-0.5">🌤 Agro-Climate Zone</p>
+              <p className="text-[11px] text-foreground leading-snug font-medium">{r.climate}</p>
+            </div>
+          )}
+          {r.yieldPotential && (
+            <div>
+              <p className="text-[9px] uppercase tracking-widest text-muted-foreground font-semibold mb-0.5">📈 Yield Potential</p>
+              <p className="text-[11px] text-emerald-700 dark:text-emerald-400 leading-snug font-semibold">{r.yieldPotential}</p>
+            </div>
+          )}
+        </div>
+      )}
 
-      {/* Recommended Crops */}
-      {r.recommendedCrops?.length ? (
+      {/* ── Recommended Crops ── */}
+      {!isWater && r.recommendedCrops?.length ? (
         <div>
-          <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium mb-0.5">Recommended Crops</p>
+          <p className="text-[9px] uppercase tracking-widest text-muted-foreground font-semibold mb-1.5">🌾 Recommended Crops</p>
           <div className="flex flex-wrap gap-1">
             {r.recommendedCrops.map((c) => (
-              <span key={c} className="px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 text-[10px] font-medium">
+              <span key={c} className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 text-[10px] font-medium whitespace-nowrap">
                 {c}
               </span>
             ))}
@@ -537,20 +546,42 @@ function LandTelemetryView({ r, areaHa, corners }: { r: LandResult; areaHa: numb
         </div>
       ) : null}
 
-      {/* Risk Factors */}
+      {/* ── Risk Factors ── */}
       {r.riskFactors?.length ? (
         <div>
-          <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium mb-0.5">Risk Factors & Notes</p>
-          <ul className="space-y-0.5 text-[11px] text-muted-foreground">
+          <p className="text-[9px] uppercase tracking-widest text-muted-foreground font-semibold mb-1">⚠️ Risk Factors</p>
+          <ul className="space-y-1">
             {r.riskFactors.map((c, i) => (
-              <li key={i} className="flex items-start gap-1">
-                <span className="text-amber-500 shrink-0">·</span>
+              <li key={i} className="flex items-start gap-1.5 text-[10px] text-muted-foreground leading-snug">
+                <span className="text-amber-500 shrink-0 mt-px">•</span>
                 <span>{c}</span>
               </li>
             ))}
           </ul>
         </div>
       ) : null}
+
+      {/* ── 4-Corner Pins (compact) ── */}
+      {corners.length > 0 && (
+        <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-2.5 space-y-1.5">
+          <p className="text-[9px] uppercase tracking-widest text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+            <MapPin className="w-2.5 h-2.5" /> 4-Corner Boundary Pins
+          </p>
+          <div className="grid grid-cols-2 gap-1">
+            {corners.map((c) => (
+              <div key={c.id} className="flex items-center gap-1.5 bg-background rounded-lg px-2 py-1 border border-border/60">
+                <span className="w-4 h-4 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center text-[9px] font-extrabold shrink-0">
+                  {c.id}
+                </span>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-semibold text-foreground">{c.label}</p>
+                  <p className="text-[9px] text-muted-foreground font-mono truncate">{c.lat.toFixed(3)}°, {c.lng.toFixed(3)}°</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -559,11 +590,12 @@ function InfoBlock({ label, value }: { label: string; value?: string }) {
   if (!value) return null;
   return (
     <div>
-      <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">{label}</p>
+      <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">{label}</p>
       <p className="text-[11px] font-medium text-foreground mt-0.5 leading-snug">{value}</p>
     </div>
   );
 }
+
 
 // Extract 4 main corner vertices (NW, NE, SE, SW) from polygon or bounding box
 function extract4Corners(latlngs: { lat: number; lng: number }[], bounds?: any): CornerPoint[] {
