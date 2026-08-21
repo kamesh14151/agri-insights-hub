@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as ApiSendEmailRouteImport } from './routes/api.send-email'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppAdminRouteImport } from './routes/app.admin'
 import { Route as AppBookingRouteImport } from './routes/app.booking'
@@ -44,11 +43,6 @@ const AppRoute = AppRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiSendEmailRoute = ApiSendEmailRouteImport.update({
-  id: '/api/send-email',
-  path: '/api/send-email',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppIndexRoute = AppIndexRouteImport.update({
@@ -141,7 +135,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
-  '/api/send-email': typeof ApiSendEmailRoute
   '/app/admin': typeof AppAdminRoute
   '/app/booking': typeof AppBookingRouteWithChildren
   '/app/chatbot': typeof AppChatbotRoute
@@ -163,7 +156,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/api/send-email': typeof ApiSendEmailRoute
   '/app/admin': typeof AppAdminRoute
   '/app/booking': typeof AppBookingRouteWithChildren
   '/app/chatbot': typeof AppChatbotRoute
@@ -187,7 +179,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
-  '/api/send-email': typeof ApiSendEmailRoute
   '/app/admin': typeof AppAdminRoute
   '/app/booking': typeof AppBookingRouteWithChildren
   '/app/chatbot': typeof AppChatbotRoute
@@ -212,7 +203,6 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/login'
-    | '/api/send-email'
     | '/app/admin'
     | '/app/booking'
     | '/app/chatbot'
@@ -234,7 +224,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
-    | '/api/send-email'
     | '/app/admin'
     | '/app/booking'
     | '/app/chatbot'
@@ -257,7 +246,6 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/login'
-    | '/api/send-email'
     | '/app/admin'
     | '/app/booking'
     | '/app/chatbot'
@@ -281,7 +269,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
-  ApiSendEmailRoute: typeof ApiSendEmailRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
 }
 
@@ -306,13 +293,6 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/send-email': {
-      id: '/api/send-email'
-      path: '/api/send-email'
-      fullPath: '/api/send-email'
-      preLoaderRoute: typeof ApiSendEmailRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/': {
@@ -500,7 +480,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
-  ApiSendEmailRoute: ApiSendEmailRoute,
   AuthCallbackRoute: AuthCallbackRoute,
 }
 export const routeTree = rootRouteImport

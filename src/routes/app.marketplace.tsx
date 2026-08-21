@@ -26,7 +26,7 @@ import {
   type MarketplaceProduceListing,
   type MarketplaceOrder,
 } from "@/lib/payments.server";
-import { sendEmailFn } from "@/routes/api.send-email";
+import { sendEmailFn } from "@/lib/email.actions";
 
 export const Route = createFileRoute("/app/marketplace")({
   head: () => ({

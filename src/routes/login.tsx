@@ -4,7 +4,7 @@ import { Leaf, Shield, Tractor, User as UserIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth, type Role } from "@/lib/auth";
 import { useServerFn } from "@tanstack/react-start";
-import { sendEmailFn } from "@/routes/api.send-email";
+import { sendEmailFn } from "@/lib/email.actions";
 import { supabase } from "@/lib/supabase";
 export const Route = createFileRoute("/login")({
   head: () => ({

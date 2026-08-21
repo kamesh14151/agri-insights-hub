@@ -45,9 +45,6 @@ type CornerPoint = {
 
 const GOOGLE_API_KEY = "AIzaSyBgUBjm3AVh4jrftt9HN5wmzYk-4_vhK3g";
 
-const GmpMap3d = "gmp-map-3d" as any;
-const GmpPolygon3d = "gmp-polygon-3d" as any;
-
 export function MapPanel() {
   const { t, fullName } = useI18n();
   const map3dRef = useRef<any>(null);
@@ -255,7 +252,8 @@ export function MapPanel() {
           </div>
 
           {apiLoaded ? (
-            <GmpMap3d
+            // @ts-ignore
+            <gmp-map-3d
               ref={map3dRef}
               center="11.6643,78.1460,0"
               range="4000"
@@ -265,7 +263,8 @@ export function MapPanel() {
               style={{ width: "100%", height: "100%" }}
             >
               {isDrawing && draftCorners.length > 2 && (
-                <GmpPolygon3d
+                // @ts-ignore
+                <gmp-polygon-3d
                   altitude-mode="clamp-to-ground"
                   fill-color="rgba(16, 185, 129, 0.4)"
                   stroke-color="rgba(16, 185, 129, 1)"
@@ -275,11 +274,12 @@ export function MapPanel() {
                   {draftCorners.map((pt, i) => (
                     <div key={i} slot="coordinates">{pt.lat},{pt.lng},{pt.alt}</div>
                   ))}
-                </GmpPolygon3d>
+                </gmp-polygon-3d>
               )}
 
               {!isDrawing && corners.length === 4 && (
-                <GmpPolygon3d
+                // @ts-ignore
+                <gmp-polygon-3d
                   altitude-mode="clamp-to-ground"
                   fill-color="rgba(16, 185, 129, 0.35)"
                   stroke-color="rgba(16, 185, 129, 1)"
@@ -290,9 +290,9 @@ export function MapPanel() {
                     <div key={i} slot="coordinates">{pt.lat},{pt.lng},{pt.alt}</div>
                   ))}
                   <div slot="coordinates">{corners[0].lat},{corners[0].lng},{corners[0].alt}</div>
-                </GmpPolygon3d>
+                </gmp-polygon-3d>
               )}
-            </GmpMap3d>
+            </gmp-map-3d>
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center bg-slate-900 text-emerald-500">
               <Loader2 className="w-8 h-8 animate-spin mb-4" />

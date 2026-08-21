@@ -4,7 +4,7 @@ import { Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { useServerFn } from "@tanstack/react-start";
-import { sendEmailFn } from "@/routes/api.send-email";
+import { sendEmailFn } from "@/lib/email.actions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/auth/callback")({

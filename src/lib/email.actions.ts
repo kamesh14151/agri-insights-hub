@@ -6,8 +6,6 @@ import {
   sendOrderConfirmationEmail,
 } from "@/lib/email.server";
 
-export const Route = { path: "/api/send-email" };
-
 export const sendEmailFn = createServerFn({ method: "POST" })
   .validator(
     z.discriminatedUnion("type", [
