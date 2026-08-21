@@ -19,8 +19,10 @@ import {
   Leaf,
   CloudSun,
   BarChart3,
-  AlertTriangle
+  AlertTriangle,
+  Layers
 } from "lucide-react";
+import { generateHeatmapGrid, getNdviColor, getNdwiColor } from "@/lib/heatmap";
 
 type LandResult = {
   soilType?: string;
@@ -66,6 +68,9 @@ export function MapPanel() {
   // Search location state
   const [searchQuery, setSearchQuery] = useState("");
   const [searchLoading, setSearchLoading] = useState(false);
+
+  // Layer state
+  const [activeLayer, setActiveLayer] = useState<"satellite" | "ndvi" | "ndwi">("satellite");
 
   const analyze = useServerFn(analyzeLand);
 
@@ -255,6 +260,27 @@ export function MapPanel() {
             </form>
           </div>
 
+          <div className="absolute top-16 left-3 z-[400] pointer-events-auto bg-slate-900/90 backdrop-blur-md border border-emerald-500/30 rounded-xl shadow-lg p-1.5 flex flex-col gap-1 w-12 hover:w-44 transition-all overflow-hidden group">
+            <div className="w-9 h-9 flex items-center justify-center text-emerald-400 shrink-0">
+              <Layers className="w-5 h-5" />
+            </div>
+            <div className="flex flex-col gap-1 w-full opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+              {(["satellite", "ndvi", "ndwi"] as const).map((layer) => (
+                <button
+                  key={layer}
+                  onClick={() => setActiveLayer(layer)}
+                  className={`text-left px-3 py-2 rounded-lg text-[11px] font-bold uppercase tracking-wider transition ${
+                    activeLayer === layer 
+                      ? "bg-emerald-500/20 text-emerald-400" 
+                      : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
+                  }`}
+                >
+                  {layer === "satellite" ? "Satellite Only" : layer === "ndvi" ? "NDVI Heatmap" : "Moisture Map"}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {apiLoaded ? (
             // @ts-ignore
             <gmp-map-3d
@@ -263,6 +289,7 @@ export function MapPanel() {
               range={4000}
               tilt={65}
               heading={0}
+              default-labels-disabled="false"
               style={{ width: "100%", height: "100%" }}
             >
               {isDrawing && draftCorners.length > 2 && (
@@ -280,7 +307,7 @@ export function MapPanel() {
                 </gmp-polygon-3d>
               )}
 
-              {!isDrawing && corners.length === 4 && (
+              {!isDrawing && corners.length === 4 && activeLayer === "satellite" && (
                 // @ts-ignore
                 <gmp-polygon-3d
                   altitude-mode="clamp-to-ground"
@@ -295,6 +322,23 @@ export function MapPanel() {
                   <div slot="coordinates">{corners[0].lat},{corners[0].lng},{corners[0].alt}</div>
                 </gmp-polygon-3d>
               )}
+
+              {!isDrawing && corners.length === 4 && activeLayer !== "satellite" && generateHeatmapGrid(corners, 8, result?.ndvi ?? 0.7).map(cell => (
+                // @ts-ignore
+                <gmp-polygon-3d
+                  key={cell.id}
+                  altitude-mode="clamp-to-ground"
+                  fill-color={activeLayer === "ndvi" ? getNdviColor(cell.value) : getNdwiColor(cell.value)}
+                  stroke-color="rgba(255, 255, 255, 0.05)"
+                  stroke-width="1"
+                  draws-occluded-segments="true"
+                >
+                  {cell.points.map((pt, i) => (
+                    <div key={i} slot="coordinates">{pt.lat},{pt.lng},{pt.alt}</div>
+                  ))}
+                  <div slot="coordinates">{cell.points[0].lat},{cell.points[0].lng},{cell.points[0].alt}</div>
+                </gmp-polygon-3d>
+              ))}
             </gmp-map-3d>
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center bg-slate-900 text-emerald-500">
