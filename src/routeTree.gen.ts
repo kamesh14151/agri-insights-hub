@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as ApiSendEmailRouteImport } from './routes/api.send-email'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppAdminRouteImport } from './routes/app.admin'
 import { Route as AppBookingRouteImport } from './routes/app.booking'
@@ -26,6 +27,7 @@ import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as AppShopRouteImport } from './routes/app.shop'
 import { Route as AppVoiceRouteImport } from './routes/app.voice'
 import { Route as AppWeatherRouteImport } from './routes/app.weather'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as AppBookingSuccessRouteImport } from './routes/app.booking.success'
 import { Route as AppShopSuccessRouteImport } from './routes/app.shop.success'
 
@@ -42,6 +44,11 @@ const AppRoute = AppRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSendEmailRoute = ApiSendEmailRouteImport.update({
+  id: '/api/send-email',
+  path: '/api/send-email',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppIndexRoute = AppIndexRouteImport.update({
@@ -114,6 +121,11 @@ const AppWeatherRoute = AppWeatherRouteImport.update({
   path: '/weather',
   getParentRoute: () => AppRoute,
 } as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppBookingSuccessRoute = AppBookingSuccessRouteImport.update({
   id: '/success',
   path: '/success',
@@ -129,6 +141,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
+  '/api/send-email': typeof ApiSendEmailRoute
   '/app/admin': typeof AppAdminRoute
   '/app/booking': typeof AppBookingRouteWithChildren
   '/app/chatbot': typeof AppChatbotRoute
@@ -142,6 +155,7 @@ export interface FileRoutesByFullPath {
   '/app/shop': typeof AppShopRouteWithChildren
   '/app/voice': typeof AppVoiceRoute
   '/app/weather': typeof AppWeatherRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/app/': typeof AppIndexRoute
   '/app/booking/success': typeof AppBookingSuccessRoute
   '/app/shop/success': typeof AppShopSuccessRoute
@@ -149,6 +163,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/api/send-email': typeof ApiSendEmailRoute
   '/app/admin': typeof AppAdminRoute
   '/app/booking': typeof AppBookingRouteWithChildren
   '/app/chatbot': typeof AppChatbotRoute
@@ -162,6 +177,7 @@ export interface FileRoutesByTo {
   '/app/shop': typeof AppShopRouteWithChildren
   '/app/voice': typeof AppVoiceRoute
   '/app/weather': typeof AppWeatherRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/app': typeof AppIndexRoute
   '/app/booking/success': typeof AppBookingSuccessRoute
   '/app/shop/success': typeof AppShopSuccessRoute
@@ -171,6 +187,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
+  '/api/send-email': typeof ApiSendEmailRoute
   '/app/admin': typeof AppAdminRoute
   '/app/booking': typeof AppBookingRouteWithChildren
   '/app/chatbot': typeof AppChatbotRoute
@@ -184,6 +201,7 @@ export interface FileRoutesById {
   '/app/shop': typeof AppShopRouteWithChildren
   '/app/voice': typeof AppVoiceRoute
   '/app/weather': typeof AppWeatherRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/app/': typeof AppIndexRoute
   '/app/booking/success': typeof AppBookingSuccessRoute
   '/app/shop/success': typeof AppShopSuccessRoute
@@ -194,6 +212,7 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/login'
+    | '/api/send-email'
     | '/app/admin'
     | '/app/booking'
     | '/app/chatbot'
@@ -207,6 +226,7 @@ export interface FileRouteTypes {
     | '/app/shop'
     | '/app/voice'
     | '/app/weather'
+    | '/auth/callback'
     | '/app/'
     | '/app/booking/success'
     | '/app/shop/success'
@@ -214,6 +234,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/api/send-email'
     | '/app/admin'
     | '/app/booking'
     | '/app/chatbot'
@@ -227,6 +248,7 @@ export interface FileRouteTypes {
     | '/app/shop'
     | '/app/voice'
     | '/app/weather'
+    | '/auth/callback'
     | '/app'
     | '/app/booking/success'
     | '/app/shop/success'
@@ -235,6 +257,7 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/login'
+    | '/api/send-email'
     | '/app/admin'
     | '/app/booking'
     | '/app/chatbot'
@@ -248,6 +271,7 @@ export interface FileRouteTypes {
     | '/app/shop'
     | '/app/voice'
     | '/app/weather'
+    | '/auth/callback'
     | '/app/'
     | '/app/booking/success'
     | '/app/shop/success'
@@ -257,6 +281,8 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
+  ApiSendEmailRoute: typeof ApiSendEmailRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -280,6 +306,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/send-email': {
+      id: '/api/send-email'
+      path: '/api/send-email'
+      fullPath: '/api/send-email'
+      preLoaderRoute: typeof ApiSendEmailRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/': {
@@ -380,6 +413,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppWeatherRouteImport
       parentRoute: typeof AppRoute
     }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/booking/success': {
       id: '/app/booking/success'
       path: '/success'
@@ -460,6 +500,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
+  ApiSendEmailRoute: ApiSendEmailRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

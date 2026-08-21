@@ -26,6 +26,7 @@ import {
   type MarketplaceProduceListing,
   type MarketplaceOrder,
 } from "@/lib/payments.server";
+import { sendEmailFn } from "@/routes/api.send-email";
 
 export const Route = createFileRoute("/app/marketplace")({
   head: () => ({
@@ -264,8 +265,8 @@ function BuyNowCheckoutModal({
 }) {
   const { user } = useAuth();
   const buyFn = useServerFn(createProduceOrderCheckout);
+  const sendEmail = useServerFn(sendEmailFn);
   const [busy, setBusy] = useState(false);
-
   const [orderQty, setOrderQty] = useState("1");
   const [buyerName, setBuyerName] = useState(user?.name || "Kamesh");
   const [buyerEmail, setBuyerEmail] = useState(user?.email || "kamesh14151@gmail.com");
@@ -305,6 +306,19 @@ function BuyNowCheckoutModal({
           });
           if (res.success && res.order) {
             toast.success(`🎉 Payment verified! Escrow funded for ${listing.crop}.`);
+            sendEmail({
+              data: {
+                type: "order",
+                to: buyerEmail,
+                buyerName,
+                crop: listing.crop,
+                farmer: listing.farmer,
+                quantity: `${orderQty} ${listing.unit}`,
+                totalAmount,
+                paymentId: paymentResult.razorpay_payment_id || "escrow_test",
+                deliveryAddress,
+              }
+            }).catch(console.error);
             onSuccess(res.order);
             onClose();
           }

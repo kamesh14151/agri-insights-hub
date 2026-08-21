@@ -12,7 +12,9 @@ export type Account = {
   farmSize?: string;
 };
 
-export type SessionUser = Omit<Account, "password">;
+export type SessionUser = Omit<Account, "password"> & {
+  avatarUrl?: string;
+};
 
 const STORE = "agrisynapse-accounts";
 const SESSION = "agrisynapse-session";
@@ -42,6 +44,7 @@ type Ctx = {
   ready: boolean;
   login: (email: string, password: string, role: Role, remember: boolean) => SessionUser;
   register: (input: Account) => SessionUser;
+  loginWithGoogle: (input: { name: string; email: string; role: Role; avatarUrl?: string }) => SessionUser;
   logout: () => void;
   update: (patch: Partial<SessionUser>) => void;
 };
@@ -92,6 +95,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return session;
   };
 
+  const loginWithGoogle: Ctx["loginWithGoogle"] = (input) => {
+    const accounts = readAccounts();
+    const existing = accounts.find((a) => a.email.toLowerCase() === input.email.trim().toLowerCase());
+    
+    if (existing) {
+      const { password: _pw, ...session } = existing;
+      const updatedSession = { ...session, avatarUrl: input.avatarUrl };
+      persist(updatedSession, true);
+      return updatedSession;
+    }
+
+    // New user via Google
+    const newAccount: Account = {
+      name: input.name,
+      email: input.email,
+      password: "", // No password for OAuth
+      role: input.role,
+    };
+    localStorage.setItem(STORE, JSON.stringify([...accounts, newAccount]));
+    const session = { ...newAccount, avatarUrl: input.avatarUrl };
+    persist(session, true);
+    return session;
+  };
+
   const logout = () => {
     setUser(null);
     localStorage.removeItem(SESSION);
@@ -111,7 +138,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, ready, login, register, logout, update }}>
+    <AuthContext.Provider value={{ user, ready, login, register, loginWithGoogle, logout, update }}>
       {children}
     </AuthContext.Provider>
   );
