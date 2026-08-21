@@ -337,6 +337,41 @@ export const deleteListing = createServerFn({ method: "POST" })
     return { success: true };
   });
 
+export const updateProduceListing = createServerFn({ method: "POST" })
+  .validator(z.object({
+    listingId: z.string(),
+    crop: z.string().min(2),
+    variety: z.string().optional().default(""),
+    quantity: z.string().min(1),
+    price: z.number().positive(),
+    unit: z.string().default("quintal"),
+    grade: z.string().default("A"),
+    location: z.string().min(2),
+    harvested: z.string().optional().default("Fresh Harvest"),
+    farmerPhone: z.string().min(10),
+  }))
+  .handler(async ({ data }) => {
+    const updatedFields = {
+      crop: data.variety ? `${data.crop} (${data.variety})` : data.crop,
+      variety: data.variety,
+      quantity: data.quantity,
+      price: data.price,
+      unit: data.unit,
+      grade: data.grade,
+      location: data.location,
+      harvested: data.harvested,
+      farmer_phone: data.farmerPhone,
+    };
+    const { data: updated, error } = await supabase
+      .from("produce_listings")
+      .update(updatedFields)
+      .eq("id", data.listingId)
+      .select()
+      .single();
+    if (error) throw error;
+    return { success: true, listing: mapListing(updated) };
+  });
+
 export const getAdminPlatformTelemetry = createServerFn({ method: "GET" })
   .handler(async () => {
     const { data: marketplaceOrders } = await supabase.from("marketplace_orders").select("*");

@@ -3,7 +3,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import {
   MapPin, Search, Sprout, X, Phone, MessageSquare, ChevronRight,
   PlusCircle, ShoppingCart, ShieldCheck, CheckCircle2, Clock, Truck,
-  DollarSign, PackageCheck, AlertCircle, ArrowUpRight, Filter, BadgeCheck, CreditCard
+  DollarSign, PackageCheck, AlertCircle, ArrowUpRight, Filter, BadgeCheck, CreditCard,
+  Pencil, Trash2
 } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
@@ -16,6 +17,8 @@ import { openRazorpayCheckout } from "@/lib/razorpay";
 import {
   getMarketplaceListings,
   publishProduceListing,
+  updateProduceListing,
+  deleteListing,
   createProduceOrderCheckout,
   getMarketplaceOrders,
   updateMarketplaceOrderStatus,
@@ -437,6 +440,213 @@ function BuyNowCheckoutModal({
   );
 }
 
+/* ── Modal: Edit Seller Listing ── */
+function EditListingModal({
+  listing,
+  onClose,
+  onSuccess,
+}: {
+  listing: MarketplaceProduceListing;
+  onClose: () => void;
+  onSuccess: (updated: MarketplaceProduceListing) => void;
+}) {
+  const updateFn = useServerFn(updateProduceListing);
+  const [busy, setBusy] = useState(false);
+
+  // Pre-fill from existing listing (strip variety if embedded in crop name)
+  const rawCrop = listing.crop.replace(/\s*\(.*\)\s*$/, "").trim();
+  const rawVariety = listing.variety || "";
+
+  const [form, setForm] = useState({
+    crop: rawCrop,
+    variety: rawVariety,
+    quantity: listing.quantity,
+    price: String(listing.price),
+    unit: listing.unit,
+    grade: listing.grade,
+    location: listing.location,
+    harvested: listing.harvested,
+    farmerPhone: listing.farmerPhone || "",
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.crop || !form.quantity || !form.price || !form.location) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const res = await updateFn({
+        data: {
+          listingId: listing.id,
+          crop: form.crop,
+          variety: form.variety,
+          quantity: form.quantity,
+          price: Number(form.price),
+          unit: form.unit,
+          grade: form.grade,
+          location: form.location,
+          harvested: form.harvested,
+          farmerPhone: form.farmerPhone,
+        },
+      });
+      if (res.success && res.listing) {
+        toast.success(`✅ ${form.crop} listing updated!`);
+        onSuccess(res.listing);
+        onClose();
+      }
+    } catch {
+      toast.error("Failed to update listing. Try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md">
+      <div className="relative w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+        <div className="flex items-center justify-between border-b border-border pb-4">
+          <div className="flex items-center gap-2.5">
+            <div className="grid h-9 w-9 place-items-center rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
+              <Pencil className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="font-serif text-lg font-semibold">Edit Listing</h2>
+              <p className="text-xs text-muted-foreground">Update your produce lot details</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="mt-5 space-y-4">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">Crop Name *</label>
+              <input
+                required
+                value={form.crop}
+                onChange={e => setForm(f => ({ ...f, crop: e.target.value }))}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">Variety / Cultivar</label>
+              <input
+                value={form.variety}
+                onChange={e => setForm(f => ({ ...f, variety: e.target.value }))}
+                placeholder="e.g. ADT 45, Salem Finger"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">Quantity *</label>
+              <input
+                required
+                value={form.quantity}
+                onChange={e => setForm(f => ({ ...f, quantity: e.target.value }))}
+                placeholder="e.g. 5 tonnes"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">Price (₹) *</label>
+              <input
+                required
+                type="number"
+                value={form.price}
+                onChange={e => setForm(f => ({ ...f, price: e.target.value }))}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">Unit</label>
+              <select
+                value={form.unit}
+                onChange={e => setForm(f => ({ ...f, unit: e.target.value }))}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="quintal">quintal</option>
+                <option value="ton">ton</option>
+                <option value="kg">kg</option>
+                <option value="crate">crate</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">Quality Grade</label>
+              <select
+                value={form.grade}
+                onChange={e => setForm(f => ({ ...f, grade: e.target.value }))}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="Premium">Grade Premium (Export Quality)</option>
+                <option value="A">Grade A (High Commercial)</option>
+                <option value="B">Grade B (Standard Market)</option>
+                <option value="C">Grade C (Processing / Industrial)</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">Farm Location *</label>
+              <input
+                required
+                value={form.location}
+                onChange={e => setForm(f => ({ ...f, location: e.target.value }))}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">Harvest Status</label>
+              <input
+                value={form.harvested}
+                onChange={e => setForm(f => ({ ...f, harvested: e.target.value }))}
+                placeholder="e.g. Fresh Harvest (Ready to load)"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">Contact Phone</label>
+              <input
+                value={form.farmerPhone}
+                onChange={e => setForm(f => ({ ...f, farmerPhone: e.target.value }))}
+                placeholder="+91 98765 43210"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-muted"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={busy}
+              className="rounded-lg bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 text-sm font-semibold transition disabled:opacity-50"
+            >
+              {busy ? "Saving..." : "Save Changes"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 /* ── Modal: Direct Enquiry / Offer ── */
 function EnquiryModal({
   listing,
@@ -606,6 +816,20 @@ function MarketplacePage() {
   const [publishModalOpen, setPublishModalOpen] = useState(false);
   const [buyNowListing, setBuyNowListing] = useState<MarketplaceProduceListing | null>(null);
   const [enquireListing, setEnquireListing] = useState<MarketplaceProduceListing | null>(null);
+  const [editListing, setEditListing] = useState<MarketplaceProduceListing | null>(null);
+
+  const deleteListingFn = useServerFn(deleteListing);
+
+  const handleDeleteListing = async (listingId: string, cropName: string) => {
+    if (!window.confirm(`Remove "${cropName}" listing permanently?`)) return;
+    try {
+      await deleteListingFn({ data: { listingId } });
+      setListings(prev => prev.filter(l => l.id !== listingId));
+      toast.success(`"${cropName}" listing removed.`);
+    } catch {
+      toast.error("Failed to delete listing.");
+    }
+  };
 
   // Load live listings & orders
   useEffect(() => {
@@ -952,19 +1176,35 @@ function MarketplacePage() {
 
             <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {myListings.map(l => (
-                <div key={l.id} className="rounded-xl border border-border bg-background p-4 space-y-3">
+                <div key={l.id} className="rounded-xl border border-border bg-background p-4 space-y-3 hover:border-primary/40 transition">
                   <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="font-semibold text-base">{l.crop}</h4>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-base truncate">{l.crop}</h4>
                       <p className="text-xs text-muted-foreground">{l.location} · Grade {l.grade}</p>
                     </div>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/10 text-emerald-600 font-medium">
+                    <span className="shrink-0 ml-2 px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/10 text-emerald-600 font-medium">
                       Active
                     </span>
                   </div>
                   <div className="text-xs space-y-1">
                     <p><span className="text-muted-foreground">Quantity:</span> {l.quantity}</p>
                     <p><span className="text-muted-foreground">Asking Price:</span> ₹{l.price.toLocaleString("en-IN")} / {l.unit}</p>
+                    <p><span className="text-muted-foreground">Harvest Status:</span> {l.harvested}</p>
+                  </div>
+                  <div className="flex items-center gap-2 pt-1 border-t border-border">
+                    <button
+                      onClick={() => setEditListing(l)}
+                      className="flex-1 flex items-center justify-center gap-1.5 rounded-lg border border-border py-1.5 text-xs font-medium hover:bg-muted transition"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteListing(l.id, l.crop)}
+                      className="flex items-center justify-center gap-1.5 rounded-lg border border-red-500/30 bg-red-500/5 text-red-600 dark:text-red-400 py-1.5 px-3 text-xs font-medium hover:bg-red-500/10 transition"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
                   </div>
                 </div>
               ))}
@@ -1001,6 +1241,17 @@ function MarketplacePage() {
         <EnquiryModal
           listing={enquireListing}
           onClose={() => setEnquireListing(null)}
+        />
+      )}
+
+      {editListing && (
+        <EditListingModal
+          listing={editListing}
+          onClose={() => setEditListing(null)}
+          onSuccess={(updated) => {
+            setListings(prev => prev.map(l => l.id === updated.id ? updated : l));
+            setEditListing(null);
+          }}
         />
       )}
     </>
