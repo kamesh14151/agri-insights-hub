@@ -45,8 +45,8 @@ type CornerPoint = {
 
 const GOOGLE_API_KEY = "AIzaSyBgUBjm3AVh4jrftt9HN5wmzYk-4_vhK3g";
 
-// Google Earth Satellite Tile Endpoint
-const GOOGLE_SATELLITE_URL = `https://mt{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}&key=${GOOGLE_API_KEY}`;
+// Google Earth Hybrid Tile: Satellite imagery + area names + roads (like Google Maps satellite view)
+const GOOGLE_HYBRID_URL = `https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&key=${GOOGLE_API_KEY}`;
 
 export function MapPanel() {
   const { t, fullName } = useI18n();
@@ -87,10 +87,10 @@ export function MapPanel() {
 
       leafletMapRef.current = map;
 
-      // Add Google Earth Satellite tile layer
-      L.tileLayer(GOOGLE_SATELLITE_URL, {
-        attribution: "© Google Earth Engine / Satellite",
-        maxZoom: 20,
+      // Add Google Earth Hybrid tile layer (satellite imagery + area labels + roads)
+      L.tileLayer(GOOGLE_HYBRID_URL, {
+        attribution: "Map data © Google",
+        maxZoom: 21,
         subdomains: ["0", "1", "2", "3"],
       }).addTo(map);
 

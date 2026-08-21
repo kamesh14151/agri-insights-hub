@@ -356,7 +356,22 @@ export async function generateGeminiLandAnalysis(opts: {
     "AIzaSyBgUBjm3AVh4jrftt9HN5wmzYk-4_vhK3g";
 
   if (geminiKey) {
-    const modelsToTry = ["gemini-2.5-flash-lite", "gemini-2.0-flash", "gemini-1.5-flash"];
+    const modelsToTry = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash", "gemini-1.5-flash"];
+
+    // Derive a human-readable region hint from coordinates for better AI context
+    const isIndia = opts.centerLat >= 6 && opts.centerLat <= 37 && opts.centerLng >= 67 && opts.centerLng <= 98;
+    const isTamilNadu = opts.centerLat >= 8 && opts.centerLat <= 13.5 && opts.centerLng >= 76.5 && opts.centerLng <= 80.5;
+    const isAndhraTelangana = opts.centerLat >= 12 && opts.centerLat <= 20 && opts.centerLng >= 76 && opts.centerLng <= 84.5;
+    const isPunjabHaryana = opts.centerLat >= 27 && opts.centerLat <= 32.5 && opts.centerLng >= 73 && opts.centerLng <= 77.5;
+    const isKerala = opts.centerLat >= 8 && opts.centerLat <= 12.8 && opts.centerLng >= 74.8 && opts.centerLng <= 77.5;
+    const isMaharashtra = opts.centerLat >= 15.6 && opts.centerLat <= 22.1 && opts.centerLng >= 72.6 && opts.centerLng <= 80.9;
+
+    let regionHint = isIndia ? "India" : "Global Agricultural Region";
+    if (isTamilNadu) regionHint = "Tamil Nadu, South India";
+    else if (isAndhraTelangana) regionHint = "Andhra Pradesh / Telangana, South India";
+    else if (isPunjabHaryana) regionHint = "Punjab / Haryana, North India (Indo-Gangetic Plain)";
+    else if (isKerala) regionHint = "Kerala, Southwest India";
+    else if (isMaharashtra) regionHint = "Maharashtra, West-Central India";
 
     for (const model of modelsToTry) {
       try {
@@ -371,27 +386,56 @@ export async function generateGeminiLandAnalysis(opts: {
                   role: "user",
                   parts: [
                     {
-                      text: `You are an expert Google Earth Engine agronomist and remote sensing scientist. Given coordinates (Lat: ${opts.centerLat.toFixed(4)}, Lng: ${opts.centerLng.toFixed(4)}) and area (${opts.areaHectares.toFixed(2)} ha), provide Earth Engine satellite analytics. If the coordinate is in open sea/ocean water, set soilType to "N/A — Open Water / Marine Body", recommendedCrops to [], riskFactors to ["Selected boundary points are in open sea/ocean water."]. Respond ONLY with strict JSON matching: {
-                        "soilType": string,
-                        "climate": string,
-                        "recommendedCrops": string[],
-                        "waterNeeds": string,
-                        "riskFactors": string[],
-                        "yieldPotential": string,
-                        "ndvi": number,
-                        "ndviStatus": string,
-                        "ndwi": string,
-                        "soilMoisture": string,
-                        "landSurfaceTemp": string,
-                        "elevationMeters": number,
-                        "geeSatelliteSource": string
-                      }. Respond in ${opts.language || "English"}. No markdown.`,
+                      text: `You are a senior Google Earth Engine remote sensing scientist and precision agronomist with deep expertise in Indian soil science and crop agronomy.
+
+FIELD COORDINATES: Latitude ${opts.centerLat.toFixed(5)}, Longitude ${opts.centerLng.toFixed(5)}
+APPROXIMATE REGION: ${regionHint}
+FIELD AREA: ${opts.areaHectares.toFixed(2)} hectares
+
+Using your knowledge of:
+- NBSS&LUP soil maps and ICAR soil classification for India
+- Sentinel-2 MSI and Landsat-9 OLI satellite spectral indices
+- SRTM Digital Elevation Model (30m resolution)
+- IMD seasonal rainfall data and agro-climatic zones
+- National Horticulture Board crop zone maps
+
+IMPORTANT: If the coordinates fall in open sea/ocean water (e.g. Arabian Sea, Bay of Bengal, Indian Ocean), set soilType to "N/A — Open Water / Marine Body", recommendedCrops to [], ndvi to 0.02, and riskFactors to ["Coordinates are in open water. No agricultural land present."].
+
+Otherwise, generate a HIGHLY REALISTIC and LOCATION-SPECIFIC analysis including:
+- Exact soil series name from NBSS&LUP soil classification (e.g. "Red Sandy Loam (Udic Ustorthents), pH 6.2–6.8, low N, medium P, high K")
+- Precise agro-climatic zone (e.g. "Southern Dry Zone / Semi-Arid Tropics — Zone XI")
+- NDVI value realistic for the season (use 0.65–0.82 for active crop; 0.35–0.55 for fallow; 0.12–0.25 for barren)
+- Actual recommended crops for THIS specific region based on soil + climate (not generic list)
+- Specific NPK recommendation with doses (e.g. "N:P:K at 120:60:40 kg/ha basal + 60 kg/ha N top-dress")
+- Yield potential with variety names (e.g. "Paddy ADT-45: 5.8–6.2 t/ha; Turmeric BSR-2: 28–32 t/ha fresh rhizome")
+- Risk factors specific to this region (e.g. "Blast fungus pressure during NE monsoon", "White stem borer in sugarcane belt")
+- Elevation from SRTM data (realistic for this coordinate)
+
+Respond ONLY with valid JSON (no markdown, no code fences):
+{
+  "soilType": "detailed soil series name with pH and texture",
+  "climate": "agro-climatic zone name and annual rainfall",
+  "recommendedCrops": ["Crop 1 (Variety)", "Crop 2 (Variety)", "Crop 3"],
+  "waterNeeds": "irrigation method and mm/season requirement",
+  "riskFactors": ["specific regional risk 1", "specific regional risk 2", "specific regional risk 3"],
+  "yieldPotential": "realistic t/ha range with variety names",
+  "ndvi": 0.00,
+  "ndviStatus": "descriptive NDVI status for current season",
+  "ndwi": "percentage and interpretation",
+  "soilMoisture": "percentage range and root zone status",
+  "landSurfaceTemp": "°C with seasonal context",
+  "elevationMeters": 000,
+  "geeSatelliteSource": "Sentinel-2 MSI / Landsat-9 OLI — Band Composite Analysis"
+}
+
+Respond in ${opts.language || "English"}.`,
                     },
                   ],
                 },
               ],
               generationConfig: {
-                temperature: 0.3,
+                temperature: 0.15,
+                maxOutputTokens: 1200,
                 response_mime_type: "application/json",
               },
             }),
@@ -402,7 +446,13 @@ export async function generateGeminiLandAnalysis(opts: {
           const data = (await res.json()) as any;
           const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
           if (text) {
-            return JSON.parse(text);
+            try {
+              return JSON.parse(text);
+            } catch {
+              // Try to extract JSON from text
+              const jsonMatch = text.match(/\{[\s\S]*\}/);
+              if (jsonMatch) return JSON.parse(jsonMatch[0]);
+            }
           }
         }
       } catch (err) {
@@ -410,6 +460,7 @@ export async function generateGeminiLandAnalysis(opts: {
       }
     }
   }
+
 
   return {
     soilType: "Red Loamy to Alluvial Soil (pH 6.8 - 7.2)",
