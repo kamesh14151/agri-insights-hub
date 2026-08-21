@@ -259,10 +259,10 @@ export function MapPanel() {
             // @ts-ignore
             <gmp-map-3d
               ref={map3dRef}
-              center="11.6643,78.1460,0"
-              range="4000"
-              tilt="65"
-              heading="0"
+              center={{ lat: 11.6643, lng: 78.1460, altitude: 0 }}
+              range={4000}
+              tilt={65}
+              heading={0}
               style={{ width: "100%", height: "100%" }}
             >
               {isDrawing && draftCorners.length > 2 && (
