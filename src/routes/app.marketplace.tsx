@@ -3,13 +3,16 @@ import { createFileRoute } from "@tanstack/react-router";
 import {
   MapPin, Search, Sprout, X, Phone, MessageSquare, ChevronRight,
   PlusCircle, ShoppingCart, ShieldCheck, CheckCircle2, Clock, Truck,
-  DollarSign, PackageCheck, AlertCircle, ArrowUpRight, Filter, BadgeCheck
+  DollarSign, PackageCheck, AlertCircle, ArrowUpRight, Filter, BadgeCheck, CreditCard
 } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { PageIntro, Panel } from "@/components/DashboardShell";
 import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
+import { openRazorpayCheckout } from "@/lib/razorpay";
+
+
 import {
   getMarketplaceListings,
   publishProduceListing,
@@ -393,18 +396,67 @@ function BuyNowCheckoutModal({
           <div className="rounded-xl border border-border bg-card/60 p-3 space-y-1.5 text-xs text-muted-foreground">
             <div className="flex items-center gap-1.5 font-medium text-foreground">
               <ShieldCheck className="h-4 w-4 text-emerald-500" />
-              <span>Dodo Payments & Agricultural Escrow Guarantee</span>
+              <span>Razorpay Standard Checkout & Agricultural Escrow Protection</span>
+
             </div>
             <p>Your ₹{totalAmount.toLocaleString("en-IN")} is held in safe escrow. Funds are only disbursed to {listing.farmer} upon delivery verification.</p>
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-2">
+          <div className="flex flex-wrap items-center justify-end gap-2 pt-2">
             <button
               type="button"
               onClick={onClose}
               className="rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-muted"
             >
               Cancel
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={async () => {
+                setBusy(true);
+                await openRazorpayCheckout({
+                  amountInRupees: totalAmount,
+                  name: "Agrisynapse Produce Marketplace",
+                  description: `Escrow Fund for ${orderQty} ${listing.unit} of ${listing.crop}`,
+                  prefill: {
+                    name: buyerName,
+                    email: buyerEmail,
+                    contact: buyerPhone,
+                  },
+                  onSuccess: async (paymentResult) => {
+                    try {
+                      const res = await buyFn({
+                        data: {
+                          listingId: listing.id,
+                          quantity: `${orderQty} ${listing.unit}`,
+                          totalAmount,
+                          buyerName,
+                          buyerEmail,
+                          buyerPhone,
+                          deliveryAddress,
+                          baseUrl: typeof window !== "undefined" ? window.location.origin : "",
+                        },
+                      });
+                      if (res.success && res.order) {
+                        toast.success(`🎉 Verified Razorpay Escrow for ${listing.crop}!`);
+                        onSuccess(res.order);
+                        onClose();
+                      }
+                    } catch {
+                      toast.error("Order recording failed after payment.");
+                    } finally {
+                      setBusy(false);
+                    }
+                  },
+                  onFailure: () => setBusy(false),
+                  onDismiss: () => setBusy(false),
+                });
+              }}
+              className="rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm px-4 py-2 transition flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+            >
+              <CreditCard className="w-4 h-4" />
+              Pay via Razorpay
             </button>
             <button
               type="submit"
@@ -414,6 +466,7 @@ function BuyNowCheckoutModal({
               {busy ? "Securing Escrow..." : `Pay ₹${totalAmount.toLocaleString("en-IN")} & Fund Escrow`}
             </button>
           </div>
+
         </form>
       </div>
     </div>

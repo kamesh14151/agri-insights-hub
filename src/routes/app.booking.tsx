@@ -6,6 +6,9 @@ import { useServerFn } from "@tanstack/react-start";
 import { PageIntro, Panel } from "@/components/DashboardShell";
 import { SERVICES, type Service } from "@/lib/mock";
 import { createBookingCheckout } from "@/lib/payments.server";
+import { openRazorpayCheckout } from "@/lib/razorpay";
+
+
 
 export const Route = createFileRoute("/app/booking")({
   head: () => ({
@@ -144,19 +147,34 @@ function BookingPage() {
                 </div>
 
                 <button
-                  type="submit" disabled={busy}
-                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground hover:opacity-90 transition disabled:opacity-50"
+                  type="button" disabled={busy}
+                  onClick={async () => {
+                    if (!selected) return;
+                    setBusy(true);
+                    await openRazorpayCheckout({
+                      amountInRupees: total,
+                      name: selected.name,
+                      description: `Service Booking: ${selected.name} (${qty} ${selected.unit})`,
+
+                      onSuccess: (paymentResult) => {
+                        toast.success("Service Booking Confirmed via Razorpay!");
+                        setBusy(false);
+                        navigate({ to: "/app/booking/success", search: { booking_id: `bkg_${Date.now()}`, payment_id: paymentResult.razorpay_payment_id } as any });
+                      },
+                      onFailure: () => setBusy(false),
+                      onDismiss: () => setBusy(false),
+                    });
+                  }}
+                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition disabled:opacity-50 shadow-sm"
                 >
-                  {busy ? (
-                    <><Loader2 className="h-4 w-4 animate-spin" /> Redirecting to payment…</>
-                  ) : (
-                    <><CreditCard className="h-4 w-4" /> Pay ₹{total.toLocaleString("en-IN")} via Dodo</>
-                  )}
+                  <CreditCard className="h-4 w-4" /> Pay ₹{total.toLocaleString("en-IN")} via Razorpay
                 </button>
 
                 <p className="text-center text-[11px] text-muted-foreground">
-                  Secured by Dodo Payments · UPI, Cards, Net Banking accepted
+                  Secured by Razorpay Standard Checkout · UPI, Cards, Net Banking accepted
                 </p>
+
+
               </form>
             ) : (
               <div className="flex flex-col items-center gap-3 py-6 text-center">

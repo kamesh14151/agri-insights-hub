@@ -107,7 +107,8 @@ const STRINGS: Record<Lang, Dict> = {
     inspect_telemetry: "Inspect sensor telemetry",
     admin_summary: "Administrative Summary",
     buyer_guarantees: "Consumer Buyer Guarantees",
-    buyer_guarantees_desc: "Your payments are held securely via Dodo Payments until delivery confirmation. Full refund in case of product damage or delivery failure.",
+    buyer_guarantees_desc: "Your payments are held securely via Razorpay until delivery confirmation. Full refund in case of product damage or delivery failure.",
+
     browse_marketplace: "Browse marketplace",
 
     // Settings

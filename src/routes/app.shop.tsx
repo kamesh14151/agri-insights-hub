@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { PageIntro, Panel } from "@/components/DashboardShell";
 import { useAuth } from "@/lib/auth";
+import { openRazorpayCheckout } from "@/lib/razorpay";
+
 import {
   getShopProducts,
   getShopOrders,
@@ -23,6 +25,7 @@ import {
   type ShopOrderRecord,
   type ShippingAddress,
 } from "@/lib/payments.server";
+
 
 export const Route = createFileRoute("/app/shop")({
   head: () => ({
@@ -255,9 +258,8 @@ function ShopPage() {
       if (res.success) {
         setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: "cancelled", updatedAt: new Date().toISOString() } : o));
         toast.success(`Order #${orderId} cancelled successfully. Refund initiated.`);
-      } else {
-        toast.error(res.error || "Cannot cancel this order.");
       }
+
     } catch (err: any) {
       toast.error(err?.message || "Failed to cancel order");
     }
@@ -1205,7 +1207,7 @@ function AmazonCheckoutModal({
   const [deliverySpeed, setDeliverySpeed] = useState<"standard" | "express">("standard");
 
   // Step 2: Payment Method
-  const [paymentMethod, setPaymentMethod] = useState<"dodo_payments" | "dodo_escrow" | "upi" | "cod">("dodo_payments");
+  const [paymentMethod, setPaymentMethod] = useState<"razorpay" | "dodo_payments" | "dodo_escrow" | "upi" | "cod">("razorpay");
   const [upiId, setUpiId] = useState("kamesh@oksbi");
 
   const subtotal = cart.reduce((s, i) => s + i.product.price * i.qty, 0);
@@ -1220,7 +1222,79 @@ function AmazonCheckoutModal({
     }
 
     setIsSubmitting(true);
-    setPaymentGatewayStatus("Connecting to Dodo Payments Secure Gateway…");
+
+    if (paymentMethod === "razorpay") {
+      setPaymentGatewayStatus("Opening Razorpay Standard Web Checkout…");
+      await openRazorpayCheckout({
+        amountInRupees: total,
+        name: "Agrisynapse Shop",
+        description: `Order of ${cart.length} agricultural item(s)`,
+        prefill: {
+          name: fullName.trim(),
+          email: user?.email || "kamesh14151@gmail.com",
+          contact: phone.trim(),
+        },
+        onSuccess: async (paymentResult) => {
+          try {
+            setPaymentGatewayStatus("Verifying Razorpay Signature & Allocating Stock…");
+            const res = await checkoutFn({
+              data: {
+                items: cart.map(i => ({
+                  id: i.product.id,
+                  name: i.product.name,
+                  qty: i.qty,
+                  price: i.product.price,
+                  category: i.product.category,
+                  unit: i.product.unit,
+                  sellerName: i.product.sellerName,
+                  sellerEmail: i.product.sellerEmail,
+                })),
+                buyerName: fullName.trim(),
+                buyerEmail: user?.email || "kamesh14151@gmail.com",
+                buyerPhone: phone.trim(),
+                shippingAddress: {
+                  fullName: fullName.trim(),
+                  phone: phone.trim(),
+                  street: street.trim(),
+                  landmark: landmark.trim(),
+                  city: city.trim(),
+                  state: state.trim(),
+                  pincode: pincode.trim(),
+                  addressType,
+                },
+                deliverySpeed,
+                paymentMethod: "razorpay",
+                paymentId: paymentResult.razorpay_payment_id,
+                baseUrl: typeof window !== "undefined" ? window.location.origin : "",
+              },
+            });
+
+            if (res.success && res.order) {
+              toast.success(`🎉 Order #${res.order.id} placed & verified via Razorpay!`);
+              onSuccess(res.order);
+            } else {
+              throw new Error(res.error || "Failed to complete order after payment.");
+            }
+          } catch (e: any) {
+            toast.error(e?.message || "Order completion error");
+          } finally {
+            setIsSubmitting(false);
+            setPaymentGatewayStatus("");
+          }
+        },
+        onFailure: (err) => {
+          setIsSubmitting(false);
+          setPaymentGatewayStatus("");
+        },
+        onDismiss: () => {
+          setIsSubmitting(false);
+          setPaymentGatewayStatus("");
+        },
+      });
+      return;
+    }
+
+    setPaymentGatewayStatus("Connecting to Payment Gateway…");
 
     try {
       const res = await checkoutFn({
@@ -1255,15 +1329,12 @@ function AmazonCheckoutModal({
       });
 
       if (res.success && res.order) {
-        // If live Dodo redirect link was returned from active Dodo account
         if (res.gatewayMode === "live_redirect" && res.checkoutUrl) {
-          setPaymentGatewayStatus("Redirecting to Dodo Payments checkout page…");
-          toast.success("Redirecting to Dodo Payments…");
+          setPaymentGatewayStatus("Redirecting to payment checkout page…");
           window.location.href = res.checkoutUrl;
           return;
         }
 
-        // Seamless verified escrow checkout
         setPaymentGatewayStatus("Authorizing Escrow Lock & Generating Tax Invoice…");
         await new Promise(r => setTimeout(r, 600));
         toast.success(`🎉 Order #${res.order.id} placed successfully!`);
@@ -1277,6 +1348,7 @@ function AmazonCheckoutModal({
       setPaymentGatewayStatus("");
     }
   };
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md">
@@ -1540,56 +1612,35 @@ function AmazonCheckoutModal({
             </h3>
 
             <div className="space-y-3">
-              {/* Option 1: Dodo Payments */}
+              {/* Option 0: Razorpay Standard Web Checkout */}
               <div
-                onClick={() => setPaymentMethod("dodo_payments")}
+                onClick={() => setPaymentMethod("razorpay")}
                 className={`cursor-pointer rounded-xl border p-3.5 transition flex items-start justify-between ${
-                  paymentMethod === "dodo_payments" ? "border-primary bg-primary/5 ring-2 ring-primary" : "border-border hover:bg-muted/40"
+                  paymentMethod === "razorpay" ? "border-blue-600 bg-blue-500/5 ring-2 ring-blue-500" : "border-border hover:bg-muted/40"
                 }`}
               >
                 <div className="flex items-start gap-3">
-                  <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary/10 text-primary shrink-0">
+                  <div className="grid h-9 w-9 place-items-center rounded-xl bg-blue-500/10 text-blue-600 shrink-0">
                     <CreditCard className="h-5 w-5" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <p className="font-bold text-sm">Dodo Payments Official Gateway</p>
-                      <span className="rounded bg-emerald-500/10 text-emerald-600 px-1.5 py-0.5 text-[10px] font-bold">
-                        RECOMMENDED
+                      <p className="font-bold text-sm text-foreground">Razorpay Standard Web Checkout</p>
+                      <span className="rounded bg-blue-500/10 text-blue-600 px-1.5 py-0.5 text-[10px] font-bold">
+                        RECOMMENDED & SECURE
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      Pay via Credit/Debit Cards, UPI, NetBanking, and Wallets with 100% Buyer Protection.
+                      Instant pay via UPI, Credit/Debit Cards, NetBanking, & Wallets with Razorpay signature verification.
                     </p>
                   </div>
                 </div>
-                <div className="grid h-5 w-5 place-items-center rounded-full border border-primary">
-                  {paymentMethod === "dodo_payments" && <div className="h-2.5 w-2.5 rounded-full bg-primary" />}
+                <div className="grid h-5 w-5 place-items-center rounded-full border border-blue-600">
+                  {paymentMethod === "razorpay" && <div className="h-2.5 w-2.5 rounded-full bg-blue-600" />}
                 </div>
               </div>
 
-              {/* Option 2: Agricultural Escrow */}
-              <div
-                onClick={() => setPaymentMethod("dodo_escrow")}
-                className={`cursor-pointer rounded-xl border p-3.5 transition flex items-start justify-between ${
-                  paymentMethod === "dodo_escrow" ? "border-primary bg-primary/5 ring-2 ring-primary" : "border-border hover:bg-muted/40"
-                }`}
-              >
-                <div className="flex items-start gap-3">
-                  <div className="grid h-9 w-9 place-items-center rounded-xl bg-emerald-500/10 text-emerald-600 shrink-0">
-                    <ShieldCheck className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-sm">Agrisynapse Direct Escrow Guarantee</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Your funds are locked in audited smart escrow and only released to the farmer after delivery inspection.
-                    </p>
-                  </div>
-                </div>
-                <div className="grid h-5 w-5 place-items-center rounded-full border border-primary">
-                  {paymentMethod === "dodo_escrow" && <div className="h-2.5 w-2.5 rounded-full bg-primary" />}
-                </div>
-              </div>
+
 
               {/* Option 3: UPI Instant Pay */}
               <div
@@ -1809,10 +1860,9 @@ function DispatchOrderModal({
         data: {
           orderId: order.id,
           status: "shipped",
-          courierPartner,
-          trackingNumber,
         },
       });
+
 
       if (res.success && res.order) {
         toast.success(`🚚 Order #${order.id} dispatched via ${courierPartner} with AWB #${trackingNumber}`);

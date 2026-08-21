@@ -330,10 +330,11 @@ function AdminPage() {
             <div className="space-y-4 text-xs">
               <div className="rounded-xl border border-border p-3 space-y-1">
                 <div className="flex justify-between font-medium">
-                  <span>Dodo Payments Engine</span>
+                  <span>Razorpay Payment Gateway</span>
                   <span className="text-emerald-500">Live Integrated</span>
                 </div>
-                <p className="text-muted-foreground">Handles live checkout sessions, webhook reconciliation, and automated receipts.</p>
+                <p className="text-muted-foreground">Handles live checkout sessions, HMAC signature verification, and automated receipts.</p>
+
               </div>
 
               <div className="rounded-xl border border-border p-3 space-y-1">
