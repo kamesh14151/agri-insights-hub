@@ -196,15 +196,7 @@ export function MapPanel() {
 
   return (
     <section id="map" className="max-w-[1280px] mx-auto px-6 py-6 md:py-10 border-t border-border">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h2 className="font-serif text-2xl md:text-3xl tracking-tight font-bold">
-            Map your land in 3D
-          </h2>
-          <p className="text-muted-foreground mt-2 max-w-2xl text-sm leading-relaxed">
-            Exclusively powered by Google Maps Photorealistic 3D and Earth Engine. Navigate the 3D globe, select 4 corners, and view live Sentinel-2 NDVI health, soil moisture, and crop recommendations.
-          </p>
-        </div>
+      <div className="flex flex-col md:flex-row md:items-end justify-end gap-4">
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={() => {
