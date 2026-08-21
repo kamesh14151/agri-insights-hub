@@ -28,7 +28,7 @@ export const Route = createFileRoute("/app/marketplace")({
   head: () => ({
     meta: [
       { title: "Agricultural Marketplace — Agrisynapse | AJ STUDIOZ" },
-      { name: "description", content: "Farmer-to-buyer direct crop trade with Dodo Payments and Escrow protection." },
+      { name: "description", content: "Farmer-to-buyer direct crop trade with Razorpay Standard Checkout and Escrow protection." },
     ],
   }),
   component: MarketplacePage,
@@ -249,7 +249,7 @@ function PublishListingModal({
   );
 }
 
-/* ── Modal: Buyer Instant Escrow / Dodo Checkout ── */
+/* ── Modal: Buyer Instant Escrow / Razorpay Checkout ── */
 function BuyNowCheckoutModal({
   listing,
   onClose,
@@ -271,39 +271,49 @@ function BuyNowCheckoutModal({
 
   const totalAmount = Math.max(1, Number(orderQty) || 1) * listing.price;
 
-  const handleCheckout = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setBusy(true);
-
-    try {
-      const res = await buyFn({
-        data: {
-          listingId: listing.id,
-          quantity: `${orderQty} ${listing.unit}`,
-          totalAmount,
-          buyerName,
-          buyerEmail,
-          buyerPhone,
-          deliveryAddress,
-          baseUrl: typeof window !== "undefined" ? window.location.origin : "",
-        },
-      });
-
-      if (res.success && res.order) {
-        toast.success(`Payment & Escrow Initiated for ${listing.crop}!`);
-        onSuccess(res.order);
-
-        if (res.checkoutUrl && (res.checkoutUrl.startsWith("http://") || res.checkoutUrl.startsWith("https://"))) {
-          window.location.href = res.checkoutUrl;
-        } else {
-          onClose();
-        }
-      }
-    } catch (err) {
-      toast.error("Checkout encounter. Please try again.");
-    } finally {
-      setBusy(false);
+  const handleRazorpayCheckout = async () => {
+    if (!buyerName || !buyerPhone || !deliveryAddress) {
+      toast.error("Please fill in all required buyer details.");
+      return;
     }
+    setBusy(true);
+    await openRazorpayCheckout({
+      amountInRupees: totalAmount,
+      name: "Agrisynapse Produce Marketplace",
+      description: `Escrow Fund for ${orderQty} ${listing.unit} of ${listing.crop}`,
+      prefill: {
+        name: buyerName,
+        email: buyerEmail,
+        contact: buyerPhone,
+      },
+      onSuccess: async (paymentResult) => {
+        try {
+          const res = await buyFn({
+            data: {
+              listingId: listing.id,
+              quantity: `${orderQty} ${listing.unit}`,
+              totalAmount,
+              buyerName,
+              buyerEmail,
+              buyerPhone,
+              deliveryAddress,
+              baseUrl: typeof window !== "undefined" ? window.location.origin : "",
+            },
+          });
+          if (res.success && res.order) {
+            toast.success(`🎉 Payment verified! Escrow funded for ${listing.crop}.`);
+            onSuccess(res.order);
+            onClose();
+          }
+        } catch {
+          toast.error("Order recording failed after payment. Contact support.");
+        } finally {
+          setBusy(false);
+        }
+      },
+      onFailure: () => setBusy(false),
+      onDismiss: () => setBusy(false),
+    });
   };
 
   return (
@@ -324,7 +334,7 @@ function BuyNowCheckoutModal({
           </button>
         </div>
 
-        <form onSubmit={handleCheckout} className="mt-5 space-y-4">
+        <div className="mt-5 space-y-4">
           <div className="rounded-xl bg-muted/60 p-3.5 space-y-2 text-sm border border-border/50">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Produce Lot:</span>
@@ -393,11 +403,10 @@ function BuyNowCheckoutModal({
             />
           </div>
 
-          <div className="rounded-xl border border-border bg-card/60 p-3 space-y-1.5 text-xs text-muted-foreground">
+          <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3 space-y-1.5 text-xs text-muted-foreground">
             <div className="flex items-center gap-1.5 font-medium text-foreground">
               <ShieldCheck className="h-4 w-4 text-emerald-500" />
               <span>Razorpay Standard Checkout & Agricultural Escrow Protection</span>
-
             </div>
             <p>Your ₹{totalAmount.toLocaleString("en-IN")} is held in safe escrow. Funds are only disbursed to {listing.farmer} upon delivery verification.</p>
           </div>
@@ -406,68 +415,23 @@ function BuyNowCheckoutModal({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-muted"
+              disabled={busy}
+              className="rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="button"
               disabled={busy}
-              onClick={async () => {
-                setBusy(true);
-                await openRazorpayCheckout({
-                  amountInRupees: totalAmount,
-                  name: "Agrisynapse Produce Marketplace",
-                  description: `Escrow Fund for ${orderQty} ${listing.unit} of ${listing.crop}`,
-                  prefill: {
-                    name: buyerName,
-                    email: buyerEmail,
-                    contact: buyerPhone,
-                  },
-                  onSuccess: async (paymentResult) => {
-                    try {
-                      const res = await buyFn({
-                        data: {
-                          listingId: listing.id,
-                          quantity: `${orderQty} ${listing.unit}`,
-                          totalAmount,
-                          buyerName,
-                          buyerEmail,
-                          buyerPhone,
-                          deliveryAddress,
-                          baseUrl: typeof window !== "undefined" ? window.location.origin : "",
-                        },
-                      });
-                      if (res.success && res.order) {
-                        toast.success(`🎉 Verified Razorpay Escrow for ${listing.crop}!`);
-                        onSuccess(res.order);
-                        onClose();
-                      }
-                    } catch {
-                      toast.error("Order recording failed after payment.");
-                    } finally {
-                      setBusy(false);
-                    }
-                  },
-                  onFailure: () => setBusy(false),
-                  onDismiss: () => setBusy(false),
-                });
-              }}
-              className="rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm px-4 py-2 transition flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+              onClick={handleRazorpayCheckout}
+              className="rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm px-5 py-2 transition flex items-center gap-2 shadow-sm disabled:opacity-50"
             >
               <CreditCard className="w-4 h-4" />
-              Pay via Razorpay
-            </button>
-            <button
-              type="submit"
-              disabled={busy}
-              className="rounded-lg bg-emerald-600 px-5 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50 transition shadow-sm"
-            >
-              {busy ? "Securing Escrow..." : `Pay ₹${totalAmount.toLocaleString("en-IN")} & Fund Escrow`}
+              {busy ? "Processing..." : `Pay ₹${totalAmount.toLocaleString("en-IN")} via Razorpay`}
             </button>
           </div>
 
-        </form>
+        </div>
       </div>
     </div>
   );
@@ -711,7 +675,7 @@ function MarketplacePage() {
         index="07 / Trade"
         eyebrow="Farmer-to-Buyer Production Marketplace"
         title="Direct Agricultural Commerce & Escrow."
-        subtitle="Farmers publish fresh harvest lots for sale, verified buyers purchase directly with Dodo Payments protection, and platform escrows ensure fair settlement."
+        subtitle="Farmers publish fresh harvest lots for sale, verified buyers purchase directly with Razorpay Secure Checkout, and platform escrows ensure fair settlement."
       />
 
       {/* Action Header & Tabs */}
@@ -769,7 +733,7 @@ function MarketplacePage() {
               ? "Farmers publish harvest lots for sale & fulfill incoming buyer orders."
               : role === "admin"
               ? "Admin mode: Audit marketplace lots, monitor escrow settlements and manage orders."
-              : "Buyers browse direct farmer harvests & purchase securely via Dodo Payments Escrow."}
+              : "Buyers browse direct farmer harvests & purchase securely via Razorpay Escrow Checkout."}
           </span>
         </div>
       </div>
@@ -927,7 +891,7 @@ function MarketplacePage() {
                       Farmer: <strong>{order.farmer}</strong> · Quantity: <strong>{order.quantity}</strong> · Destination: {order.deliveryAddress}
                     </p>
                     <p className="text-[11px] text-muted-foreground/80">
-                      Payment ID: <code className="bg-muted px-1.5 py-0.5 rounded">{order.paymentId}</code> ({order.paymentGateway === "dodo_live" ? "Dodo Live" : "Dodo Escrow"})
+                      Payment ID: <code className="bg-muted px-1.5 py-0.5 rounded">{order.paymentId}</code> · Razorpay Escrow
                     </p>
                   </div>
 
