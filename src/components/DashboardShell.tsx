@@ -136,7 +136,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="lg:pl-[268px]">
-        <header className="sticky top-0 z-30 h-16 border-b border-border bg-background/80 backdrop-blur-md">
+        <header className="sticky top-0 z-40 h-16 border-b border-border bg-background/80 backdrop-blur-md">
           <div className="h-full px-4 sm:px-6 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
             <button onClick={() => setOpen(true)} className="lg:hidden text-muted-foreground" aria-label="Open menu">
               <Menu className="h-5 w-5" />

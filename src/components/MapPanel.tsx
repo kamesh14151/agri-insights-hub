@@ -353,10 +353,10 @@ export function MapPanel() {
       </div>
 
       <div className="mt-5 grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* Compact & Sleek Satellite Map Container */}
-        <div className="lg:col-span-2 relative border border-border rounded-3xl overflow-hidden bg-slate-950 shadow-md h-[380px] sm:h-[420px] lg:h-[460px]">
+        {/* Map section with isolated stacking context — prevents Leaflet layers from leaking above the sticky header */}
+        <div className="lg:col-span-2 relative [isolation:isolate] border border-border rounded-3xl overflow-hidden bg-slate-950 shadow-md h-[380px] sm:h-[420px] lg:h-[460px]">
           {/* Top Location Search Bar Overlay */}
-          <div className="absolute top-3 left-3 z-[1000] pointer-events-auto">
+          <div className="absolute top-3 left-3 z-[400] pointer-events-auto">
             <form
               onSubmit={handleLocationSearch}
               className="flex items-center gap-1.5 bg-slate-900/90 backdrop-blur-md border border-emerald-500/30 text-white rounded-xl px-3 py-1.5 shadow-lg w-72"
