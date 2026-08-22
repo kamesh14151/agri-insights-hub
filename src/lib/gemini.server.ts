@@ -303,6 +303,70 @@ export async function generateGeminiVisionAnalysis(opts: {
   };
 }
 
+/**
+ * Generate Treatment Plan from YOLO Disease Output
+ */
+export async function generateGeminiTreatmentPlan(opts: {
+  diseaseName: string;
+  language?: string;
+}): Promise<any> {
+  const geminiKey =
+    process.env.GEMINI_API_KEY?.trim() ||
+    process.env.GOOGLE_API_KEY?.trim() ||
+    process.env.GOOGLE_GENAI_API_KEY?.trim() ||
+    process.env.VITE_GEMINI_API_KEY?.trim() ||
+    "AIzaSyBgUBjm3AVh4jrftt9HN5wmzYk-4_vhK3g";
+
+  if (geminiKey) {
+    const modelsToTry = ["gemini-2.0-flash", "gemini-2.5-flash-lite", "gemini-1.5-flash"];
+
+    for (const model of modelsToTry) {
+      try {
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [
+                {
+                  role: "user",
+                  parts: [
+                    {
+                      text: `You are an expert plant pathologist. The AI vision model has detected: "${opts.diseaseName}". Respond ONLY with strict JSON matching: {"symptoms":string[],"treatment":string[],"prevention":string[]}. Provide highly actionable agricultural advice. Respond in ${opts.language || "English"}. No markdown, no prose.`,
+                    }
+                  ],
+                },
+              ],
+              generationConfig: {
+                temperature: 0.2,
+                response_mime_type: "application/json",
+              },
+            }),
+          }
+        );
+
+        if (res.ok) {
+          const data = (await res.json()) as any;
+          const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (text) {
+            return JSON.parse(text);
+          }
+        }
+      } catch (err) {
+        console.warn(`[Gemini Treatment] Model ${model} error:`, err);
+      }
+    }
+  }
+
+  // Fallback
+  return {
+    symptoms: ["Visual symptoms matching " + opts.diseaseName],
+    treatment: ["Consult local agronomist for targeted chemical application."],
+    prevention: ["Maintain proper field sanitation and crop rotation."],
+  };
+}
+
 function isCoordinatesInOcean(lat: number, lng: number): boolean {
   // Arabian Sea (West of India)
   if (lat >= 3 && lat <= 23 && lng >= 50 && lng <= 72.8) return true;

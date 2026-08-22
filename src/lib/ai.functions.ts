@@ -4,6 +4,7 @@ import {
   generateGeminiChat,
   generateGeminiVisionAnalysis,
   generateGeminiLandAnalysis,
+  generateGeminiTreatmentPlan
 } from "./gemini.server";
 
 /* ---------------- Plant disease analysis ---------------- */
@@ -18,6 +19,20 @@ export const analyzePlant = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     return generateGeminiVisionAnalysis({
       imageDataUrl: data.imageDataUrl,
+      language: data.language,
+    });
+  });
+
+const TreatmentInput = z.object({
+  diseaseName: z.string(),
+  language: z.string().default("English"),
+});
+
+export const getTreatmentPlan = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => TreatmentInput.parse(d))
+  .handler(async ({ data }) => {
+    return generateGeminiTreatmentPlan({
+      diseaseName: data.diseaseName,
       language: data.language,
     });
   });

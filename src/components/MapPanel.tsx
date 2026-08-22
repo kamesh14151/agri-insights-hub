@@ -3,6 +3,8 @@ import { useI18n } from "@/lib/i18n";
 import { useServerFn } from "@tanstack/react-start";
 import { analyzeLand } from "@/lib/ai.functions";
 import { toast } from "sonner";
+import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
 import {
   Loader2,
   Search,
@@ -49,23 +51,46 @@ type CornerPoint = {
   alt?: number;
 };
 
-const GOOGLE_API_KEY = "AIzaSyBgUBjm3AVh4jrftt9HN5wmzYk-4_vhK3g";
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || "";
+mapboxgl.accessToken = MAPBOX_TOKEN;
+
+const sortPointsClockwise = (pts: CornerPoint[]) => {
+  const centerLat = pts.reduce((sum, p) => sum + p.lat, 0) / pts.length;
+  const centerLng = pts.reduce((sum, p) => sum + p.lng, 0) / pts.length;
+
+  return [...pts].sort((a, b) => {
+    const angleA = Math.atan2(a.lng - centerLng, a.lat - centerLat);
+    const angleB = Math.atan2(b.lng - centerLng, b.lat - centerLat);
+    return angleA - angleB;
+  });
+};
+
+function planarArea(corners: CornerPoint[]) {
+  if (corners.length < 3) return 0;
+  let area = 0;
+  const R = 6378137;
+  for (let i = 0; i < corners.length; i++) {
+    const p1 = corners[i];
+    const p2 = corners[(i + 1) % corners.length];
+    area += (p2.lng - p1.lng) * (2 + Math.sin(p1.lat * Math.PI / 180) + Math.sin(p2.lat * Math.PI / 180));
+  }
+  return Math.abs(area * R * R / 2) * (Math.PI / 180);
+}
 
 export function MapPanel() {
   const { t, fullName } = useI18n();
-  const map3dRef = useRef<any>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [apiLoaded, setApiLoaded] = useState(false);
   const [result, setResult] = useState<LandResult | null>(null);
   const [areaHa, setAreaHa] = useState<number | null>(null);
-  const [corners, setCorners] = useState<CornerPoint[]>([]);
   
-  // Drawing state
+  const [corners, setCorners] = useState<CornerPoint[]>([]);
   const [isDrawing, setIsDrawing] = useState(false);
   const [draftCorners, setDraftCorners] = useState<CornerPoint[]>([]);
 
-  // Refs for stable event listener
   const isDrawingRef = useRef(isDrawing);
   const draftCornersRef = useRef(draftCorners);
 
@@ -74,40 +99,63 @@ export function MapPanel() {
     draftCornersRef.current = draftCorners;
   }, [isDrawing, draftCorners]);
 
-  // Search location state
   const [searchQuery, setSearchQuery] = useState("");
   const [searchLoading, setSearchLoading] = useState(false);
-
-  // Layer state
   const [activeLayer, setActiveLayer] = useState<"satellite" | "ndvi" | "ndwi">("satellite");
 
   const analyze = useServerFn(analyzeLand);
 
-  // 1. Load Google Maps 3D API
+  // Initialize Mapbox
   useEffect(() => {
-    if (window.google?.maps?.importLibrary) {
-      setApiLoaded(true);
-      return;
-    }
-    const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&v=alpha&libraries=maps3d,marker`;
-    script.async = true;
-    script.onload = () => setApiLoaded(true);
-    document.head.appendChild(script);
-  }, []);
+    if (!mapContainerRef.current) return;
+    
+    const map = new mapboxgl.Map({
+      container: mapContainerRef.current,
+      style: "mapbox://styles/mapbox/satellite-streets-v12",
+      projection: "globe" as any,
+      center: [78.1460, 11.6643],
+      zoom: 14,
+      pitch: 65,
+    });
 
-  // 2. Handle map clicks for drawing (Stable listener)
-  useEffect(() => {
-    const map = map3dRef.current;
-    if (!map || !apiLoaded) return;
-
-    const handleClick = (e: any) => {
-      if (!isDrawingRef.current) return;
-      if (!e.position) return;
+    map.on("style.load", () => {
+      map.setFog({
+        color: "rgb(186, 210, 235)",
+        "high-color": "rgb(36, 92, 223)",
+        "horizon-blend": 0.02,
+        "space-color": "rgb(11, 11, 25)",
+        "star-intensity": 0.6,
+      });
+      map.addSource("mapbox-dem", {
+        type: "raster-dem",
+        url: "mapbox://mapbox.mapbox-terrain-dem-v1",
+        tileSize: 512,
+        maxzoom: 14,
+      });
+      map.setTerrain({ source: "mapbox-dem", exaggeration: 1.5 });
       
-      const lat = typeof e.position.lat === "function" ? e.position.lat() : e.position.lat;
-      const lng = typeof e.position.lng === "function" ? e.position.lng() : e.position.lng;
-      const alt = typeof e.position.altitude === "function" ? e.position.altitude() : (e.position.altitude || 0);
+      // Add empty sources
+      map.addSource("draft-lines", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+      map.addSource("draft-points", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+      map.addSource("field-polygon", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+      map.addSource("heatmap", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+
+      // Add layers
+      map.addLayer({ id: "heatmap-layer", type: "fill", source: "heatmap", paint: { "fill-color": ["get", "color"], "fill-opacity": 0.6 } });
+      map.addLayer({ id: "heatmap-outline", type: "line", source: "heatmap", paint: { "line-color": "rgba(255,255,255,0.2)", "line-width": 1 } });
+      
+      map.addLayer({ id: "field-polygon-layer", type: "fill", source: "field-polygon", paint: { "fill-color": "#10b981", "fill-opacity": 0.3 } });
+      map.addLayer({ id: "field-polygon-outline", type: "line", source: "field-polygon", paint: { "line-color": "#10b981", "line-width": 4 } });
+      
+      map.addLayer({ id: "draft-lines-layer", type: "line", source: "draft-lines", paint: { "line-color": "#10b981", "line-width": 4 } });
+      map.addLayer({ id: "draft-points-layer", type: "circle", source: "draft-points", paint: { "circle-radius": 8, "circle-color": "#10b981", "circle-stroke-width": 2, "circle-stroke-color": "#ffffff" } });
+      
+      setApiLoaded(true);
+    });
+
+    const handleClick = (e: mapboxgl.MapMouseEvent) => {
+      if (!isDrawingRef.current) return;
+      const { lat, lng } = e.lngLat;
 
       const currentDraft = draftCornersRef.current;
       const newPt: CornerPoint = {
@@ -115,7 +163,7 @@ export function MapPanel() {
         label: ["NW", "NE", "SE", "SW"][currentDraft.length] || `P${currentDraft.length + 1}`,
         lat,
         lng,
-        alt,
+        alt: 0,
       };
 
       const newCorners = [...currentDraft, newPt];
@@ -130,14 +178,82 @@ export function MapPanel() {
       }
     };
 
-    map.addEventListener("gmp-click", handleClick);
-    return () => map.removeEventListener("gmp-click", handleClick);
-  }, [apiLoaded]);
+    map.on("click", handleClick);
+    mapRef.current = map;
+
+    return () => {
+      map.remove();
+    };
+  }, []);
+
+  // Sync state to Mapbox layers
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !apiLoaded) return;
+
+    // Draft Points
+    const pointsGeoJSON: GeoJSON.FeatureCollection = {
+      type: "FeatureCollection",
+      features: draftCorners.map(pt => ({
+        type: "Feature",
+        properties: {},
+        geometry: { type: "Point", coordinates: [pt.lng, pt.lat] }
+      }))
+    };
+    (map.getSource("draft-points") as mapboxgl.GeoJSONSource)?.setData(pointsGeoJSON);
+
+    // Draft Lines
+    const linesGeoJSON: GeoJSON.FeatureCollection = {
+      type: "FeatureCollection",
+      features: draftCorners.length > 1 ? [{
+        type: "Feature",
+        properties: {},
+        geometry: { type: "LineString", coordinates: draftCorners.map(pt => [pt.lng, pt.lat]) }
+      }] : []
+    };
+    (map.getSource("draft-lines") as mapboxgl.GeoJSONSource)?.setData(linesGeoJSON);
+
+    // Field Polygon
+    const fieldGeoJSON: GeoJSON.FeatureCollection = {
+      type: "FeatureCollection",
+      features: (!isDrawing && corners.length === 4 && activeLayer === "satellite") ? [{
+        type: "Feature",
+        properties: {},
+        geometry: {
+          type: "Polygon",
+          coordinates: [[...corners.map(pt => [pt.lng, pt.lat]), [corners[0].lng, corners[0].lat]]]
+        }
+      }] : []
+    };
+    (map.getSource("field-polygon") as mapboxgl.GeoJSONSource)?.setData(fieldGeoJSON);
+
+    // Heatmap Layer
+    let heatmapFeatures: GeoJSON.Feature[] = [];
+    if (!isDrawing && corners.length === 4 && activeLayer !== "satellite") {
+      const grid = generateHeatmapGrid(corners, 8, result?.ndvi ?? 0.7);
+      heatmapFeatures = grid.map(cell => ({
+        type: "Feature",
+        properties: {
+          color: activeLayer === "ndvi" ? getNdviColor(cell.value) : getNdwiColor(cell.value)
+        },
+        geometry: {
+          type: "Polygon",
+          coordinates: [[...cell.points.map(pt => [pt.lng, pt.lat]), [cell.points[0].lng, cell.points[0].lat]]]
+        }
+      }));
+    }
+    
+    const heatmapGeoJSON: GeoJSON.FeatureCollection = {
+      type: "FeatureCollection",
+      features: heatmapFeatures
+    };
+    (map.getSource("heatmap") as mapboxgl.GeoJSONSource)?.setData(heatmapGeoJSON);
+
+  }, [isDrawing, draftCorners, corners, activeLayer, result, apiLoaded]);
+
 
   const processFieldAnalysis = async (pts: CornerPoint[]) => {
     if (pts.length < 4) return;
-    
-    // Compute center and area
     const centerLat = pts.reduce((sum, p) => sum + p.lat, 0) / 4;
     const centerLng = pts.reduce((sum, p) => sum + p.lng, 0) / 4;
     const areaM2 = planarArea(pts);
@@ -153,7 +269,7 @@ export function MapPanel() {
         data: { centerLat, centerLng, areaHectares: ha, language: fullName },
       });
       setResult(r as LandResult);
-      toast.success("Google Earth Satellite Analysis Ready!");
+      toast.success("Satellite Analysis Ready!");
     } catch (err) {
       console.error(err);
       toast.error("Analysis request failed.");
@@ -162,19 +278,16 @@ export function MapPanel() {
     }
   };
 
-  // Search location and jump map
   const handleLocationSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!searchQuery.trim() || !map3dRef.current) return;
+    if (!searchQuery.trim() || !mapRef.current) return;
     setSearchLoading(true);
     try {
-      const res = await fetch(
-        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(searchQuery)}&count=1&language=en&format=json`
-      );
+      const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(searchQuery)}&count=1&language=en&format=json`);
       const data = await res.json();
       if (data.results && data.results.length > 0) {
         const place = data.results[0];
-        flyToTarget(place.latitude, place.longitude, 2000, 60);
+        mapRef.current.flyTo({ center: [place.longitude, place.latitude], zoom: 15, duration: 2000 });
         toast.success(`Centered on ${place.name}, ${place.country || ""}`);
       } else {
         toast.error("Location not found.");
@@ -187,26 +300,17 @@ export function MapPanel() {
   };
 
   const flyToMyLocation = () => {
-    if (!navigator.geolocation) {
-      toast.error("Geolocation is not supported by your browser");
+    if (!navigator.geolocation || !mapRef.current) {
+      toast.error("Geolocation is not supported");
       return;
     }
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        flyToTarget(pos.coords.latitude, pos.coords.longitude, 800, 65);
+        mapRef.current?.flyTo({ center: [pos.coords.longitude, pos.coords.latitude], zoom: 15, duration: 2000 });
         toast.success("Flew to your location");
       },
       () => toast.error("Unable to retrieve your location")
     );
-  };
-
-  const flyToTarget = (lat: number, lng: number, range = 1500, tilt = 60) => {
-    if (map3dRef.current?.flyCameraTo) {
-      map3dRef.current.flyCameraTo({
-        endCamera: { center: { lat, lng, altitude: 0 }, tilt, range, heading: 0 },
-        durationMillis: 2000,
-      });
-    }
   };
 
   return (
@@ -233,7 +337,7 @@ export function MapPanel() {
           </button>
           <div className="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 px-3 py-2 rounded-xl text-xs font-semibold">
             <ShieldCheck className="w-4 h-4 text-emerald-500" />
-            <span>3D Earth Active</span>
+            <span>Mapbox 3D Active</span>
           </div>
         </div>
       </div>
@@ -280,81 +384,12 @@ export function MapPanel() {
             ))}
           </div>
 
-          {apiLoaded ? (
-            // @ts-ignore
-            <gmp-map-3d
-              ref={map3dRef}
-              center={{ lat: 11.6643, lng: 78.1460, altitude: 0 }}
-              range={4000}
-              tilt={65}
-              heading={0}
-              default-labels-disabled="false"
-              style={{ width: "100%", height: "100%" }}
-            >
-              {isDrawing && draftCorners.length > 0 && (
-                // @ts-ignore
-                <gmp-polyline-3d
-                  altitude-mode="clamp-to-ground"
-                  stroke-color="rgba(16, 185, 129, 1)"
-                  stroke-width="4"
-                  draws-occluded-segments="true"
-                >
-                  {draftCorners.map((pt, i) => (
-                    <div key={i} slot="coordinates">{pt.lat},{pt.lng},{pt.alt}</div>
-                  ))}
-                </gmp-polyline-3d>
-              )}
-
-              {(isDrawing ? draftCorners : corners).map((pt, i) => (
-                // @ts-ignore
-                <gmp-polyline-3d
-                  key={`laser-marker-${i}`}
-                  altitude-mode="clamp-to-ground"
-                  stroke-color="rgba(16, 185, 129, 0.9)"
-                  stroke-width="6"
-                >
-                  <div slot="coordinates">{pt.lat},{pt.lng},0</div>
-                  <div slot="coordinates">{pt.lat},{pt.lng},100</div>
-                </gmp-polyline-3d>
-              ))}
-
-              {!isDrawing && corners.length === 4 && activeLayer === "satellite" && (
-                // @ts-ignore
-                <gmp-polygon-3d
-                  altitude-mode="clamp-to-ground"
-                  fill-color="rgba(16, 185, 129, 0.35)"
-                  stroke-color="rgba(16, 185, 129, 1)"
-                  stroke-width="4"
-                  draws-occluded-segments="true"
-                >
-                  {corners.map((pt, i) => (
-                    <div key={i} slot="coordinates">{pt.lat},{pt.lng},{pt.alt}</div>
-                  ))}
-                  <div slot="coordinates">{corners[0].lat},{corners[0].lng},{corners[0].alt}</div>
-                </gmp-polygon-3d>
-              )}
-
-              {!isDrawing && corners.length === 4 && activeLayer !== "satellite" && generateHeatmapGrid(corners, 8, result?.ndvi ?? 0.7).map(cell => (
-                // @ts-ignore
-                <gmp-polygon-3d
-                  key={cell.id}
-                  altitude-mode="clamp-to-ground"
-                  fill-color={activeLayer === "ndvi" ? getNdviColor(cell.value) : getNdwiColor(cell.value)}
-                  stroke-color="rgba(255, 255, 255, 0.05)"
-                  stroke-width="1"
-                  draws-occluded-segments="true"
-                >
-                  {cell.points.map((pt, i) => (
-                    <div key={i} slot="coordinates">{pt.lat},{pt.lng},{pt.alt}</div>
-                  ))}
-                  <div slot="coordinates">{cell.points[0].lat},{cell.points[0].lng},{cell.points[0].alt}</div>
-                </gmp-polygon-3d>
-              ))}
-            </gmp-map-3d>
-          ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center bg-slate-900 text-emerald-500">
+          <div ref={mapContainerRef} className="w-full h-full" />
+          
+          {!apiLoaded && (
+            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-900 text-emerald-500">
               <Loader2 className="w-8 h-8 animate-spin mb-4" />
-              <p className="text-sm font-medium">Loading Google 3D Earth...</p>
+              <p className="text-sm font-medium">Loading Mapbox 3D Earth...</p>
             </div>
           )}
         </div>
@@ -392,7 +427,7 @@ export function MapPanel() {
                 <div>
                   <p className="font-semibold text-sm text-foreground">Plot Your Field</p>
                   <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
-                    Click <strong>Plot 4-Corner Field</strong> and select 4 points on the 3D map to run AI satellite analysis.
+                    Click <strong>Plot 4-Corner Field</strong> and select 4 points on the Mapbox globe to run AI satellite analysis.
                   </p>
                 </div>
               </div>
@@ -557,16 +592,4 @@ function LandTelemetryView({ r, areaHa, corners }: { r: LandResult; areaHa: numb
       )}
     </div>
   );
-}
-
-function planarArea(corners: CornerPoint[]) {
-  if (corners.length < 3) return 0;
-  let area = 0;
-  const R = 6378137;
-  for (let i = 0; i < corners.length; i++) {
-    const p1 = corners[i];
-    const p2 = corners[(i + 1) % corners.length];
-    area += (p2.lng - p1.lng) * (2 + Math.sin(p1.lat * Math.PI / 180) + Math.sin(p2.lat * Math.PI / 180));
-  }
-  return Math.abs(area * R * R / 2) * (Math.PI / 180);
 }

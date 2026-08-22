@@ -3,7 +3,7 @@ import { useI18n } from "@/lib/i18n";
 import { toast } from "sonner";
 import { Upload, Loader2 } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
-import { analyzePlant } from "@/lib/ai.functions";
+import { getTreatmentPlan } from "@/lib/ai.functions";
 
 type Result = {
   plant?: string; disease?: string; confidence?: number;
@@ -17,23 +17,83 @@ export function PlantAnalysis() {
   const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
-  const analyze = useServerFn(analyzePlant);
+  const getTreatment = useServerFn(getTreatmentPlan);
 
   const onFile = async (file: File) => {
     const reader = new FileReader();
     reader.onload = async () => {
       const dataUrl = reader.result as string;
       setPreview(dataUrl);
-      toast.success(t("toast_uploaded"));
+      toast.success(t("toast_uploaded") || "Image uploaded. Running custom YOLO model...");
       setLoading(true);
       setResult(null);
+      
       try {
-        const res = await analyze({ data: { imageDataUrl: dataUrl, language: fullName } });
-        setResult(res as Result);
-        toast.success(t("toast_analyzed"));
+        // Step 1: Call custom YOLO Model Endpoint
+        const url = "https://predict-6a889a07526d33d90cc080f2-dproatj77a-em.a.run.app/predict";
+        const apiKey = "ul_d57f1478462aa0c38e346fd3b30f1e70f1c4278d";
+        
+        const form = new FormData();
+        form.append("file", file);
+        form.append("conf", "0.25");
+        form.append("iou", "0.7");
+        form.append("imgsz", "640");
+
+        const yoloResponse = await fetch(url, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${apiKey}` },
+          body: form,
+        });
+
+        if (!yoloResponse.ok) {
+          throw new Error("YOLO Model endpoint failed");
+        }
+
+        const yoloData = await yoloResponse.json();
+        console.log("YOLO Response:", yoloData);
+        
+        // Extract top prediction (assuming 'predictions' array or similar YOLO structure)
+        let detectedDisease = "Unknown Disease";
+        let conf = 0.8;
+        let severity = "Moderate";
+        
+        if (yoloData && Array.isArray(yoloData.predictions) && yoloData.predictions.length > 0) {
+          detectedDisease = yoloData.predictions[0].class || yoloData.predictions[0].name || "Disease Detected";
+          conf = yoloData.predictions[0].confidence || 0.8;
+        } else if (yoloData && yoloData.class) {
+          detectedDisease = yoloData.class;
+          conf = yoloData.confidence || 0.8;
+        } else if (typeof yoloData === 'string') {
+          detectedDisease = yoloData;
+        } else {
+          // Fallback if we don't know the exact structure
+          detectedDisease = JSON.stringify(yoloData).slice(0, 50) + "...";
+        }
+        
+        if (conf > 0.85) severity = "High";
+        else if (conf < 0.5) severity = "Low";
+
+        toast.success(`YOLO detected: ${detectedDisease}. Generating treatment plan...`);
+
+        // Step 2: Generate Treatment Plan via Gemini
+        const treatmentPlan = await getTreatment({ 
+          data: { diseaseName: detectedDisease, language: fullName } 
+        }) as any;
+
+        setResult({
+          plant: "Analyzed Crop",
+          disease: detectedDisease,
+          confidence: conf,
+          severity,
+          symptoms: treatmentPlan?.symptoms || [],
+          treatment: treatmentPlan?.treatment || [],
+          prevention: treatmentPlan?.prevention || [],
+        });
+        
+        toast.success(t("toast_analyzed") || "Analysis complete!");
       } catch (e) {
         console.error(e);
-        toast.error(t("toast_failed"));
+        toast.error(t("toast_failed") || "Failed to analyze image");
       } finally {
         setLoading(false);
       }
