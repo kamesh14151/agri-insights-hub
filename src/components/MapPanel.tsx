@@ -290,29 +290,17 @@ export function MapPanel() {
                 </gmp-polyline-3d>
               )}
 
-              {(isDrawing ? draftCorners : corners).map((pt, i) => {
-                const s = 0.0001;
-                const box = [
-                  { lat: pt.lat + s, lng: pt.lng - s },
-                  { lat: pt.lat + s, lng: pt.lng + s },
-                  { lat: pt.lat - s, lng: pt.lng + s },
-                  { lat: pt.lat - s, lng: pt.lng - s }
-                ];
-                return (
-                  // @ts-ignore
-                  <gmp-polygon-3d
-                    key={`custom-marker-${i}`}
-                    altitude-mode="clamp-to-ground"
-                    fill-color="rgba(255, 255, 255, 0.9)"
-                    stroke-color="rgba(16, 185, 129, 1)"
-                    stroke-width="3"
-                    draws-occluded-segments="true"
-                  >
-                    {box.map((c, j) => <div key={j} slot="coordinates">{c.lat},{c.lng},0</div>)}
-                    <div slot="coordinates">{box[0].lat},{box[0].lng},0</div>
-                  </gmp-polygon-3d>
-                );
-              })}
+              {(isDrawing ? draftCorners : corners).map((pt, i) => (
+                // @ts-ignore
+                <gmp-marker-3d
+                  key={`custom-marker-${i}`}
+                  position={{ lat: pt.lat, lng: pt.lng, altitude: pt.alt }}
+                >
+                  <div className="w-4 h-4 bg-emerald-500 rounded-full border-2 border-white shadow-sm flex items-center justify-center font-bold text-[9px] text-white">
+                    {i + 1}
+                  </div>
+                </gmp-marker-3d>
+              ))}
 
               {!isDrawing && corners.length === 4 && activeLayer === "satellite" && (
                 // @ts-ignore
