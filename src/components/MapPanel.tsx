@@ -109,9 +109,10 @@ export function MapPanel() {
 
       if (newCorners.length === 4) {
         setIsDrawing(false);
-        setCorners(newCorners);
+        const sortedCorners = sortPointsClockwise(newCorners);
+        setCorners(sortedCorners);
         setDraftCorners([]);
-        processFieldAnalysis(newCorners);
+        processFieldAnalysis(sortedCorners);
       }
     };
 
