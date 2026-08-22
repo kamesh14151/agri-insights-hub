@@ -65,6 +65,15 @@ export function MapPanel() {
   const [isDrawing, setIsDrawing] = useState(false);
   const [draftCorners, setDraftCorners] = useState<CornerPoint[]>([]);
 
+  // Refs for stable event listener
+  const isDrawingRef = useRef(isDrawing);
+  const draftCornersRef = useRef(draftCorners);
+
+  useEffect(() => {
+    isDrawingRef.current = isDrawing;
+    draftCornersRef.current = draftCorners;
+  }, [isDrawing, draftCorners]);
+
   // Search location state
   const [searchQuery, setSearchQuery] = useState("");
   const [searchLoading, setSearchLoading] = useState(false);
@@ -87,24 +96,29 @@ export function MapPanel() {
     document.head.appendChild(script);
   }, []);
 
-  // 2. Handle map clicks for drawing
+  // 2. Handle map clicks for drawing (Stable listener)
   useEffect(() => {
     const map = map3dRef.current;
     if (!map || !apiLoaded) return;
 
     const handleClick = (e: any) => {
-      if (!isDrawing) return;
+      if (!isDrawingRef.current) return;
       if (!e.position) return;
       
+      const lat = typeof e.position.lat === "function" ? e.position.lat() : e.position.lat;
+      const lng = typeof e.position.lng === "function" ? e.position.lng() : e.position.lng;
+      const alt = typeof e.position.altitude === "function" ? e.position.altitude() : (e.position.altitude || 0);
+
+      const currentDraft = draftCornersRef.current;
       const newPt: CornerPoint = {
-        id: draftCorners.length + 1,
-        label: ["NW", "NE", "SE", "SW"][draftCorners.length] || `P${draftCorners.length + 1}`,
-        lat: e.position.lat,
-        lng: e.position.lng,
-        alt: e.position.altitude || 0,
+        id: currentDraft.length + 1,
+        label: ["NW", "NE", "SE", "SW"][currentDraft.length] || `P${currentDraft.length + 1}`,
+        lat,
+        lng,
+        alt,
       };
 
-      const newCorners = [...draftCorners, newPt];
+      const newCorners = [...currentDraft, newPt];
       setDraftCorners(newCorners);
 
       if (newCorners.length === 4) {
@@ -118,7 +132,7 @@ export function MapPanel() {
 
     map.addEventListener("gmp-click", handleClick);
     return () => map.removeEventListener("gmp-click", handleClick);
-  }, [isDrawing, draftCorners, apiLoaded]);
+  }, [apiLoaded]);
 
   const processFieldAnalysis = async (pts: CornerPoint[]) => {
     if (pts.length < 4) return;
@@ -293,14 +307,15 @@ export function MapPanel() {
 
               {(isDrawing ? draftCorners : corners).map((pt, i) => (
                 // @ts-ignore
-                <gmp-marker-3d
-                  key={`custom-marker-${i}`}
-                  position={{ lat: pt.lat, lng: pt.lng, altitude: pt.alt }}
+                <gmp-polyline-3d
+                  key={`laser-marker-${i}`}
+                  altitude-mode="clamp-to-ground"
+                  stroke-color="rgba(16, 185, 129, 0.9)"
+                  stroke-width="6"
                 >
-                  <div className="w-4 h-4 bg-emerald-500 rounded-full border-2 border-white shadow-sm flex items-center justify-center font-bold text-[9px] text-white">
-                    {i + 1}
-                  </div>
-                </gmp-marker-3d>
+                  <div slot="coordinates">{pt.lat},{pt.lng},0</div>
+                  <div slot="coordinates">{pt.lat},{pt.lng},100</div>
+                </gmp-polyline-3d>
               ))}
 
               {!isDrawing && corners.length === 4 && activeLayer === "satellite" && (
