@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 export type Role = "admin" | "farmer" | "user" | "manager" | "agronomist";
 
 export type Account = {
+  id?: string;
   name: string;
   email: string;
   password: string;
@@ -13,6 +14,7 @@ export type Account = {
 };
 
 export type SessionUser = Omit<Account, "password"> & {
+  id: string;
   avatarUrl?: string;
 };
 
@@ -20,11 +22,11 @@ const STORE = "agrisynapse-accounts";
 const SESSION = "agrisynapse-session";
 
 const SEED: Account[] = [
-  { name: "Admin Control", email: "admin@agrisynapse.in", password: "admin123", role: "admin", location: "Chennai, Tamil Nadu" },
-  { name: "Murugan Selvam", email: "farmer@agrisynapse.in", password: "farmer123", role: "farmer", location: "Erode, Tamil Nadu", farmSize: "4.2 ha", phone: "+91 98400 11223" },
-  { name: "Karthik Manager", email: "manager@agrisynapse.in", password: "manager123", role: "manager", location: "Coimbatore, Tamil Nadu", phone: "+91 98765 43210" },
-  { name: "Dr. Vasanthi", email: "expert@agrisynapse.in", password: "expert123", role: "agronomist", location: "TNAU, Coimbatore", phone: "+91 94433 22110" },
-  { name: "Priya Raman", email: "user@agrisynapse.in", password: "user123", role: "user", location: "Coimbatore, Tamil Nadu" },
+  { id: "usr_admin", name: "Admin Control", email: "admin@agrisynapse.in", password: "admin123", role: "admin", location: "Chennai, Tamil Nadu" },
+  { id: "usr_farmer_murugan", name: "Murugan Selvam", email: "farmer@agrisynapse.in", password: "farmer123", role: "farmer", location: "Erode, Tamil Nadu", farmSize: "4.2 ha", phone: "+91 98400 11223" },
+  { id: "usr_manager_karthik", name: "Karthik Manager", email: "manager@agrisynapse.in", password: "manager123", role: "manager", location: "Coimbatore, Tamil Nadu", phone: "+91 98765 43210" },
+  { id: "usr_expert_vasanthi", name: "Dr. Vasanthi", email: "expert@agrisynapse.in", password: "expert123", role: "agronomist", location: "TNAU, Coimbatore", phone: "+91 94433 22110" },
+  { id: "usr_priya", name: "Priya Raman", email: "user@agrisynapse.in", password: "user123", role: "user", location: "Coimbatore, Tamil Nadu" },
 ];
 
 function readAccounts(): Account[] {
@@ -35,7 +37,19 @@ function readAccounts(): Account[] {
       localStorage.setItem(STORE, JSON.stringify(SEED));
       return SEED;
     }
-    return JSON.parse(raw) as Account[];
+    const accounts = JSON.parse(raw) as Account[];
+    let modified = false;
+    const updated = accounts.map(a => {
+      if (!a.id) {
+        modified = true;
+        return { ...a, id: `usr_${a.email.replace(/[^a-zA-Z0-9]/g, '_')}` };
+      }
+      return a;
+    });
+    if (modified) {
+      localStorage.setItem(STORE, JSON.stringify(updated));
+    }
+    return updated;
   } catch {
     return SEED;
   }
@@ -61,7 +75,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const raw = localStorage.getItem(SESSION) ?? sessionStorage.getItem(SESSION);
     if (raw) {
       try {
-        setUser(JSON.parse(raw) as SessionUser);
+        const u = JSON.parse(raw) as SessionUser;
+        if (!u.id && u.email) {
+          u.id = `usr_${u.email.replace(/[^a-zA-Z0-9]/g, '_')}`;
+        }
+        setUser(u);
       } catch {
         /* ignore */
       }
@@ -82,8 +100,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (found.password !== password) throw new Error("Incorrect password");
     if (found.role !== role) throw new Error(`This account is registered as a ${found.role}`);
     const { password: _pw, ...session } = found;
-    persist(session, remember);
-    return session;
+    const userSession: SessionUser = {
+      ...session,
+      id: session.id || `usr_${session.email.replace(/[^a-zA-Z0-9]/g, '_')}`,
+    };
+    persist(userSession, remember);
+    return userSession;
   };
 
   const register: Ctx["register"] = (input) => {
@@ -91,10 +113,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (accounts.some((a) => a.email.toLowerCase() === input.email.trim().toLowerCase())) {
       throw new Error("An account with that email already exists");
     }
-    localStorage.setItem(STORE, JSON.stringify([...accounts, input]));
-    const { password: _pw, ...session } = input;
-    persist(session, true);
-    return session;
+    const newAcc: Account = {
+      ...input,
+      id: input.id || `usr_${input.email.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}`,
+    };
+    localStorage.setItem(STORE, JSON.stringify([...accounts, newAcc]));
+    const { password: _pw, ...session } = newAcc;
+    const userSession: SessionUser = {
+      ...session,
+      id: newAcc.id!,
+    };
+    persist(userSession, true);
+    return userSession;
   };
 
   const loginWithGoogle: Ctx["loginWithGoogle"] = (input) => {
@@ -103,22 +133,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     if (existing) {
       const { password: _pw, ...session } = existing;
-      const updatedSession = { ...session, avatarUrl: input.avatarUrl };
+      const updatedSession: SessionUser = {
+        ...session,
+        id: session.id || `usr_${session.email.replace(/[^a-zA-Z0-9]/g, '_')}`,
+        avatarUrl: input.avatarUrl,
+      };
       persist(updatedSession, true);
       return updatedSession;
     }
 
     // New user via Google
     const newAccount: Account = {
+      id: `usr_${input.email.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}`,
       name: input.name,
       email: input.email,
       password: "", // No password for OAuth
       role: input.role,
     };
     localStorage.setItem(STORE, JSON.stringify([...accounts, newAccount]));
-    const session = { ...newAccount, avatarUrl: input.avatarUrl };
-    persist(session, true);
-    return session;
+    const userSession: SessionUser = {
+      ...newAccount,
+      id: newAccount.id!,
+      avatarUrl: input.avatarUrl,
+    };
+    persist(userSession, true);
+    return userSession;
   };
 
   const logout = () => {

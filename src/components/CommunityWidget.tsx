@@ -39,7 +39,7 @@ export function CommunityWidget() {
         .subscribe();
       return () => { supabase.removeChannel(channel); };
     }
-  }, [open, user?.id]);
+  }, [open, user?.id, user?.email]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -47,12 +47,14 @@ export function CommunityWidget() {
     }
   }, [messages]);
 
+  const currentUserId = user?.id || (user?.email ? `usr_${user.email.replace(/[^a-zA-Z0-9]/g, '_')}` : "");
+
   const fetchMessages = async () => {
     try {
       const { data, error } = await supabase
         .from("community_posts")
         .select("*")
-        .order("created_at", { ascending: true }) // WhatsApp loads newest at bottom
+        .order("created_at", { ascending: true })
         .limit(100);
         
       if (error) {
@@ -60,16 +62,27 @@ export function CommunityWidget() {
         throw error;
       }
       
-      if (user?.id && data) {
-        const { data: likes } = await supabase
-          .from("community_likes")
-          .select("post_id")
-          .eq("user_id", user.id);
-          
-        const likedIds = new Set(likes?.map(l => l.post_id) || []);
-        setMessages(data.map(m => ({ ...m, user_has_liked: likedIds.has(m.id) })));
+      const posts = data || [];
+
+      if (currentUserId && posts.length > 0) {
+        try {
+          const { data: likes, error: likesError } = await supabase
+            .from("community_likes")
+            .select("post_id")
+            .eq("user_id", currentUserId);
+            
+          if (!likesError && likes) {
+            const likedIds = new Set(likes.map(l => l.post_id));
+            setMessages(posts.map(m => ({ ...m, user_has_liked: likedIds.has(m.id) })));
+          } else {
+            setMessages(posts.map(m => ({ ...m, user_has_liked: false })));
+          }
+        } catch (likeErr) {
+          console.warn("Could not query community_likes:", likeErr);
+          setMessages(posts.map(m => ({ ...m, user_has_liked: false })));
+        }
       } else {
-        setMessages(data || []);
+        setMessages(posts.map(m => ({ ...m, user_has_liked: false })));
       }
     } catch (err: any) {
       console.error(err);
@@ -91,7 +104,7 @@ export function CommunityWidget() {
       const { error } = await supabase
         .from("community_posts")
         .insert({
-          user_id: String(user.id),
+          user_id: currentUserId,
           user_name: user.name || "Farmer",
           user_role: user.role || "farmer",
           content: content,
@@ -103,6 +116,9 @@ export function CommunityWidget() {
         console.error("Supabase insert error details:", error);
         toast.error(`Error sending message: ${error.message || error.details || error.hint}`);
         setNewMessage(content); // Revert clear on failure
+      } else {
+        // Trigger fetch so message displays immediately
+        await fetchMessages();
       }
     } catch (err: any) {
       console.error("Exception during insert:", err);
@@ -114,22 +130,23 @@ export function CommunityWidget() {
   };
 
   const toggleLike = async (msgId: string, hasLiked: boolean) => {
-    if (!user) return toast.error("Please login to like messages.");
+    if (!user || !currentUserId) return toast.error("Please login to like messages.");
     
     // Optimistic update
     setMessages(prev => prev.map(m => 
       m.id === msgId 
-        ? { ...m, user_has_liked: !hasLiked, likes_count: m.likes_count + (hasLiked ? -1 : 1) } 
+        ? { ...m, user_has_liked: !hasLiked, likes_count: Math.max(0, m.likes_count + (hasLiked ? -1 : 1)) } 
         : m
     ));
 
     try {
       if (hasLiked) {
-        await supabase.from("community_likes").delete().eq("post_id", msgId).eq("user_id", user.id);
+        await supabase.from("community_likes").delete().eq("post_id", msgId).eq("user_id", currentUserId);
       } else {
-        await supabase.from("community_likes").insert({ post_id: msgId, user_id: user.id });
+        await supabase.from("community_likes").insert({ post_id: msgId, user_id: currentUserId });
       }
     } catch (err) {
+      console.warn("Like action error:", err);
       fetchMessages(); // Revert on failure
     }
   };
@@ -139,6 +156,7 @@ export function CommunityWidget() {
       <button
         onClick={() => setOpen(true)}
         className="fixed bottom-[180px] right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-600 text-white shadow-xl shadow-emerald-600/30 transition-transform hover:scale-105 active:scale-95"
+        title="Open Community Network"
       >
         <Users className="h-6 w-6" />
       </button>
@@ -184,7 +202,9 @@ export function CommunityWidget() {
           </div>
         ) : (
           messages.map(msg => {
-            const isMe = msg.user_id === user?.id;
+            const isMe = Boolean(
+              currentUserId && (msg.user_id === currentUserId || msg.user_id === user?.email || (user?.name && msg.user_name === user?.name && (!msg.user_id || msg.user_id === "undefined")))
+            );
             return (
               <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
                 {!isMe && (
@@ -198,7 +218,7 @@ export function CommunityWidget() {
                     ? 'bg-[#E7FFDB] text-slate-800 rounded-tr-sm border border-[#D1F4C9]' 
                     : 'bg-white text-slate-800 rounded-tl-sm border border-slate-100'
                 }`}>
-                  <p className="whitespace-pre-wrap word-break">{msg.content}</p>
+                  <p className="whitespace-pre-wrap break-words">{msg.content}</p>
                   
                   <div className={`flex items-center gap-2 mt-1.5 ${isMe ? 'justify-end' : 'justify-between'}`}>
                     <span className="text-[9px] font-medium text-slate-400">
