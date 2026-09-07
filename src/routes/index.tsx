@@ -113,7 +113,7 @@ function LandingPage() {
           background: "linear-gradient(135deg, rgba(26,26,24,0.96) 0%, rgba(40,60,10,0.96) 100%)",
         }}>
           <span className="inline-flex items-center gap-1.5 rounded-full bg-[rgba(184,217,64,0.20)] border border-[rgba(184,217,64,0.35)] px-3 py-1 text-[11px] font-semibold text-[#c8e44a] mb-6">
-            <Sparkles className="h-3 w-3" /> Powered by Gemini AI
+            <Sparkles className="h-3 w-3" /> Powered by Agrisynapse Vision AI
           </span>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-[-0.04em] text-white leading-[1.1]">
             Ready to grow smarter?

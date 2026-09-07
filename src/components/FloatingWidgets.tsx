@@ -599,32 +599,34 @@ export function FloatingWidgets() {
     <div className="relative">
       <button
         onClick={() => setLangDropdownOpen(v => !v)}
-        className="flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-white/25 transition border border-white/20 shadow-sm"
+        className="flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-white/25 transition border border-white/20 shadow-sm active:scale-95"
         title="Select AI Language (Default: English)"
       >
         <Globe className="h-3 w-3 text-emerald-300" />
         <span>{selectedLang.label}</span>
-        <ChevronDown className="h-3 w-3 opacity-70" />
+        <ChevronDown className={`h-3 w-3 opacity-70 transition-transform duration-200 ${langDropdownOpen ? "rotate-180" : ""}`} />
       </button>
 
       {langDropdownOpen && (
         <>
-          <div className="fixed inset-0 z-40" onClick={() => setLangDropdownOpen(false)} />
+          <div className="fixed inset-0 z-[90]" onClick={() => setLangDropdownOpen(false)} />
           <div
-            className="absolute right-0 top-full z-50 mt-1.5 w-44 rounded-xl overflow-hidden shadow-2xl border border-white/20"
-            style={{ background: "rgba(18, 22, 32, 0.98)", backdropFilter: "blur(20px)" }}
+            className="absolute right-0 top-full z-[100] mt-2 w-48 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.85)] border border-white/20 bg-slate-950/95 backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-150"
           >
             <div className="p-1.5 space-y-0.5">
-              <p className="px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold text-white/50">
-                Choose Language
-              </p>
+              <div className="px-2.5 py-1.5 flex items-center justify-between border-b border-white/10 mb-1">
+                <p className="text-[10px] uppercase tracking-wider font-bold text-white/50">
+                  Select Language
+                </p>
+                <span className="text-[10px] font-semibold text-emerald-400">{selectedLang.name}</span>
+              </div>
               {AI_LANGUAGES.map(l => (
                 <button
                   key={l.code}
                   onClick={() => switchLanguage(l)}
-                  className={`flex w-full items-center justify-between px-2.5 py-1.5 text-xs rounded-lg transition ${
+                  className={`flex w-full items-center justify-between px-2.5 py-1.5 text-xs rounded-xl transition ${
                     selectedLang.code === l.code
-                      ? "bg-primary/40 text-primary-foreground font-bold"
+                      ? "bg-emerald-500/30 text-emerald-200 font-bold border border-emerald-500/40"
                       : "text-white/80 hover:bg-white/10 hover:text-white"
                   }`}
                 >
@@ -770,24 +772,6 @@ export function FloatingWidgets() {
             )}
             {!chatMinimized && (
               <>
-                {/* Language pill bar */}
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-black/20 border-b border-white/5 overflow-x-auto text-[11px]">
-                  <span className="text-[10px] text-white/50 uppercase font-semibold shrink-0">Lang:</span>
-                  {AI_LANGUAGES.map(l => (
-                    <button
-                      key={l.code}
-                      onClick={() => switchLanguage(l)}
-                      className={`px-2 py-0.5 rounded-full shrink-0 font-medium transition ${
-                        selectedLang.code === l.code
-                          ? "bg-emerald-500 text-white font-bold shadow-sm"
-                          : "bg-white/10 text-white/70 hover:bg-white/20 hover:text-white"
-                      }`}
-                    >
-                      {l.label}
-                    </button>
-                  ))}
-                </div>
-
                 <div ref={chatScrollRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-3" style={{scrollbarWidth:"thin"}}>
                   {chatMsgs.map((m,i)=>(
                     <div key={i} className={`flex ${m.role==="user"?"justify-end":"justify-start"}`}>
@@ -810,7 +794,7 @@ export function FloatingWidgets() {
                 </div>
 
                 {showPrompts && (
-                  <div className="flex flex-wrap gap-1.5 px-4 pb-2">
+                  <div className="flex flex-wrap gap-1.5 px-4 pb-2 max-h-24 overflow-y-auto" style={{scrollbarWidth:"none"}}>
                     {loc.prompts.map(p=><button key={p} onClick={()=>sendChat(p)} className="rounded-full border border-white/30 px-2.5 py-1 text-[11px] text-white/80 backdrop-blur-sm transition hover:bg-white/20 hover:text-white active:scale-95">{p}</button>)}
                   </div>
                 )}
@@ -846,23 +830,6 @@ export function FloatingWidgets() {
               <div className="flex justify-center pt-3 pb-1 shrink-0"><div className="h-1 w-10 rounded-full bg-white/30"/></div>
               {panelHeader("Agri AI", `${selectedLang.label} · crop expert`, "linear-gradient(135deg,rgba(22,101,52,0.9),rgba(21,128,61,0.85))", resetChat, closeChat)}
 
-              {/* Language pill bar */}
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-black/20 border-b border-white/5 overflow-x-auto text-[11px]">
-                {AI_LANGUAGES.map(l => (
-                  <button
-                    key={l.code}
-                    onClick={() => switchLanguage(l)}
-                    className={`px-2.5 py-0.5 rounded-full shrink-0 font-medium transition ${
-                      selectedLang.code === l.code
-                        ? "bg-emerald-500 text-white font-bold"
-                        : "bg-white/10 text-white/70 hover:bg-white/20"
-                    }`}
-                  >
-                    {l.label}
-                  </button>
-                ))}
-              </div>
-
               <div ref={chatScrollRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-3" style={{scrollbarWidth:"thin"}}>
                 {chatMsgs.map((m,i)=>(
                   <div key={i} className={m.role === "user" ? "flex justify-end" : "flex justify-start"}>
@@ -884,13 +851,13 @@ export function FloatingWidgets() {
                   </div>
                 )}
               </div>
-              {showPrompts&&<div className="flex flex-wrap gap-1.5 px-4 pb-2">{loc.prompts.map(p=><button key={p} onClick={()=>sendChat(p)} className="rounded-full border border-white/30 px-2.5 py-1 text-[11px] text-white/80 backdrop-blur-sm transition hover:bg-white/20 active:scale-95">{p}</button>)}</div>}
+              {showPrompts&&<div className="flex flex-wrap gap-1.5 px-4 pb-2 max-h-24 overflow-y-auto" style={{scrollbarWidth:"none"}}>{loc.prompts.map(p=><button key={p} onClick={()=>sendChat(p)} className="rounded-full border border-white/30 px-2.5 py-1 text-[11px] text-white/80 backdrop-blur-sm transition hover:bg-white/20 active:scale-95">{p}</button>)}</div>}
               <div className="px-3 pb-3">
                 <form onSubmit={e=>{e.preventDefault();sendChat(chatInput);}} className="flex items-center gap-2 rounded-full px-4 py-2" style={{background:"rgba(255,255,255,.15)",backdropFilter:"blur(16px)",border:"1px solid rgba(255,255,255,.25)"}}>
                   <input ref={chatInputRef} value={chatInput} onChange={e=>setChatInput(e.target.value)} placeholder={loc.placeholder} className="min-w-0 flex-1 bg-transparent py-1 text-sm text-white placeholder:text-white/50 focus:outline-none"/>
                   <button type="submit" disabled={chatBusy||!chatInput.trim()} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all hover:scale-110 disabled:opacity-40" style={{background:chatInput.trim()?"linear-gradient(135deg,var(--primary),#16a34a)":"rgba(255,255,255,.2)"}}><Send className="h-3.5 w-3.5 text-white"/></button>
                 </form>
-                <p className="mt-1.5 text-center text-[10px] text-white/40"><Sprout className="mr-1 inline h-2.5 w-2.5"/>Agrisynapse AI</p>
+                <p className="mt-1.5 text-center text-[10px] text-white/40"><Sprout className="mr-1 inline h-2.5 w-2.5"/>Agrisynapse AI · Precision Agronomy</p>
               </div>
             </div>
           </div>

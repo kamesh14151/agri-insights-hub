@@ -160,7 +160,7 @@ function IotPage() {
   ], [currentTelemetry]);
 
   return (
-    <div className="w-full bg-gradient-to-br from-green-50 via-emerald-50/50 to-blue-50/30 min-h-full">
+    <div className="w-full overflow-x-hidden bg-gradient-to-br from-green-50 via-emerald-50/50 to-blue-50/30 min-h-full">
       <div className="px-6 py-12 max-w-[1200px] mx-auto space-y-8">
         
         {/* ── Header ── */}
