@@ -6,7 +6,7 @@ import {
 import {
   ArrowUpRight, Check, CircleAlert, Droplets, Leaf,
   ScanLine, Sparkles, ThermometerSun, Activity, Zap,
-  MapPin, TrendingUp, ExternalLink,
+  MapPin, TrendingUp, ExternalLink, Users, ShieldAlert,
 } from "lucide-react";
 import { Panel } from "@/components/DashboardShell";
 import { IOT_TIMESERIES } from "@/lib/mock";
@@ -93,12 +93,14 @@ function DashboardHome() {
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
 
   return (
-    <div className="space-y-3 animate-float-up pb-10">
+    <div className="space-y-4 animate-float-up pb-10">
 
       {/* ── Page header — matches "Data Driven Growth / Data Meets Growth" ── */}
       <div className="flex items-end justify-between gap-4 mb-1">
         <div>
-          <p className="text-[11px] font-medium text-[#7a7a72] mb-1">Data Driven Growth</p>
+          <p className="text-[11px] font-medium text-[#7a7a72] mb-1">
+            {user?.role === "manager" || user?.role === "admin" ? `${user.role.toUpperCase()} OVERSIGHT` : "Data Driven Growth"}
+          </p>
           <h1 className="text-[28px] sm:text-[32px] font-bold tracking-[-0.04em] text-[#1a1a18]">
             {greeting}, {name}.
           </h1>
@@ -115,6 +117,44 @@ function DashboardHome() {
           </button>
         </div>
       </div>
+
+      {/* ── Executive Management Command Strip for Manager & Admin ── */}
+      {(user?.role === "manager" || user?.role === "admin") && (
+        <div className="rounded-[22px] border border-black/[0.08] bg-gradient-to-r from-[#1a1a18] via-[#242b1a] to-[#1e2b14] p-5 text-white shadow-xl">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="px-2.5 py-0.5 rounded-full bg-[#c8e44a] text-[#1a1a18] text-[10px] font-bold uppercase tracking-wider">
+                  {user.role} workspace
+                </span>
+                <h2 className="text-[17px] font-bold tracking-tight text-white">
+                  Territory & Platform Operations Hub
+                </h2>
+              </div>
+              <p className="text-[12px] text-white/70 max-w-xl">
+                Manage registered farmer accounts, supervise regional disease radar alerts, monitor IoT node health, and audit marketplace escrow transactions.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+              <Link
+                to="/app/admin"
+                className="inline-flex items-center gap-1.5 rounded-full bg-[#c8e44a] px-4 py-2 text-[12px] font-bold text-[#1a1a18] hover:bg-[#b8d940] transition shadow-md hover:scale-105 active:scale-95"
+              >
+                <Users className="h-3.5 w-3.5" />
+                <span>User Directory & Admin</span>
+              </Link>
+              <Link
+                to="/app/manager"
+                className="inline-flex items-center gap-1.5 rounded-full bg-white/15 border border-white/20 px-4 py-2 text-[12px] font-semibold text-white hover:bg-white/25 transition backdrop-blur-sm hover:scale-105 active:scale-95"
+              >
+                <ShieldAlert className="h-3.5 w-3.5 text-[#c8e44a]" />
+                <span>Manager Hub & Disease Radar</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Bento grid — mirrors reference layout exactly ──────────────── */}
       {/* Row 1: 3 columns */}

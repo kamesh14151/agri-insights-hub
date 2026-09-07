@@ -17,7 +17,7 @@ export const Route = createFileRoute("/app/manager")({
 function ManagerPage() {
   const { user } = useAuth();
 
-  if (user?.role !== "manager") {
+  if (user?.role !== "manager" && user?.role !== "admin") {
     return (
       <div className="flex h-[60vh] flex-col items-center justify-center text-center">
         <h2 className="text-2xl font-bold text-foreground">Access Restricted</h2>

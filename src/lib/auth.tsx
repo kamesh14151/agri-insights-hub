@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
-export type Role = "admin" | "farmer" | "user" | "manager" | "agronomist";
+export type Role = "admin" | "farmer" | "user" | "manager";
 
 export type Account = {
   id?: string;
@@ -22,14 +22,13 @@ const STORE = "agrisynapse-accounts";
 const SESSION = "agrisynapse-session";
 
 const SEED: Account[] = [
-  { id: "usr_admin", name: "Admin Control", email: "admin@agrisynapse.in", password: "admin123", role: "admin", location: "Chennai, Tamil Nadu" },
-  { id: "usr_farmer_murugan", name: "Murugan Selvam", email: "farmer@agrisynapse.in", password: "farmer123", role: "farmer", location: "Erode, Tamil Nadu", farmSize: "4.2 ha", phone: "+91 98400 11223" },
+  { id: "usr_admin", name: "Admin Control", email: "admin@agrisynapse.in", password: "admin123", role: "admin", location: "Chennai, Tamil Nadu", phone: "+91 94444 00112" },
   { id: "usr_manager_karthik", name: "Karthik Manager", email: "manager@agrisynapse.in", password: "manager123", role: "manager", location: "Coimbatore, Tamil Nadu", phone: "+91 98765 43210" },
-  { id: "usr_expert_vasanthi", name: "Dr. Vasanthi", email: "expert@agrisynapse.in", password: "expert123", role: "agronomist", location: "TNAU, Coimbatore", phone: "+91 94433 22110" },
-  { id: "usr_priya", name: "Priya Raman", email: "user@agrisynapse.in", password: "user123", role: "user", location: "Coimbatore, Tamil Nadu" },
+  { id: "usr_farmer_murugan", name: "Murugan Selvam", email: "farmer@agrisynapse.in", password: "farmer123", role: "farmer", location: "Erode, Tamil Nadu", farmSize: "4.2 ha", phone: "+91 98400 11223" },
+  { id: "usr_priya", name: "Priya Raman", email: "user@agrisynapse.in", password: "user123", role: "user", location: "Coimbatore, Tamil Nadu", phone: "+91 98401 22334" },
 ];
 
-function readAccounts(): Account[] {
+export function readAccounts(): Account[] {
   if (typeof window === "undefined") return SEED;
   try {
     const raw = localStorage.getItem(STORE);
@@ -39,7 +38,11 @@ function readAccounts(): Account[] {
     }
     const accounts = JSON.parse(raw) as Account[];
     let modified = false;
-    const updated = accounts.map(a => {
+    // Filter out any obsolete agronomist accounts
+    const filtered = accounts.filter(a => (a.role as string) !== "agronomist");
+    if (filtered.length !== accounts.length) modified = true;
+
+    const updated = filtered.map(a => {
       if (!a.id) {
         modified = true;
         return { ...a, id: `usr_${a.email.replace(/[^a-zA-Z0-9]/g, '_')}` };
@@ -53,6 +56,11 @@ function readAccounts(): Account[] {
   } catch {
     return SEED;
   }
+}
+
+export function writeAccounts(accounts: Account[]) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(STORE, JSON.stringify(accounts));
 }
 
 type Ctx = {

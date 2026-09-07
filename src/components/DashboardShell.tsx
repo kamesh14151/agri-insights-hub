@@ -52,6 +52,8 @@ export function DashboardShell({ children }: { children: ReactNode }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const isManagerOrAdmin = user?.role === "manager" || user?.role === "admin";
+
   const navItems = [
     { to: "/app",          label: "Dashboard",   icon: LayoutDashboard, exact: true },
     { to: "/app/iot",      label: t("nav_iot"),   icon: Cpu },
@@ -59,7 +61,10 @@ export function DashboardShell({ children }: { children: ReactNode }) {
     { to: "/app/crops",    label: "Crop Planner", icon: Sprout },
     { to: "/app/weather",  label: t("nav_weather"), icon: CloudSun },
     { to: "/app/market",   label: t("nav_market"),  icon: TrendingUp },
-    ...(user?.role === "manager" ? [{ to: "/app/manager", label: "Manager Hub", icon: ShieldAlert }] : []),
+    ...(isManagerOrAdmin ? [
+      { to: "/app/manager", label: "Manager Hub", icon: ShieldAlert },
+      { to: "/app/admin",   label: "Admin Console", icon: Users },
+    ] : []),
   ];
 
   const isActive = (to: string, exact?: boolean) =>
