@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Leaf, Tractor, User as UserIcon, Loader2, ArrowRight, Eye, EyeOff } from "lucide-react";
+import { Leaf, Tractor, User as UserIcon, Loader2, ArrowRight, Eye, EyeOff, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
 
@@ -17,12 +17,13 @@ export const Route = createFileRoute("/login")({
 const ROLES = [
   { id: "farmer",    label: "Farmer",     icon: Tractor,  desc: "Manage your fields" },
   { id: "agronomist", label: "Agronomist", icon: UserIcon, desc: "Advisory & analysis" },
+  { id: "manager",    label: "Manager",    icon: ShieldAlert, desc: "Regional oversight" },
 ];
 
 function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [role, setRole] = useState<"farmer" | "agronomist">("farmer");
+  const [role, setRole] = useState<"farmer" | "agronomist" | "manager">("farmer");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
@@ -112,7 +113,7 @@ function LoginPage() {
           <form onSubmit={onSubmit} className="mt-8 space-y-4">
 
             {/* Role selector */}
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               {ROLES.map((r) => (
                 <button
                   key={r.id}
@@ -143,7 +144,7 @@ function LoginPage() {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder={role === "farmer" ? "farmer@agrisynapse.in" : "expert@agrisynapse.in"}
+                placeholder={role === "farmer" ? "farmer@agrisynapse.in" : role === "manager" ? "manager@agrisynapse.in" : "expert@agrisynapse.in"}
                 className="input-premium w-full px-3.5 py-2.5 text-[13.5px] text-[#1a1a18] placeholder:text-[#7a7a72]"
               />
             </div>

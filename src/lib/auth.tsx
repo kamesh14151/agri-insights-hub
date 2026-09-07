@@ -22,6 +22,7 @@ const SESSION = "agrisynapse-session";
 const SEED: Account[] = [
   { name: "Admin Control", email: "admin@agrisynapse.in", password: "admin123", role: "admin", location: "Chennai, Tamil Nadu" },
   { name: "Murugan Selvam", email: "farmer@agrisynapse.in", password: "farmer123", role: "farmer", location: "Erode, Tamil Nadu", farmSize: "4.2 ha", phone: "+91 98400 11223" },
+  { name: "Karthik Manager", email: "manager@agrisynapse.in", password: "manager123", role: "manager", location: "Coimbatore, Tamil Nadu", phone: "+91 98765 43210" },
   { name: "Priya Raman", email: "user@agrisynapse.in", password: "user123", role: "user", location: "Coimbatore, Tamil Nadu" },
 ];
 
