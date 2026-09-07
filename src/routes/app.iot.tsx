@@ -95,16 +95,34 @@ function IotPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const generateMockTelemetry = (): Telemetry => ({
+    name: "Mock Soil Node (Demo)",
+    moisture: 55 + Math.random() * 20,
+    temperature: 24 + Math.random() * 4,
+    humidity: 60 + Math.random() * 10,
+    ph: 6.2 + Math.random() * 0.8,
+    nitrogen: 45 + Math.random() * 15,
+    phosphorus: 35 + Math.random() * 10,
+    potassium: 40 + Math.random() * 20,
+    battery: 92 - Math.random() * 2,
+    timestamp: new Date().toISOString(),
+  });
+
   const fetchTelemetry = async () => {
-    if (!IOT_ENDPOINT) { setError("Telemetry endpoint is not configured."); return; }
+    setLoading(true);
+    setError("");
     try {
-      const parsed = new URL(IOT_ENDPOINT);
-      if (parsed.protocol !== "http:" && parsed.protocol !== "https:") throw new Error("Use an http:// or https:// URL.");
-      setLoading(true);
-      setError("");
-      const response = await fetch(parsed.toString(), { headers: { Accept: "application/json" } });
-      if (!response.ok) throw new Error(`Device returned HTTP ${response.status}.`);
-      const reading = normaliseTelemetry(await response.json());
+      let reading: Telemetry;
+      if (IOT_ENDPOINT) {
+        const parsed = new URL(IOT_ENDPOINT);
+        if (parsed.protocol !== "http:" && parsed.protocol !== "https:") throw new Error("Use an http:// or https:// URL.");
+        const response = await fetch(parsed.toString(), { headers: { Accept: "application/json" } });
+        if (!response.ok) throw new Error(`Device returned HTTP ${response.status}.`);
+        reading = normaliseTelemetry(await response.json());
+      } else {
+        // Use mock data if no endpoint is configured
+        reading = generateMockTelemetry();
+      }
       setTelemetry(reading);
       setHistory((current) => [...current.slice(-23), { ...reading, time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }]);
       setConnected(true);
@@ -117,7 +135,6 @@ function IotPage() {
   };
 
   useEffect(() => {
-    if (!IOT_ENDPOINT) return;
     void fetchTelemetry();
   }, []);
 
@@ -145,12 +162,12 @@ function IotPage() {
       <PageIntro index="03 / Sense" eyebrow="Connected field telemetry" title="Soil health, from the hardware." subtitle="Live readings are supplied by the hardware endpoint configured for this deployment." />
 
       <Panel title="Telemetry service">
-        <div className="flex flex-wrap items-center justify-between gap-4"><div className="flex items-center gap-2 text-sm"><Wifi className={`h-4 w-4 ${connected ? "text-primary" : "text-muted-foreground"}`} /><span>{connected ? `Connected · refreshes every ${IOT_POLL_SECONDS}s` : loading ? "Connecting to configured device…" : IOT_ENDPOINT ? "Device connection unavailable" : "Device endpoint not configured"}</span></div>{IOT_ENDPOINT && <button onClick={fetchTelemetry} disabled={loading} className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-xs font-semibold text-primary-foreground disabled:opacity-60"><RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />Refresh readings</button>}</div>
-        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground"><span>Set <code className="rounded bg-muted px-1.5 py-0.5 text-foreground">VITE_IOT_TELEMETRY_URL</code> and <code className="rounded bg-muted px-1.5 py-0.5 text-foreground">VITE_IOT_POLL_INTERVAL_SECONDS</code> in the deployment environment.</span><span>Endpoint must allow browser CORS.</span>{error && <span className="text-destructive">{error}</span>}</div>
+        <div className="flex flex-wrap items-center justify-between gap-4"><div className="flex items-center gap-2 text-sm"><Wifi className={`h-4 w-4 ${connected ? "text-primary" : "text-muted-foreground"}`} /><span>{connected ? (IOT_ENDPOINT ? `Connected · refreshes every ${IOT_POLL_SECONDS}s` : `Mock Mode · refreshes every ${IOT_POLL_SECONDS}s`) : loading ? "Connecting to device…" : IOT_ENDPOINT ? "Device connection unavailable" : "Device endpoint not configured"}</span></div><button onClick={fetchTelemetry} disabled={loading} className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-xs font-semibold text-primary-foreground disabled:opacity-60"><RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />Refresh readings</button></div>
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground"><span>{IOT_ENDPOINT ? "Live sensor active. " : "Currently running in mock mode. "}Set <code className="rounded bg-muted px-1.5 py-0.5 text-foreground">VITE_IOT_TELEMETRY_URL</code> and <code className="rounded bg-muted px-1.5 py-0.5 text-foreground">VITE_IOT_POLL_INTERVAL_SECONDS</code> in the deployment environment to connect real hardware.</span>{error && <span className="text-destructive">{error}</span>}</div>
         <details className="mt-4 rounded-lg bg-muted/60 px-3 py-2 text-xs text-muted-foreground"><summary className="cursor-pointer font-medium text-foreground">Expected device JSON format</summary><pre className="mt-2 overflow-x-auto text-[11px]">{`{"name":"Field Node 1","moisture":62,"temperature":29.4,"humidity":68,"ph":6.4,"nitrogen":68,"phosphorus":42,"potassium":55,"battery":88}`}</pre></details>
       </Panel>
 
-      {!telemetry ? <Panel title="Waiting for live readings" className="mt-6"><p className="text-sm text-muted-foreground">{IOT_ENDPOINT ? "The configured telemetry endpoint has not returned a reading yet." : "Add the telemetry URL to your environment configuration, then redeploy the application."}</p></Panel> : <>
+      {!telemetry ? <Panel title="Waiting for live readings" className="mt-6"><p className="text-sm text-muted-foreground">{IOT_ENDPOINT ? "The configured telemetry endpoint has not returned a reading yet." : "Generating mock telemetry data..."}</p></Panel> : <>
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3"><div><h2 className="font-serif text-2xl">{telemetry.name}</h2><p className="mt-1 text-xs text-muted-foreground">Last reading: {new Date(telemetry.timestamp).toLocaleString()}</p></div><span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium ${status.color}`}><CheckCircle2 className="h-3.5 w-3.5" />{status.label}</span></div>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-5"><MetricCard icon={Droplets} label="Soil moisture" value={telemetry.moisture} unit="%" /><MetricCard icon={Thermometer} label="Temperature" value={telemetry.temperature} unit="°C" /><MetricCard icon={Gauge} label="Soil pH" value={telemetry.ph || "—"} unit="" /><MetricCard icon={Gauge} label="Humidity" value={telemetry.humidity} unit="% RH" /><MetricCard icon={Battery} label="Battery" value={telemetry.battery} unit="%" /></div>

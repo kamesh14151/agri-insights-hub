@@ -139,25 +139,8 @@ export function DashboardShell({ children }: { children: ReactNode }) {
               <Menu className="h-4 w-4" />
             </button>
 
-            {/* Desktop: nav tabs */}
-            <nav className="hidden lg:flex flex-1 items-center gap-1.5">
-              {navItems.slice(0, 6).map((item) => {
-                const active = isActive(item.to, "exact" in item ? item.exact : false);
-                return (
-                  <Link
-                    key={item.to}
-                    to={item.to}
-                    className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[12.5px] transition-all duration-150 ${
-                      active
-                        ? "nav-pill-active"
-                        : "text-[#7a7a72] hover:text-[#1a1a18] hover:bg-black/[0.06]"
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </nav>
+            {/* Desktop: empty placeholder to push right controls */}
+            <div className="hidden lg:flex flex-1" />
 
             {/* Mobile logo */}
             <div className="lg:hidden flex-1 min-w-0">
