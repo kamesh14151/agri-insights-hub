@@ -26,7 +26,7 @@ import {
 } from "lucide-react";
 import { getNdviColor, getNdwiColor } from "@/lib/heatmap";
 
-const SENTINEL_INSTANCE_ID = import.meta.env.VITE_SENTINEL_INSTANCE_ID || "";
+
 
 type LandResult = {
   soilType?: string;
@@ -103,7 +103,6 @@ export function MapPanel() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [searchLoading, setSearchLoading] = useState(false);
-  const [activeLayer, setActiveLayer] = useState<"satellite" | "ndvi" | "ndwi">("satellite");
 
   const analyze = useServerFn(analyzeLand);
 
@@ -141,25 +140,7 @@ export function MapPanel() {
       map.addSource("draft-points", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
       map.addSource("field-polygon", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
       
-      if (SENTINEL_INSTANCE_ID) {
-        map.addSource("sentinel-wms", {
-          type: "raster",
-          tiles: [
-            `https://services.sentinel-hub.com/ogc/wms/${SENTINEL_INSTANCE_ID}?REQUEST=GetMap&BBOX={bbox-epsg-3857}&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&LAYERS=NDVI&FORMAT=image/png`
-          ],
-          tileSize: 512,
-        });
-      }
-
       // Add layers
-      if (SENTINEL_INSTANCE_ID) {
-        map.addLayer({
-          id: "sentinel-wms-layer",
-          type: "raster",
-          source: "sentinel-wms",
-          paint: { "raster-opacity": 0 },
-        });
-      }
       
       map.addLayer({ id: "field-polygon-layer", type: "fill", source: "field-polygon", paint: { "fill-color": "#10b981", "fill-opacity": 0.3 } });
       map.addLayer({ id: "field-polygon-outline", type: "line", source: "field-polygon", paint: { "line-color": "#10b981", "line-width": 4 } });
@@ -244,31 +225,7 @@ export function MapPanel() {
     };
     (map.getSource("field-polygon") as mapboxgl.GeoJSONSource)?.setData(fieldGeoJSON);
 
-    // Live Sentinel Satellite WMS Layer logic
-    if (SENTINEL_INSTANCE_ID && map.getLayer("sentinel-wms-layer")) {
-      const isRasterActive = !isDrawing && corners.length === 4 && activeLayer !== "satellite";
-      map.setPaintProperty("sentinel-wms-layer", "raster-opacity", isRasterActive ? 0.75 : 0);
-      
-      if (isRasterActive) {
-        const layerType = activeLayer === "ndvi" ? "NDVI" : "MOISTURE_INDEX";
-        const wmsUrl = `https://services.sentinel-hub.com/ogc/wms/${SENTINEL_INSTANCE_ID}?REQUEST=GetMap&BBOX={bbox-epsg-3857}&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&LAYERS=${layerType}&FORMAT=image/png`;
-        
-        // Mapbox GL JS doesn't support dynamically changing a raster source URL directly without re-adding it,
-        // but since we added the layer structure, the best way for a smooth experience is updating the source style.
-        const source = map.getSource("sentinel-wms") as mapboxgl.RasterTileSource;
-        if (source) {
-          // Replace tiles array if it's different
-          if (source.tiles && source.tiles[0] !== wmsUrl) {
-            map.removeLayer("sentinel-wms-layer");
-            map.removeSource("sentinel-wms");
-            map.addSource("sentinel-wms", { type: "raster", tiles: [wmsUrl], tileSize: 512 });
-            map.addLayer({ id: "sentinel-wms-layer", type: "raster", source: "sentinel-wms", paint: { "raster-opacity": 0.75 } }, "field-polygon-layer");
-          }
-        }
-      }
-    }
-
-  }, [isDrawing, draftCorners, corners, activeLayer, result, apiLoaded]);
+  }, [isDrawing, draftCorners, corners, result, apiLoaded]);
 
 
   const processFieldAnalysis = async (pts: CornerPoint[]) => {
@@ -386,36 +343,7 @@ export function MapPanel() {
             </form>
           </div>
 
-          <div className="absolute top-16 left-3 z-[400] pointer-events-auto bg-slate-900/90 backdrop-blur-md border border-emerald-500/30 rounded-xl shadow-lg p-1.5 flex flex-col gap-1.5 w-auto">
-            {(["satellite", "ndvi", "ndwi"] as const).map((layer) => (
-              <button
-                key={layer}
-                onClick={() => setActiveLayer(layer)}
-                className={`flex items-center gap-2 text-left px-3 py-2 rounded-lg text-[11px] font-bold uppercase tracking-wider transition whitespace-nowrap ${
-                  activeLayer === layer 
-                    ? "bg-emerald-500 text-slate-950 shadow-md" 
-                    : "text-slate-300 hover:bg-white/10"
-                }`}
-              >
-                <Layers className={`w-3.5 h-3.5 ${activeLayer === layer ? "text-slate-950" : "text-emerald-400"}`} />
-                {layer === "satellite" ? "Satellite Map" : layer === "ndvi" ? "NDVI Heatmap" : "Moisture Map"}
-              </button>
-            ))}
-          </div>
-
           <div ref={mapContainerRef} className="w-full h-full" />
-          
-          {!SENTINEL_INSTANCE_ID && activeLayer !== "satellite" && corners.length === 4 && (
-            <div className="absolute inset-x-4 top-24 z-[400] pointer-events-none">
-              <div className="bg-slate-900/90 backdrop-blur-md border border-amber-500/50 rounded-xl p-4 shadow-xl text-center pointer-events-auto max-w-sm mx-auto">
-                <AlertTriangle className="w-6 h-6 text-amber-500 mx-auto mb-2" />
-                <h4 className="text-sm font-bold text-white mb-1">Live Satellite API Key Required</h4>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  To view live NDVI and Moisture heatmaps, add your Sentinel Hub Instance ID to <code className="bg-black/50 text-emerald-400 px-1 py-0.5 rounded text-[10px]">VITE_SENTINEL_INSTANCE_ID</code> in your <code className="bg-black/50 px-1 py-0.5 rounded text-[10px] text-amber-300">.env</code> file.
-                </p>
-              </div>
-            </div>
-          )}
 
           {!apiLoaded && (
             <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-900 text-emerald-500">
