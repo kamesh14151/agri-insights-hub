@@ -3,7 +3,7 @@ import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard, ScanLine, Cpu, Sprout, CloudSun,
   TrendingUp, Settings, Menu, X, LogOut, Leaf, ChevronRight,
-  Bell, Search, Globe, ChevronDown
+  Bell, Search, Globe, ChevronDown, ShieldAlert
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useI18n, LANGUAGES, type Lang } from "@/lib/i18n";
@@ -36,9 +36,10 @@ export function DashboardShell({ children }: { children: ReactNode }) {
     { to: "/app",          label: "Dashboard",   icon: LayoutDashboard, exact: true },
     { to: "/app/iot",      label: t("nav_iot"),   icon: Cpu },
     { to: "/app/disease",  label: "AI Insights",  icon: ScanLine },
-    { to: "/app/crops",    label: "Field Intel",  icon: Sprout },
+    { to: "/app/crops",    label: "Crop Planner", icon: Sprout },
     { to: "/app/weather",  label: t("nav_weather"), icon: CloudSun },
     { to: "/app/market",   label: t("nav_market"),  icon: TrendingUp },
+    ...(user?.role === "manager" ? [{ to: "/app/manager", label: "Manager Hub", icon: ShieldAlert }] : []),
   ];
 
   const isActive = (to: string, exact?: boolean) =>
@@ -58,6 +59,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
       phone: formData.get("phone") as string,
       location: formData.get("location") as string,
       farmSize: formData.get("farmSize") as string,
+      role: (formData.get("role") as any) || user?.role,
     });
     toast.success("Profile updated");
     setProfileOpen(false);
@@ -249,6 +251,15 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                         <input name="location" defaultValue={user?.location || ""} className="w-full mt-1 rounded-xl bg-black/[0.03] border-transparent px-3 py-2 text-[13px] focus:bg-white focus:border-[#c8e44a] focus:ring-1 focus:ring-[#c8e44a] outline-none transition" />
                       </div>
                       
+                      <div>
+                        <label className="text-[10px] uppercase font-bold text-[#7a7a72] ml-1">Account Role (Testing)</label>
+                        <select name="role" defaultValue={user?.role || "farmer"} className="w-full mt-1 rounded-xl bg-black/[0.03] border-transparent px-3 py-2 text-[13px] focus:bg-white focus:border-[#c8e44a] focus:ring-1 focus:ring-[#c8e44a] outline-none transition">
+                          <option value="farmer">Farmer</option>
+                          <option value="manager">Manager</option>
+                          <option value="admin">Admin</option>
+                        </select>
+                      </div>
+
                       <div className="flex gap-2 mt-4 pt-4 border-t border-black/[0.06]">
                         <button type="submit" className="flex-1 btn-lime py-2 text-[13px] rounded-full">Save</button>
                         <button type="button" onClick={signOut} className="p-2 rounded-full text-[#e05245] hover:bg-red-50 transition" title="Sign out">

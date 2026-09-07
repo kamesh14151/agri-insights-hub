@@ -125,3 +125,10 @@ export const ACTIVITY = [
   { title: "New buyer enquiry", detail: "8 t paddy lot — Erode Mandi trader", time: "3 hrs ago" },
   { title: "Booking confirmed", detail: "Drone spraying · 6 acres · tomorrow 07:00", time: "Yesterday" },
 ];
+
+export const REGIONAL_DISEASE_ALERTS = [
+  { region: "Coimbatore North", disease: "Yellow Rust", occurrences: 4, trend: "Highly Growing", severity: "Critical" },
+  { region: "Erode Delta", disease: "Leaf Blight", occurrences: 12, trend: "Common", severity: "Medium" },
+  { region: "Salem Hills", disease: "Powdery Mildew", occurrences: 7, trend: "Spreading", severity: "High" },
+  { region: "Tiruppur Belt", disease: "Root Rot", occurrences: 2, trend: "Isolated", severity: "Low" },
+];

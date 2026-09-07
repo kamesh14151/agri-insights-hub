@@ -19,6 +19,7 @@ import { Route as AppChatbotRouteImport } from './routes/app.chatbot'
 import { Route as AppCropsRouteImport } from './routes/app.crops'
 import { Route as AppDiseaseRouteImport } from './routes/app.disease'
 import { Route as AppIotRouteImport } from './routes/app.iot'
+import { Route as AppManagerRouteImport } from './routes/app.manager'
 import { Route as AppMarketRouteImport } from './routes/app.market'
 import { Route as AppMarketplaceRouteImport } from './routes/app.marketplace'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
@@ -79,6 +80,11 @@ const AppIotRoute = AppIotRouteImport.update({
   path: '/iot',
   getParentRoute: () => AppRoute,
 } as any)
+const AppManagerRoute = AppManagerRouteImport.update({
+  id: '/manager',
+  path: '/manager',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMarketRoute = AppMarketRouteImport.update({
   id: '/market',
   path: '/market',
@@ -135,6 +141,7 @@ export interface FileRoutesByFullPath {
   '/app/crops': typeof AppCropsRoute
   '/app/disease': typeof AppDiseaseRoute
   '/app/iot': typeof AppIotRoute
+  '/app/manager': typeof AppManagerRoute
   '/app/market': typeof AppMarketRoute
   '/app/marketplace': typeof AppMarketplaceRoute
   '/app/profile': typeof AppProfileRoute
@@ -155,6 +162,7 @@ export interface FileRoutesByTo {
   '/app/crops': typeof AppCropsRoute
   '/app/disease': typeof AppDiseaseRoute
   '/app/iot': typeof AppIotRoute
+  '/app/manager': typeof AppManagerRoute
   '/app/market': typeof AppMarketRoute
   '/app/marketplace': typeof AppMarketplaceRoute
   '/app/profile': typeof AppProfileRoute
@@ -177,6 +185,7 @@ export interface FileRoutesById {
   '/app/crops': typeof AppCropsRoute
   '/app/disease': typeof AppDiseaseRoute
   '/app/iot': typeof AppIotRoute
+  '/app/manager': typeof AppManagerRoute
   '/app/market': typeof AppMarketRoute
   '/app/marketplace': typeof AppMarketplaceRoute
   '/app/profile': typeof AppProfileRoute
@@ -200,6 +209,7 @@ export interface FileRouteTypes {
     | '/app/crops'
     | '/app/disease'
     | '/app/iot'
+    | '/app/manager'
     | '/app/market'
     | '/app/marketplace'
     | '/app/profile'
@@ -220,6 +230,7 @@ export interface FileRouteTypes {
     | '/app/crops'
     | '/app/disease'
     | '/app/iot'
+    | '/app/manager'
     | '/app/market'
     | '/app/marketplace'
     | '/app/profile'
@@ -241,6 +252,7 @@ export interface FileRouteTypes {
     | '/app/crops'
     | '/app/disease'
     | '/app/iot'
+    | '/app/manager'
     | '/app/market'
     | '/app/marketplace'
     | '/app/profile'
@@ -330,6 +342,13 @@ declare module '@tanstack/react-router' {
       path: '/iot'
       fullPath: '/app/iot'
       preLoaderRoute: typeof AppIotRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/manager': {
+      id: '/app/manager'
+      path: '/manager'
+      fullPath: '/app/manager'
+      preLoaderRoute: typeof AppManagerRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/market': {
@@ -428,6 +447,7 @@ interface AppRouteChildren {
   AppCropsRoute: typeof AppCropsRoute
   AppDiseaseRoute: typeof AppDiseaseRoute
   AppIotRoute: typeof AppIotRoute
+  AppManagerRoute: typeof AppManagerRoute
   AppMarketRoute: typeof AppMarketRoute
   AppMarketplaceRoute: typeof AppMarketplaceRoute
   AppProfileRoute: typeof AppProfileRoute
@@ -444,6 +464,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppCropsRoute: AppCropsRoute,
   AppDiseaseRoute: AppDiseaseRoute,
   AppIotRoute: AppIotRoute,
+  AppManagerRoute: AppManagerRoute,
   AppMarketRoute: AppMarketRoute,
   AppMarketplaceRoute: AppMarketplaceRoute,
   AppProfileRoute: AppProfileRoute,
