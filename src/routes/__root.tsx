@@ -18,19 +18,20 @@ import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
+    <div className="flex min-h-screen flex-col items-center justify-center p-6 text-center animate-scale-in" style={{
+      background: "radial-gradient(ellipse 70% 65% at -5% 110%, rgba(160,196,230,0.55), transparent 65%), radial-gradient(ellipse 65% 60% at 105% -5%, rgba(195,228,80,0.42), transparent 60%), #f5f6f0",
+    }}>
+      <div className="card max-w-md p-10 rounded-[32px]">
+        <span className="inline-grid h-16 w-16 place-items-center rounded-[20px] bg-[#1a1a18] text-white mb-6">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </span>
+        <h1 className="text-4xl font-bold tracking-[-0.04em] text-[#1a1a18]">Page not found</h1>
+        <p className="mt-4 text-[14px] text-[#7a7a72] leading-relaxed">
+          The field you're looking for seems to have been harvested or doesn't exist. Let's get you back to familiar ground.
         </p>
-        <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Go home
+        <div className="mt-8">
+          <Link to="/" className="btn-primary inline-flex items-center gap-2 px-6 py-2.5 text-[13.5px]">
+            Return to Dashboard
           </Link>
         </div>
       </div>
@@ -99,7 +100,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..800;1,14..32,300..700&family=Playfair+Display:ital,wght@0,400..700;1,400..600&display=swap",
+      },
     ],
   }),
   shellComponent: RootShell,
