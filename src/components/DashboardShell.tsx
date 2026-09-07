@@ -150,7 +150,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
       <div className="lg:pl-[260px]">
 
         {/* ── Top nav ────────────────────────────────────────────────────── */}
-        <header className="top-nav sticky top-0 z-40 h-[64px]">
+        <header className="top-nav sticky top-0 z-40 h-[64px] bg-background border-b border-border">
           <div className="h-full px-4 sm:px-6 flex items-center gap-3">
 
             {/* Mobile hamburger */}
