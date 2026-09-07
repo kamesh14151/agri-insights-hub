@@ -16,6 +16,7 @@ import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppAdminRouteImport } from './routes/app.admin'
 import { Route as AppBookingRouteImport } from './routes/app.booking'
 import { Route as AppChatbotRouteImport } from './routes/app.chatbot'
+import { Route as AppCommunityRouteImport } from './routes/app.community'
 import { Route as AppCropsRouteImport } from './routes/app.crops'
 import { Route as AppDiseaseRouteImport } from './routes/app.disease'
 import { Route as AppIotRouteImport } from './routes/app.iot'
@@ -63,6 +64,11 @@ const AppBookingRoute = AppBookingRouteImport.update({
 const AppChatbotRoute = AppChatbotRouteImport.update({
   id: '/chatbot',
   path: '/chatbot',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCommunityRoute = AppCommunityRouteImport.update({
+  id: '/community',
+  path: '/community',
   getParentRoute: () => AppRoute,
 } as any)
 const AppCropsRoute = AppCropsRouteImport.update({
@@ -138,6 +144,7 @@ export interface FileRoutesByFullPath {
   '/app/admin': typeof AppAdminRoute
   '/app/booking': typeof AppBookingRouteWithChildren
   '/app/chatbot': typeof AppChatbotRoute
+  '/app/community': typeof AppCommunityRoute
   '/app/crops': typeof AppCropsRoute
   '/app/disease': typeof AppDiseaseRoute
   '/app/iot': typeof AppIotRoute
@@ -159,6 +166,7 @@ export interface FileRoutesByTo {
   '/app/admin': typeof AppAdminRoute
   '/app/booking': typeof AppBookingRouteWithChildren
   '/app/chatbot': typeof AppChatbotRoute
+  '/app/community': typeof AppCommunityRoute
   '/app/crops': typeof AppCropsRoute
   '/app/disease': typeof AppDiseaseRoute
   '/app/iot': typeof AppIotRoute
@@ -182,6 +190,7 @@ export interface FileRoutesById {
   '/app/admin': typeof AppAdminRoute
   '/app/booking': typeof AppBookingRouteWithChildren
   '/app/chatbot': typeof AppChatbotRoute
+  '/app/community': typeof AppCommunityRoute
   '/app/crops': typeof AppCropsRoute
   '/app/disease': typeof AppDiseaseRoute
   '/app/iot': typeof AppIotRoute
@@ -206,6 +215,7 @@ export interface FileRouteTypes {
     | '/app/admin'
     | '/app/booking'
     | '/app/chatbot'
+    | '/app/community'
     | '/app/crops'
     | '/app/disease'
     | '/app/iot'
@@ -227,6 +237,7 @@ export interface FileRouteTypes {
     | '/app/admin'
     | '/app/booking'
     | '/app/chatbot'
+    | '/app/community'
     | '/app/crops'
     | '/app/disease'
     | '/app/iot'
@@ -249,6 +260,7 @@ export interface FileRouteTypes {
     | '/app/admin'
     | '/app/booking'
     | '/app/chatbot'
+    | '/app/community'
     | '/app/crops'
     | '/app/disease'
     | '/app/iot'
@@ -321,6 +333,13 @@ declare module '@tanstack/react-router' {
       path: '/chatbot'
       fullPath: '/app/chatbot'
       preLoaderRoute: typeof AppChatbotRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/community': {
+      id: '/app/community'
+      path: '/community'
+      fullPath: '/app/community'
+      preLoaderRoute: typeof AppCommunityRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/crops': {
@@ -444,6 +463,7 @@ interface AppRouteChildren {
   AppAdminRoute: typeof AppAdminRoute
   AppBookingRoute: typeof AppBookingRouteWithChildren
   AppChatbotRoute: typeof AppChatbotRoute
+  AppCommunityRoute: typeof AppCommunityRoute
   AppCropsRoute: typeof AppCropsRoute
   AppDiseaseRoute: typeof AppDiseaseRoute
   AppIotRoute: typeof AppIotRoute
@@ -461,6 +481,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAdminRoute: AppAdminRoute,
   AppBookingRoute: AppBookingRouteWithChildren,
   AppChatbotRoute: AppChatbotRoute,
+  AppCommunityRoute: AppCommunityRoute,
   AppCropsRoute: AppCropsRoute,
   AppDiseaseRoute: AppDiseaseRoute,
   AppIotRoute: AppIotRoute,

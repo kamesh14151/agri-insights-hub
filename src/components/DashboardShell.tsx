@@ -3,20 +3,24 @@ import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard, ScanLine, Cpu, Sprout, CloudSun,
   TrendingUp, Settings, Menu, X, LogOut, Leaf, ChevronRight,
-  Bell, Search, Globe, ChevronDown, ShieldAlert
+  Bell, Search, Globe, ChevronDown, ShieldAlert, Users
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useI18n, LANGUAGES, type Lang } from "@/lib/i18n";
 import { toast } from "sonner";
 import { FloatingWidgets } from "@/components/FloatingWidgets";
+import { supabase } from "@/lib/supabase";
 
 export function DashboardShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
   const profileRef = useRef<HTMLDivElement>(null);
   const langRef = useRef<HTMLDivElement>(null);
+  const notifRef = useRef<HTMLDivElement>(null);
 
   const { user, logout, update } = useAuth();
   const { lang, setLang, t } = useI18n();
@@ -24,9 +28,25 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
+    if (user?.id) {
+      supabase.from("notifications").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(10).then(({ data }) => {
+        if (data) setNotifications(data);
+      });
+      const sub = supabase.channel(`notifications:${user.id}`)
+        .on("postgres_changes", { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, (payload) => {
+          supabase.from("notifications").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(10).then(({ data }) => {
+            if (data) setNotifications(data);
+          });
+        }).subscribe();
+      return () => { supabase.removeChannel(sub); };
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (profileRef.current && !profileRef.current.contains(event.target as Node)) setProfileOpen(false);
       if (langRef.current && !langRef.current.contains(event.target as Node)) setLangOpen(false);
+      if (notifRef.current && !notifRef.current.contains(event.target as Node)) setNotificationsOpen(false);
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -39,6 +59,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
     { to: "/app/crops",    label: "Crop Planner", icon: Sprout },
     { to: "/app/weather",  label: t("nav_weather"), icon: CloudSun },
     { to: "/app/market",   label: t("nav_market"),  icon: TrendingUp },
+    { to: "/app/community",label: "Community",    icon: Users },
     ...(user?.role === "manager" ? [{ to: "/app/manager", label: "Manager Hub", icon: ShieldAlert }] : []),
   ];
 
@@ -201,10 +222,42 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                   </div>
                 )}
               </div>
-
-              <button className="grid h-9 w-9 place-items-center rounded-full bg-black/[0.06] text-[#7a7a72] hover:bg-black/10 hover:text-[#1a1a18] transition">
-                <Bell className="h-4 w-4" />
-              </button>
+              {/* Notifications */}
+              <div className="relative" ref={notifRef}>
+                <button 
+                  onClick={() => {
+                    setNotificationsOpen(!notificationsOpen);
+                    if (!notificationsOpen && notifications.some(n => !n.read)) {
+                      supabase.from("notifications").update({ read: true }).eq("user_id", user?.id).then(() => {
+                        setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+                      });
+                    }
+                  }}
+                  className="relative grid h-9 w-9 place-items-center rounded-full bg-black/[0.06] text-[#7a7a72] hover:bg-black/10 hover:text-[#1a1a18] transition"
+                >
+                  <Bell className="h-4 w-4" />
+                  {notifications.some(n => !n.read) && (
+                    <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
+                  )}
+                </button>
+                {notificationsOpen && (
+                  <div className="absolute right-0 mt-3 w-80 max-h-96 overflow-y-auto rounded-2xl bg-white border border-black/[0.06] shadow-xl p-2 z-50">
+                    <h3 className="px-3 py-2 text-xs font-bold text-[#1a1a18] uppercase tracking-wider">Notifications</h3>
+                    {notifications.length === 0 ? (
+                      <div className="p-4 text-center text-xs text-[#7a7a72]">No notifications yet</div>
+                    ) : (
+                      <div className="space-y-1 mt-1">
+                        {notifications.map(n => (
+                          <div key={n.id} className={`p-3 rounded-xl text-sm transition ${!n.read ? "bg-[#c8e44a]/10" : "hover:bg-black/[0.02]"}`}>
+                            <p className="font-semibold text-[#1a1a18]">{n.title}</p>
+                            <p className="text-xs text-[#7a7a72] mt-0.5 leading-relaxed">{n.message}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
               
               {/* Profile Modal Trigger */}
               <div className="relative" ref={profileRef}>
