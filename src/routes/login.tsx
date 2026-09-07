@@ -37,7 +37,11 @@ function LoginPage() {
     const ok = login(email, password, role as any, false);
     if (ok) {
       toast.success("Welcome back!");
-      navigate({ to: "/app", replace: true });
+      if (role === "manager" || role === "admin") {
+        navigate({ to: "/app/admin", replace: true });
+      } else {
+        navigate({ to: "/app", replace: true });
+      }
     } else {
       toast.error("Invalid credentials");
     }

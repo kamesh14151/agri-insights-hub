@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   Area, AreaChart, CartesianGrid, Cell, Pie, PieChart,
   ResponsiveContainer, Tooltip, XAxis, YAxis, ReferenceLine,
@@ -87,6 +88,18 @@ const soilData = [
 /* ── Dashboard ────────────────────────────────────────────────────────────── */
 function DashboardHome() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user?.role === "manager" || user?.role === "admin") {
+      navigate({ to: "/app/admin", replace: true });
+    }
+  }, [user?.role, navigate]);
+
+  if (user?.role === "manager" || user?.role === "admin") {
+    return null;
+  }
+
   const name = user?.name?.split(" ")[0] ?? "there";
   const now = new Date();
   const hour = now.getHours();

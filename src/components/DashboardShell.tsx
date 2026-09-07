@@ -3,7 +3,7 @@ import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard, ScanLine, Cpu, Sprout, CloudSun,
   TrendingUp, Settings, Menu, X, LogOut, Leaf, ChevronRight,
-  Bell, Search, Globe, ChevronDown, ShieldAlert, Users
+  Bell, Search, Globe, ChevronDown, ShieldAlert, Users, Shield
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useI18n, LANGUAGES, type Lang } from "@/lib/i18n";
@@ -54,18 +54,19 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 
   const isManagerOrAdmin = user?.role === "manager" || user?.role === "admin";
 
-  const navItems = [
-    { to: "/app",          label: "Dashboard",   icon: LayoutDashboard, exact: true },
-    { to: "/app/iot",      label: t("nav_iot"),   icon: Cpu },
-    { to: "/app/disease",  label: "AI Insights",  icon: ScanLine },
-    { to: "/app/crops",    label: "Crop Planner", icon: Sprout },
-    { to: "/app/weather",  label: t("nav_weather"), icon: CloudSun },
-    { to: "/app/market",   label: t("nav_market"),  icon: TrendingUp },
-    ...(isManagerOrAdmin ? [
-      { to: "/app/manager", label: "Manager Hub", icon: ShieldAlert },
-      { to: "/app/admin",   label: "Admin Console", icon: Users },
-    ] : []),
-  ];
+  const navItems = isManagerOrAdmin
+    ? [
+        { to: "/app/admin",   label: "Admin Console & Users", icon: Shield, exact: false },
+        { to: "/app/manager", label: "Manager Hub & Radar",   icon: ShieldAlert, exact: false },
+      ]
+    : [
+        { to: "/app",          label: "Dashboard",   icon: LayoutDashboard, exact: true },
+        { to: "/app/iot",      label: t("nav_iot"),   icon: Cpu },
+        { to: "/app/disease",  label: "AI Insights",  icon: ScanLine },
+        { to: "/app/crops",    label: "Crop Planner", icon: Sprout },
+        { to: "/app/weather",  label: t("nav_weather"), icon: CloudSun },
+        { to: "/app/market",   label: t("nav_market"),  icon: TrendingUp },
+      ];
 
   const isActive = (to: string, exact?: boolean) =>
     exact ? pathname === to || pathname === `${to}/` : pathname.startsWith(to);
@@ -109,7 +110,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
       >
         {/* Logo */}
         <div className="flex h-[64px] shrink-0 items-center justify-between px-5 mt-2">
-          <Link to="/app" className="flex items-center gap-2.5 min-w-0" onClick={() => setOpen(false)}>
+          <Link to={isManagerOrAdmin ? "/app/admin" : "/app"} className="flex items-center gap-2.5 min-w-0" onClick={() => setOpen(false)}>
             <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[#1a1a18] shadow-sm">
               <Leaf className="h-4 w-4 text-white" />
             </span>
@@ -122,7 +123,9 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-1">
-          <p className="px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#7a7a72]">Workspace</p>
+          <p className="px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#7a7a72]">
+            {isManagerOrAdmin ? "Management Console" : "Workspace"}
+          </p>
           {navItems.map((item) => {
             const active = isActive(item.to, "exact" in item ? item.exact : false);
             return (
