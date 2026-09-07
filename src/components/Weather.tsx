@@ -3,7 +3,7 @@ import { useI18n } from "@/lib/i18n";
 import {
   Thermometer, Droplets, CloudRain, Sun, Loader2, MapPin,
   Search, LocateFixed, Wind, AlertTriangle, CheckCircle2, Clock,
-  Bug, Sprout, Beaker, TrendingUp, Volume2, VolumeX, Printer, Info, Calendar, ShieldAlert
+  Bug, Sprout, Beaker, TrendingUp, Volume2, VolumeX, Printer, Info, Calendar, ShieldAlert, Sparkles
 } from "lucide-react";
 import { toast } from "sonner";
 import {
