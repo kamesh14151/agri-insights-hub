@@ -88,17 +88,16 @@ export function CommunityWidget() {
     setNewMessage(""); // Optimistic clear
 
     try {
-      const { error, data } = await supabase
+      const { error } = await supabase
         .from("community_posts")
         .insert({
-          user_id: String(user.id), // Ensure it's passed as string to match TEXT column
+          user_id: String(user.id),
           user_name: user.name || "Farmer",
           user_role: user.role || "farmer",
           content: content,
           likes_count: 0,
           comments_count: 0
-        })
-        .select();
+        });
         
       if (error) {
         console.error("Supabase insert error details:", error);
@@ -139,7 +138,7 @@ export function CommunityWidget() {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-[110px] right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-600 text-white shadow-xl shadow-emerald-600/30 transition-transform hover:scale-105 active:scale-95"
+        className="fixed bottom-[180px] right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-600 text-white shadow-xl shadow-emerald-600/30 transition-transform hover:scale-105 active:scale-95"
       >
         <Users className="h-6 w-6" />
       </button>
