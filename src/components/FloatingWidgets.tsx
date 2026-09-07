@@ -8,6 +8,7 @@ import {
 import { toast } from "sonner";
 import { chatWithOpenRouter } from "@/lib/ai.functions";
 import { useI18n } from "@/lib/i18n";
+import { CommunityWidget } from "@/components/CommunityWidget";
 
 /* ─────────────────────────────────── shared types & languages ─── */
 type ChatMsg  = { role: "user" | "assistant"; content: string };
@@ -997,6 +998,8 @@ export function FloatingWidgets() {
           </div>
         </div>
       )}
+      
+      <CommunityWidget />
 
       <style dangerouslySetInnerHTML={{ __html: "@keyframes fwSlide { from { transform:translateY(24px); opacity:0; } to { transform:translateY(0); opacity:1; } } @keyframes fwUp { from { transform:translateY(100%); } to { transform:translateY(0); } }" }} />
     </>

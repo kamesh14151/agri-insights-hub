@@ -59,7 +59,6 @@ export function DashboardShell({ children }: { children: ReactNode }) {
     { to: "/app/crops",    label: "Crop Planner", icon: Sprout },
     { to: "/app/weather",  label: t("nav_weather"), icon: CloudSun },
     { to: "/app/market",   label: t("nav_market"),  icon: TrendingUp },
-    { to: "/app/community",label: "Community",    icon: Users },
     ...(user?.role === "manager" ? [{ to: "/app/manager", label: "Manager Hub", icon: ShieldAlert }] : []),
   ];
 
