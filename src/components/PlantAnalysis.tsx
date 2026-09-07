@@ -125,7 +125,7 @@ export function PlantAnalysis() {
 
   const [preview, setPreview] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
-  const [analysisStep, setAnalysisStep] = useState("Initializing Gemini Vision...");
+  const [analysisStep, setAnalysisStep] = useState("Initializing Vision AI...");
   const [result, setResult] = useState<DiagnosticResult | null>(null);
 
   // Audio / Speech Narration (Siri / VoiceOver Style)
@@ -239,7 +239,7 @@ export function PlantAnalysis() {
 
     // Visual step sequence
     const steps = [
-      "Gemini Vision: Extracting leaf morphology & chlorophyll indices...",
+      "Vision AI: Extracting leaf morphology & chlorophyll indices...",
       "Analyzing micro-symptoms, spot margins & lesion halos...",
       "Cross-referencing entomology database for pest & insect vectors...",
       "Formulating precise organic & chemical curing dosages...",
@@ -261,6 +261,14 @@ export function PlantAnalysis() {
       })) as DiagnosticResult;
 
       clearInterval(stepInterval);
+
+      if (response.disease === "NOT_A_PLANT") {
+        toast.error("Invalid Image: This does not appear to be a crop or plant leaf. Please upload a clear photo of the affected plant.");
+        setResult(null);
+        setPreview(null);
+        return;
+      }
+
       setResult(response);
       toast.success(t("toast_analyzed") || "Pathology analysis complete!");
 
@@ -422,7 +430,7 @@ export function PlantAnalysis() {
           <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-black/[0.04] border border-black/[0.06] mb-1.5">
             <span className="h-1.5 w-1.5 rounded-full bg-[#b8d940] animate-pulse" />
             <span className="text-[11px] font-semibold tracking-wide uppercase text-[#55554f]">
-              Gemini Multimodal AI Vision
+              Advanced Multimodal AI Vision
             </span>
           </div>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#1a1a18]">
@@ -633,7 +641,7 @@ export function PlantAnalysis() {
                   Select or Drag & Drop Affected Leaf Photo
                 </h3>
                 <p className="text-xs sm:text-sm text-[#7a7a72] max-w-md mx-auto mt-1 mb-6">
-                  Supports High-Res JPG, PNG, WebP or HEIC from iPhone/Android up to 15MB. Our multimodal Gemini AI analyzes leaf patterns in high detail.
+                  Supports High-Res JPG, PNG, WebP or HEIC up to 15MB. Our multimodal AI analyzes leaf patterns in high detail.
                 </p>
                 <div className="flex items-center justify-center gap-3">
                   <button
@@ -715,7 +723,7 @@ export function PlantAnalysis() {
                     }`}
                   >
                     {isSpeaking ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
-                    <span>{isSpeaking ? "Pause Narration" : "Listen (Siri Voice)"}</span>
+                    <span>{isSpeaking ? "Pause Narration" : "Listen (Voice Readout)"}</span>
                   </button>
                 )}
               </div>
@@ -771,7 +779,7 @@ export function PlantAnalysis() {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between mb-0.5">
                         <span className="text-[11px] font-semibold text-[#1a1a18] uppercase tracking-wider">
-                          Apple Siri Audio Summary
+                          Voice Audio Summary
                         </span>
                         {isSpeaking && (
                           <span className="flex items-center gap-1 text-[10px] text-emerald-600 font-semibold">
@@ -799,7 +807,7 @@ export function PlantAnalysis() {
                       </div>
                     </div>
                     <h3 className="text-base font-bold text-[#1a1a18]">
-                      Consulting Gemini Vision Model...
+                      Consulting Vision AI Model...
                     </h3>
                     <p className="text-xs text-[#7a7a72] mt-2 max-w-sm transition-all duration-300">
                       {analysisStep}

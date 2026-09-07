@@ -238,6 +238,9 @@ Analyze this plant / leaf image with utmost precision.
 Detect any disease, insect pest infestation, vector damage (e.g., whiteflies, aphids, thrips, stem borers, mites, caterpillars), bacterial/fungal lesion, or nutritional chlorosis.
 If the plant is completely healthy, indicate that clearly.
 
+CRITICAL INSTRUCTION: If the image is a logo, document, person, screenshot, or clearly NOT a plant/crop/leaf, you MUST set "disease" to "NOT_A_PLANT" and leave other fields empty. Do not attempt to diagnose non-plant images.
+
+
 Respond in ${opts.language || "English"}.
 You MUST respond with ONLY a valid, strict JSON object (no markdown, no backticks, no explanatory prose) adhering exactly to this structure:
 {

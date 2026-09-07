@@ -686,7 +686,7 @@ export function FloatingWidgets() {
           "h-2 w-2 rounded-full bg-green-400"
         }/>
         <span className="text-[11px]">
-          {phase === "idle" ? `Ready in ${selectedLang.label} · tap mic` : phase === "listening" ? "Listening... speak now" : phase === "thinking" ? "Gemini 2.5 thinking..." : "Speaking response"}
+          {phase === "idle" ? `Ready in ${selectedLang.label} · tap mic` : phase === "listening" ? "Listening... speak now" : phase === "thinking" ? "AI thinking..." : "Speaking response"}
         </span>
       </div>
 
@@ -827,7 +827,7 @@ export function FloatingWidgets() {
                       <Send className="h-3.5 w-3.5 text-white"/>
                     </button>
                   </form>
-                  <p className="mt-1.5 text-center text-[10px] text-white/40"><Sprout className="mr-1 inline h-2.5 w-2.5"/>Gemini 2.5 Flash Lite · Precision Agronomy</p>
+                  <p className="mt-1.5 text-center text-[10px] text-white/40"><Sprout className="mr-1 inline h-2.5 w-2.5"/>Agrisynapse AI · Precision Agronomy</p>
                 </div>
               </>
             )}
@@ -890,7 +890,7 @@ export function FloatingWidgets() {
                   <input ref={chatInputRef} value={chatInput} onChange={e=>setChatInput(e.target.value)} placeholder={loc.placeholder} className="min-w-0 flex-1 bg-transparent py-1 text-sm text-white placeholder:text-white/50 focus:outline-none"/>
                   <button type="submit" disabled={chatBusy||!chatInput.trim()} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all hover:scale-110 disabled:opacity-40" style={{background:chatInput.trim()?"linear-gradient(135deg,var(--primary),#16a34a)":"rgba(255,255,255,.2)"}}><Send className="h-3.5 w-3.5 text-white"/></button>
                 </form>
-                <p className="mt-1.5 text-center text-[10px] text-white/40"><Sprout className="mr-1 inline h-2.5 w-2.5"/>Gemini 2.5 Flash Lite</p>
+                <p className="mt-1.5 text-center text-[10px] text-white/40"><Sprout className="mr-1 inline h-2.5 w-2.5"/>Agrisynapse AI</p>
               </div>
             </div>
           </div>
@@ -967,7 +967,7 @@ export function FloatingWidgets() {
               </div>
               <p className="mt-2 text-center text-[10px] text-white/50">
                 <Sparkles className="mr-1 inline h-2.5 w-2.5 text-violet-300"/>
-                {phase === "listening" ? `Listening in ${selectedLang.label}... speak now` : phase === "speaking" ? "Speaking... tap orb to pause" : phase === "thinking" ? "Analyzing with Gemini 2.5..." : `Tap mic to speak (${selectedLang.label})`}
+                {phase === "listening" ? `Listening in ${selectedLang.label}... speak now` : phase === "speaking" ? "Speaking... tap orb to pause" : phase === "thinking" ? "Analyzing with AI..." : `Tap mic to speak (${selectedLang.label})`}
               </p>
             </div>
           </div>
