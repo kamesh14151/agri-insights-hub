@@ -311,10 +311,7 @@ export function MapPanel() {
             {isDrawing ? <Crosshair className="w-3.5 h-3.5" /> : <Square className="w-3.5 h-3.5" />}
             {isDrawing ? `Select Corner ${draftCorners.length + 1}...` : "Plot 4-Corner Field"}
           </button>
-          <div className="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 px-3 py-2 rounded-xl text-xs font-semibold">
-            <ShieldCheck className="w-4 h-4 text-emerald-500" />
-            <span>Mapbox 3D Active</span>
-          </div>
+
         </div>
       </div>
 
@@ -348,7 +345,7 @@ export function MapPanel() {
           {!apiLoaded && (
             <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-900 text-emerald-500">
               <Loader2 className="w-8 h-8 animate-spin mb-4" />
-              <p className="text-sm font-medium">Loading Mapbox 3D Earth...</p>
+              <p className="text-sm font-medium">Loading Satellite 3D Earth...</p>
             </div>
           )}
         </div>
@@ -386,7 +383,7 @@ export function MapPanel() {
                 <div>
                   <p className="font-semibold text-sm text-foreground">Plot Your Field</p>
                   <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
-                    Click <strong>Plot 4-Corner Field</strong> and select 4 points on the Mapbox globe to run AI satellite analysis.
+                    Click <strong>Plot 4-Corner Field</strong> and select 4 points on the globe to run AI satellite analysis.
                   </p>
                 </div>
               </div>
