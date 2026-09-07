@@ -1,8 +1,8 @@
 import { useState, type ReactNode } from "react";
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
-  LayoutDashboard, ScanLine, Cpu, Sprout, CloudSun, TrendingUp, Store, CalendarCheck,
-  ShoppingBag, User, Settings, Shield, Menu, X, Moon, Sun, LogOut, Leaf,
+  LayoutDashboard, ScanLine, Cpu, Sprout, CloudSun, TrendingUp, User, Settings,
+  Menu, X, Moon, Sun, LogOut, Leaf,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useTheme } from "@/lib/theme";
@@ -18,46 +18,19 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
-  const role = user?.role ?? "user";
+  const roleTitle = "Soil Health Monitoring System";
+  const roleBadge = "🌱 Soil Health Monitoring System";
 
-  const roleTitle = role === "admin" ? "Admin Dashboard" : role === "farmer" ? "Farmer Dashboard" : "Buyer Dashboard";
-  const roleBadge = role === "admin" ? "🛡️ Admin Dashboard" : role === "farmer" ? "🌾 Farmer Dashboard" : "🛒 Buyer Dashboard";
-
-  const items = (() => {
-    if (role === "admin") {
-      return [
-        { to: "/app",             label: "🛡️ Admin Dashboard",       icon: LayoutDashboard, exact: true },
-        { to: "/app/admin",       label: t("nav_admin"),            icon: Shield },
-        { to: "/app/marketplace", label: t("nav_marketplace_audit"),icon: Store },
-        { to: "/app/profile",     label: t("nav_profile"),          icon: User },
-        { to: "/app/settings",    label: t("nav_settings"),         icon: Settings },
-      ];
-    }
-    if (role === "farmer") {
-      return [
-        { to: "/app",             label: "🌾 Farmer Dashboard",      icon: LayoutDashboard, exact: true },
-        { to: "/app/disease",     label: t("nav_disease"),          icon: ScanLine },
-        { to: "/app/iot",         label: t("nav_iot"),              icon: Cpu },
-        { to: "/app/crops",       label: t("nav_crops"),            icon: Sprout },
-        { to: "/app/weather",     label: t("nav_weather"),          icon: CloudSun },
-        { to: "/app/marketplace", label: t("nav_marketplace"),      icon: Store },
-        { to: "/app/booking",     label: t("nav_booking"),          icon: CalendarCheck },
-        { to: "/app/shop",        label: t("nav_shop"),             icon: ShoppingBag },
-        { to: "/app/profile",     label: t("nav_profile"),          icon: User },
-        { to: "/app/settings",    label: t("nav_settings"),         icon: Settings },
-      ];
-    }
-    // Buyers ("user")
-    return [
-      { to: "/app",             label: "🛒 Buyer Dashboard",       icon: LayoutDashboard, exact: true },
-      { to: "/app/marketplace", label: t("nav_marketplace"),      icon: Store },
-      { to: "/app/market",      label: t("nav_market"),           icon: TrendingUp },
-      { to: "/app/weather",     label: t("nav_weather"),          icon: CloudSun },
-      { to: "/app/shop",        label: t("nav_shop"),             icon: ShoppingBag },
-      { to: "/app/profile",     label: t("nav_profile"),          icon: User },
-      { to: "/app/settings",    label: t("nav_settings"),         icon: Settings },
-    ];
-  })();
+  const items = [
+    { to: "/app",         label: "🌱 Soil Health Overview", icon: LayoutDashboard, exact: true },
+    { to: "/app/iot",     label: t("nav_iot"),              icon: Cpu },
+    { to: "/app/disease", label: t("nav_disease"),          icon: ScanLine },
+    { to: "/app/crops",   label: t("nav_crops"),            icon: Sprout },
+    { to: "/app/weather", label: t("nav_weather"),          icon: CloudSun },
+    { to: "/app/market",  label: t("nav_market"),           icon: TrendingUp },
+    { to: "/app/profile", label: t("nav_profile"),          icon: User },
+    { to: "/app/settings",label: t("nav_settings"),         icon: Settings },
+  ];
 
   const isActive = (to: string, exact?: boolean) =>
     exact ? pathname === to || pathname === `${to}/` : pathname.startsWith(to);
@@ -151,11 +124,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
               <span className="text-sm text-muted-foreground truncate">
                 {t("welcome_back")},{" "}
                 <strong className="text-foreground font-medium">{user?.name?.split(" ")[0] ?? "User"}</strong> —{" "}
-                {role === "admin"
-                  ? t("admin_intel_sub")
-                  : role === "farmer"
-                  ? t("field_intel_sub")
-                  : t("buyer_intel_sub")}
+                {t("field_intel_sub")}
               </span>
             </div>
 

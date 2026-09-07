@@ -1,13 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Leaf, ScanLine, Cpu, TrendingUp, Store, CalendarCheck, Mic } from "lucide-react";
+import { Leaf, ScanLine, Cpu, TrendingUp, Droplets, Mic } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Agrisynapse — Agricultural Intelligence for Indian Farms" },
-      { name: "description", content: "Disease detection, IoT soil monitoring, crop and market intelligence, marketplace, services and a multilingual voice assistant in one platform." },
-      { property: "og:title", content: "Agrisynapse — Agricultural Intelligence for Indian Farms" },
-      { property: "og:description", content: "One workspace for disease detection, sensors, crop planning, market demand, marketplace and farm services." },
+      { title: "Soil Health Monitoring System — Agrisynapse" },
+      { name: "description", content: "A soil health monitoring system with field sensors, disease detection, crop intelligence and an AI agronomist." },
+      { property: "og:title", content: "Soil Health Monitoring System — Agrisynapse" },
+      { property: "og:description", content: "One workspace for soil telemetry, disease detection, crop planning and field intelligence." },
     ],
   }),
   component: Landing,
@@ -18,7 +18,7 @@ const FEATURES = [
   { icon: Cpu, title: "IoT monitoring", body: "Soil moisture, temperature, pH and NPK streaming from field nodes." },
   { icon: Leaf, title: "Crop recommendation", body: "Draw your plot; get crops scored on soil, climate and margin." },
   { icon: TrendingUp, title: "Market demand", body: "Price trends and demand gaps that decide what to plant and when to sell." },
-  { icon: Store, title: "Marketplace & shop", body: "Sell produce directly and buy seed, nutrition and irrigation supplies." },
+  { icon: Droplets, title: "Soil health alerts", body: "Track moisture, pH and nutrient levels, with timely irrigation and treatment prompts." },
   { icon: Mic, title: "Voice assistant", body: "Ask in Tamil, Hindi, Telugu, Kannada, Malayalam or English — hands free." },
 ];
 
@@ -39,12 +39,12 @@ function Landing() {
 
       <section className="border-b border-border">
         <div className="mx-auto max-w-[1200px] px-5 py-20 sm:px-6 md:py-28">
-          <p className="mb-5 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">Agricultural intelligence platform</p>
+          <p className="mb-5 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">Soil health monitoring system</p>
           <h1 className="max-w-4xl font-serif text-4xl leading-[1.05] tracking-tight sm:text-6xl md:text-7xl">
             The nervous system of the modern farm.
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-            Agrisynapse joins computer vision, field sensors, market data and an AI agronomist into one calm workspace — built for farmers, buyers and the teams who support them.
+            Agrisynapse joins field sensors, soil analysis, computer vision and an AI agronomist into one calm workspace for healthier crops.
           </p>
           <div className="mt-9 flex flex-wrap gap-3">
             <Link to="/login" className="rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:opacity-90 transition">
@@ -59,7 +59,7 @@ function Landing() {
 
       <section className="mx-auto max-w-[1200px] px-5 py-20 sm:px-6">
         <h2 className="max-w-2xl font-serif text-3xl leading-tight tracking-tight sm:text-4xl">
-          Eleven tools. One quiet interface.
+          Soil intelligence. One quiet interface.
         </h2>
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map((f) => (
@@ -74,7 +74,7 @@ function Landing() {
 
       <section className="border-t border-border">
         <div className="mx-auto grid max-w-[1200px] gap-6 px-5 py-16 sm:grid-cols-3 sm:px-6">
-          {[["12,480", "Farmers on the network"], ["3,214", "Live sensor nodes"], ["₹2.9 Cr", "Produce traded"]].map(([v, l]) => (
+          {[["12,480", "Monitored fields"], ["3,214", "Live sensor nodes"], ["99.8%", "Sensor data availability"]].map(([v, l]) => (
             <div key={l}>
               <p className="font-serif text-4xl">{v}</p>
               <p className="mt-1 text-sm text-muted-foreground">{l}</p>
@@ -92,8 +92,6 @@ function Landing() {
           </div>
         </div>
       </footer>
-
-      <CalendarCheck className="hidden" aria-hidden />
     </div>
   );
 }

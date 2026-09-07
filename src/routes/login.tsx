@@ -10,9 +10,9 @@ export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
       { title: "Sign in — Agrisynapse" },
-      { name: "description", content: "Sign in to Agrisynapse as an admin, farmer or buyer to access field intelligence, marketplace and services." },
+      { name: "description", content: "Sign in to the Agrisynapse Soil Health Monitoring System." },
       { property: "og:title", content: "Sign in — Agrisynapse" },
-      { property: "og:description", content: "Role based access for admins, farmers and buyers on the Agrisynapse platform." },
+      { property: "og:description", content: "Role-based access to soil telemetry, disease detection and crop intelligence." },
     ],
   }),
   component: LoginPage,
@@ -93,7 +93,7 @@ function LoginPage() {
             The nervous system<br />of the modern farm.
           </h2>
           <p className="mt-6 max-w-md text-muted-foreground leading-relaxed">
-            Disease detection, live soil telemetry, crop and market intelligence, a farmer-to-buyer marketplace and on-demand services — in one calm workspace.
+            Disease detection, live soil telemetry, crop recommendations and field intelligence — in one calm workspace.
           </p>
         </div>
         <dl className="grid grid-cols-3 gap-6 text-sm">
