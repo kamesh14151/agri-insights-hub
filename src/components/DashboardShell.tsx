@@ -42,7 +42,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans antialiased">
+    <div className="app-shell min-h-screen bg-background text-foreground font-sans antialiased">
       {open && (
         <button
           aria-label="Close menu"
@@ -52,7 +52,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-[268px] border-r border-border bg-card flex flex-col transition-transform duration-300 lg:translate-x-0 ${
+        className={`glass-sidebar fixed inset-y-0 left-0 z-50 w-[268px] border-r border-border flex flex-col transition-transform duration-300 lg:translate-x-0 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -109,7 +109,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="lg:pl-[268px]">
-        <header className="sticky top-0 z-40 h-16 border-b border-border bg-background/80 backdrop-blur-md">
+        <header className="glass-header sticky top-0 z-40 h-16 border-b border-border">
           <div className="h-full px-4 sm:px-6 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
             <button onClick={() => setOpen(true)} className="lg:hidden text-muted-foreground" aria-label="Open menu">
               <Menu className="h-5 w-5" />
@@ -170,7 +170,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 
 export function PageIntro({ index, eyebrow, title, subtitle }: { index: string; eyebrow: string; title: string; subtitle: string }) {
   return (
-    <header className="mb-10 grid grid-cols-12 gap-4 border-b border-border pb-8">
+    <header className="premium-page-intro mb-10 grid grid-cols-12 gap-4 border-b pb-8">
       <div className="col-span-12 md:col-span-2 font-serif text-2xl text-muted-foreground">{index}</div>
       <div className="col-span-12 md:col-span-10 min-w-0">
         <p className="mb-3 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">{eyebrow}</p>
@@ -183,7 +183,7 @@ export function PageIntro({ index, eyebrow, title, subtitle }: { index: string; 
 
 export function Panel({ title, action, children, className = "", onClick }: { title?: string; action?: ReactNode; children: ReactNode; className?: string; onClick?: () => void }) {
   return (
-    <section onClick={onClick} className={`rounded-2xl border border-border bg-card p-5 sm:p-6 ${className}`}>
+    <section onClick={onClick} className={`glass-panel rounded-3xl border border-border p-5 sm:p-6 ${className}`}>
       {(title || action) && (
         <div className="mb-5 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
           <h2 className="font-serif text-lg sm:text-xl truncate">{title}</h2>

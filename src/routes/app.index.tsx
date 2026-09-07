@@ -70,7 +70,7 @@ function DashboardHome() {
       {/* Stats Cards */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((s) => (
-          <div key={s.label} className="rounded-2xl border border-border bg-card p-5 transition hover:-translate-y-0.5 hover:shadow-sm">
+          <div key={s.label} className="glass-panel rounded-3xl border border-border p-5">
             <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
               <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground">{s.label}</p>
               <s.icon className="h-4 w-4 shrink-0 text-primary" />

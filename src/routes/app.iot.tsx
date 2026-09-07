@@ -72,7 +72,7 @@ function statusFor(reading: Telemetry) {
 
 function MetricCard({ icon: Icon, label, value, unit }: { icon: typeof Gauge; label: string; value: string | number; unit: string }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-4">
+    <div className="glass-panel rounded-3xl border border-border p-4">
       <div className="flex items-center justify-between gap-3"><p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">{label}</p><Icon className="h-4 w-4 text-primary" /></div>
       <p className="mt-3 font-serif text-3xl">{value}<span className="ml-1 text-base text-muted-foreground">{unit}</span></p>
     </div>
