@@ -4,7 +4,8 @@ import {
   generateGeminiChat,
   generateGeminiVisionAnalysis,
   generateGeminiLandAnalysis,
-  generateGeminiTreatmentPlan
+  generateGeminiTreatmentPlan,
+  askGeminiAboutDiagnosis,
 } from "./gemini.server";
 
 /* ---------------- Plant disease analysis ---------------- */
@@ -21,6 +22,23 @@ export const analyzePlant = createServerFn({ method: "POST" })
       imageDataUrl: data.imageDataUrl,
       language: data.language,
     });
+  });
+
+const DiagnosisFollowupInput = z.object({
+  diagnosisSummary: z.string(),
+  userQuestion: z.string().min(1),
+  language: z.string().default("English"),
+});
+
+export const askDiagnosisFollowup = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => DiagnosisFollowupInput.parse(d))
+  .handler(async ({ data }) => {
+    const reply = await askGeminiAboutDiagnosis({
+      diagnosisSummary: data.diagnosisSummary,
+      userQuestion: data.userQuestion,
+      language: data.language,
+    });
+    return { reply };
   });
 
 const TreatmentInput = z.object({
