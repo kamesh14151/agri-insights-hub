@@ -175,9 +175,17 @@ function LoginPage() {
             </div>
 
             {/* Hint */}
-            <p className="text-[11px] text-[#7a7a72] bg-[rgba(184,217,64,0.10)] border border-[rgba(184,217,64,0.25)] rounded-[10px] px-3 py-2">
-              Demo: farmer@agrisynapse.in / farmer123
-            </p>
+            <button
+              type="button"
+              onClick={() => {
+                if (role === "farmer") { setEmail("farmer@agrisynapse.in"); setPassword("farmer123"); }
+                else if (role === "agronomist") { setEmail("expert@agrisynapse.in"); setPassword("expert123"); }
+                else if (role === "manager") { setEmail("manager@agrisynapse.in"); setPassword("manager123"); }
+              }}
+              className="w-full text-left text-[11px] text-[#7a7a72] bg-[rgba(184,217,64,0.10)] hover:bg-[rgba(184,217,64,0.20)] transition border border-[rgba(184,217,64,0.25)] rounded-[10px] px-3 py-2"
+            >
+              <span className="font-semibold text-[#3d5a00]">Click to auto-fill</span> {role === "farmer" ? "Farmer" : role === "agronomist" ? "Agronomist" : "Manager"} demo credentials
+            </button>
 
             {/* Submit */}
             <button

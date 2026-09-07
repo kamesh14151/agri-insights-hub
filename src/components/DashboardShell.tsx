@@ -59,7 +59,6 @@ export function DashboardShell({ children }: { children: ReactNode }) {
       phone: formData.get("phone") as string,
       location: formData.get("location") as string,
       farmSize: formData.get("farmSize") as string,
-      role: (formData.get("role") as any) || user?.role,
     });
     toast.success("Profile updated");
     setProfileOpen(false);
@@ -251,14 +250,6 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                         <input name="location" defaultValue={user?.location || ""} className="w-full mt-1 rounded-xl bg-black/[0.03] border-transparent px-3 py-2 text-[13px] focus:bg-white focus:border-[#c8e44a] focus:ring-1 focus:ring-[#c8e44a] outline-none transition" />
                       </div>
                       
-                      <div>
-                        <label className="text-[10px] uppercase font-bold text-[#7a7a72] ml-1">Account Role (Testing)</label>
-                        <select name="role" defaultValue={user?.role || "farmer"} className="w-full mt-1 rounded-xl bg-black/[0.03] border-transparent px-3 py-2 text-[13px] focus:bg-white focus:border-[#c8e44a] focus:ring-1 focus:ring-[#c8e44a] outline-none transition">
-                          <option value="farmer">Farmer</option>
-                          <option value="manager">Manager</option>
-                          <option value="admin">Admin</option>
-                        </select>
-                      </div>
 
                       <div className="flex gap-2 mt-4 pt-4 border-t border-black/[0.06]">
                         <button type="submit" className="flex-1 btn-lime py-2 text-[13px] rounded-full">Save</button>
