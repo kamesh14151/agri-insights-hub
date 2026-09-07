@@ -24,7 +24,9 @@ import {
   AlertTriangle,
   Layers
 } from "lucide-react";
-import { generateHeatmapGrid, getNdviColor, getNdwiColor } from "@/lib/heatmap";
+import { getNdviColor, getNdwiColor } from "@/lib/heatmap";
+
+const SENTINEL_INSTANCE_ID = import.meta.env.VITE_SENTINEL_INSTANCE_ID || "";
 
 type LandResult = {
   soilType?: string;
@@ -138,11 +140,26 @@ export function MapPanel() {
       map.addSource("draft-lines", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
       map.addSource("draft-points", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
       map.addSource("field-polygon", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
-      map.addSource("heatmap", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+      
+      if (SENTINEL_INSTANCE_ID) {
+        map.addSource("sentinel-wms", {
+          type: "raster",
+          tiles: [
+            `https://services.sentinel-hub.com/ogc/wms/${SENTINEL_INSTANCE_ID}?REQUEST=GetMap&BBOX={bbox-epsg-3857}&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&LAYERS=NDVI&FORMAT=image/png`
+          ],
+          tileSize: 512,
+        });
+      }
 
       // Add layers
-      map.addLayer({ id: "heatmap-layer", type: "fill", source: "heatmap", paint: { "fill-color": ["get", "color"], "fill-opacity": 0.6 } });
-      map.addLayer({ id: "heatmap-outline", type: "line", source: "heatmap", paint: { "line-color": "rgba(255,255,255,0.2)", "line-width": 1 } });
+      if (SENTINEL_INSTANCE_ID) {
+        map.addLayer({
+          id: "sentinel-wms-layer",
+          type: "raster",
+          source: "sentinel-wms",
+          paint: { "raster-opacity": 0 },
+        });
+      }
       
       map.addLayer({ id: "field-polygon-layer", type: "fill", source: "field-polygon", paint: { "fill-color": "#10b981", "fill-opacity": 0.3 } });
       map.addLayer({ id: "field-polygon-outline", type: "line", source: "field-polygon", paint: { "line-color": "#10b981", "line-width": 4 } });
@@ -216,7 +233,7 @@ export function MapPanel() {
     // Field Polygon
     const fieldGeoJSON: GeoJSON.FeatureCollection = {
       type: "FeatureCollection",
-      features: (!isDrawing && corners.length === 4 && activeLayer === "satellite") ? [{
+      features: (!isDrawing && corners.length === 4) ? [{
         type: "Feature",
         properties: {},
         geometry: {
@@ -227,27 +244,29 @@ export function MapPanel() {
     };
     (map.getSource("field-polygon") as mapboxgl.GeoJSONSource)?.setData(fieldGeoJSON);
 
-    // Heatmap Layer
-    let heatmapFeatures: GeoJSON.Feature[] = [];
-    if (!isDrawing && corners.length === 4 && activeLayer !== "satellite") {
-      const grid = generateHeatmapGrid(corners, 8, result?.ndvi ?? 0.7);
-      heatmapFeatures = grid.map(cell => ({
-        type: "Feature",
-        properties: {
-          color: activeLayer === "ndvi" ? getNdviColor(cell.value) : getNdwiColor(cell.value)
-        },
-        geometry: {
-          type: "Polygon",
-          coordinates: [[...cell.points.map(pt => [pt.lng, pt.lat]), [cell.points[0].lng, cell.points[0].lat]]]
+    // Live Sentinel Satellite WMS Layer logic
+    if (SENTINEL_INSTANCE_ID && map.getLayer("sentinel-wms-layer")) {
+      const isRasterActive = !isDrawing && corners.length === 4 && activeLayer !== "satellite";
+      map.setPaintProperty("sentinel-wms-layer", "raster-opacity", isRasterActive ? 0.75 : 0);
+      
+      if (isRasterActive) {
+        const layerType = activeLayer === "ndvi" ? "NDVI" : "MOISTURE_INDEX";
+        const wmsUrl = `https://services.sentinel-hub.com/ogc/wms/${SENTINEL_INSTANCE_ID}?REQUEST=GetMap&BBOX={bbox-epsg-3857}&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&LAYERS=${layerType}&FORMAT=image/png`;
+        
+        // Mapbox GL JS doesn't support dynamically changing a raster source URL directly without re-adding it,
+        // but since we added the layer structure, the best way for a smooth experience is updating the source style.
+        const source = map.getSource("sentinel-wms") as mapboxgl.RasterTileSource;
+        if (source) {
+          // Replace tiles array if it's different
+          if (source.tiles && source.tiles[0] !== wmsUrl) {
+            map.removeLayer("sentinel-wms-layer");
+            map.removeSource("sentinel-wms");
+            map.addSource("sentinel-wms", { type: "raster", tiles: [wmsUrl], tileSize: 512 });
+            map.addLayer({ id: "sentinel-wms-layer", type: "raster", source: "sentinel-wms", paint: { "raster-opacity": 0.75 } }, "field-polygon-layer");
+          }
         }
-      }));
+      }
     }
-    
-    const heatmapGeoJSON: GeoJSON.FeatureCollection = {
-      type: "FeatureCollection",
-      features: heatmapFeatures
-    };
-    (map.getSource("heatmap") as mapboxgl.GeoJSONSource)?.setData(heatmapGeoJSON);
 
   }, [isDrawing, draftCorners, corners, activeLayer, result, apiLoaded]);
 
@@ -386,6 +405,18 @@ export function MapPanel() {
 
           <div ref={mapContainerRef} className="w-full h-full" />
           
+          {!SENTINEL_INSTANCE_ID && activeLayer !== "satellite" && corners.length === 4 && (
+            <div className="absolute inset-x-4 top-24 z-[400] pointer-events-none">
+              <div className="bg-slate-900/90 backdrop-blur-md border border-amber-500/50 rounded-xl p-4 shadow-xl text-center pointer-events-auto max-w-sm mx-auto">
+                <AlertTriangle className="w-6 h-6 text-amber-500 mx-auto mb-2" />
+                <h4 className="text-sm font-bold text-white mb-1">Live Satellite API Key Required</h4>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  To view live NDVI and Moisture heatmaps, add your Sentinel Hub Instance ID to <code className="bg-black/50 text-emerald-400 px-1 py-0.5 rounded text-[10px]">VITE_SENTINEL_INSTANCE_ID</code> in your <code className="bg-black/50 px-1 py-0.5 rounded text-[10px] text-amber-300">.env</code> file.
+                </p>
+              </div>
+            </div>
+          )}
+
           {!apiLoaded && (
             <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-900 text-emerald-500">
               <Loader2 className="w-8 h-8 animate-spin mb-4" />
