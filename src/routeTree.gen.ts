@@ -22,7 +22,6 @@ import { Route as AppIotRouteImport } from './routes/app.iot'
 import { Route as AppMarketRouteImport } from './routes/app.market'
 import { Route as AppMarketplaceRouteImport } from './routes/app.marketplace'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
-import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as AppShopRouteImport } from './routes/app.shop'
 import { Route as AppVoiceRouteImport } from './routes/app.voice'
 import { Route as AppWeatherRouteImport } from './routes/app.weather'
@@ -95,11 +94,6 @@ const AppProfileRoute = AppProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => AppRoute,
 } as any)
-const AppSettingsRoute = AppSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppShopRoute = AppShopRouteImport.update({
   id: '/shop',
   path: '/shop',
@@ -144,7 +138,6 @@ export interface FileRoutesByFullPath {
   '/app/market': typeof AppMarketRoute
   '/app/marketplace': typeof AppMarketplaceRoute
   '/app/profile': typeof AppProfileRoute
-  '/app/settings': typeof AppSettingsRoute
   '/app/shop': typeof AppShopRouteWithChildren
   '/app/voice': typeof AppVoiceRoute
   '/app/weather': typeof AppWeatherRoute
@@ -165,7 +158,6 @@ export interface FileRoutesByTo {
   '/app/market': typeof AppMarketRoute
   '/app/marketplace': typeof AppMarketplaceRoute
   '/app/profile': typeof AppProfileRoute
-  '/app/settings': typeof AppSettingsRoute
   '/app/shop': typeof AppShopRouteWithChildren
   '/app/voice': typeof AppVoiceRoute
   '/app/weather': typeof AppWeatherRoute
@@ -188,7 +180,6 @@ export interface FileRoutesById {
   '/app/market': typeof AppMarketRoute
   '/app/marketplace': typeof AppMarketplaceRoute
   '/app/profile': typeof AppProfileRoute
-  '/app/settings': typeof AppSettingsRoute
   '/app/shop': typeof AppShopRouteWithChildren
   '/app/voice': typeof AppVoiceRoute
   '/app/weather': typeof AppWeatherRoute
@@ -212,7 +203,6 @@ export interface FileRouteTypes {
     | '/app/market'
     | '/app/marketplace'
     | '/app/profile'
-    | '/app/settings'
     | '/app/shop'
     | '/app/voice'
     | '/app/weather'
@@ -233,7 +223,6 @@ export interface FileRouteTypes {
     | '/app/market'
     | '/app/marketplace'
     | '/app/profile'
-    | '/app/settings'
     | '/app/shop'
     | '/app/voice'
     | '/app/weather'
@@ -255,7 +244,6 @@ export interface FileRouteTypes {
     | '/app/market'
     | '/app/marketplace'
     | '/app/profile'
-    | '/app/settings'
     | '/app/shop'
     | '/app/voice'
     | '/app/weather'
@@ -365,13 +353,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProfileRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/settings': {
-      id: '/app/settings'
-      path: '/settings'
-      fullPath: '/app/settings'
-      preLoaderRoute: typeof AppSettingsRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/app/shop': {
       id: '/app/shop'
       path: '/shop'
@@ -450,7 +431,6 @@ interface AppRouteChildren {
   AppMarketRoute: typeof AppMarketRoute
   AppMarketplaceRoute: typeof AppMarketplaceRoute
   AppProfileRoute: typeof AppProfileRoute
-  AppSettingsRoute: typeof AppSettingsRoute
   AppShopRoute: typeof AppShopRouteWithChildren
   AppVoiceRoute: typeof AppVoiceRoute
   AppWeatherRoute: typeof AppWeatherRoute
@@ -467,7 +447,6 @@ const AppRouteChildren: AppRouteChildren = {
   AppMarketRoute: AppMarketRoute,
   AppMarketplaceRoute: AppMarketplaceRoute,
   AppProfileRoute: AppProfileRoute,
-  AppSettingsRoute: AppSettingsRoute,
   AppShopRoute: AppShopRouteWithChildren,
   AppVoiceRoute: AppVoiceRoute,
   AppWeatherRoute: AppWeatherRoute,

@@ -14,6 +14,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const langRef = useRef<HTMLDivElement>(null);
 
@@ -38,7 +39,6 @@ export function DashboardShell({ children }: { children: ReactNode }) {
     { to: "/app/crops",    label: "Field Intel",  icon: Sprout },
     { to: "/app/weather",  label: t("nav_weather"), icon: CloudSun },
     { to: "/app/market",   label: t("nav_market"),  icon: TrendingUp },
-    { to: "/app/settings", label: t("nav_settings"), icon: Settings },
   ];
 
   const isActive = (to: string, exact?: boolean) =>
@@ -123,6 +123,26 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             );
           })}
         </nav>
+
+        {/* Sidebar Footer: Profile area that opens Settings */}
+        <div className="px-3 pb-4 border-t border-black/[0.06] pt-3">
+          <div 
+            onClick={() => {
+              setSettingsOpen(true);
+              setOpen(false);
+            }}
+            className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-black/[0.04] transition cursor-pointer"
+          >
+            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#c8e44a] text-[13px] font-bold text-[#1a1a18]">
+              {(user?.name ?? "G").charAt(0).toUpperCase()}
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[13px] font-semibold text-[#1a1a18]">{user?.name ?? "Farmer"}</p>
+              <p className="truncate text-[11px] text-[#7a7a72]">Settings & Preferences</p>
+            </div>
+            <Settings className="h-4 w-4 text-[#7a7a72]" />
+          </div>
+        </div>
       </aside>
 
       {/* ── Main area ────────────────────────────────────────────────────── */}
@@ -251,6 +271,61 @@ export function DashboardShell({ children }: { children: ReactNode }) {
       </div>
 
       <FloatingWidgets />
+
+      {/* ── Settings Modal ─────────────────────────────────────────────────── */}
+      {settingsOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setSettingsOpen(false)} />
+          <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white rounded-3xl shadow-2xl p-6 sm:p-8 animate-scale-in">
+            <button 
+              onClick={() => setSettingsOpen(false)} 
+              className="absolute top-4 right-4 p-2 rounded-full text-muted-foreground hover:bg-black/5 hover:text-foreground transition"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <h2 className="text-2xl font-bold tracking-tight mb-6">{t("settings_title") || "Settings"}</h2>
+            
+            <div className="grid gap-6 sm:grid-cols-2">
+              <div className="card p-5 rounded-2xl bg-black/[0.02] border-transparent">
+                <h3 className="font-semibold text-sm mb-4">{t("lang_appearance") || "Appearance"}</h3>
+                <label className="block mb-4">
+                  <span className="mb-1.5 block text-xs uppercase tracking-[0.15em] text-muted-foreground">{t("interface_lang") || "Language"}</span>
+                  <select
+                    value={lang}
+                    onChange={(e) => {
+                      setLang(e.target.value as Lang);
+                      toast.success(t("toast_lang"));
+                    }}
+                    className="w-full rounded-xl border border-black/10 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#c8e44a]"
+                  >
+                    {LANGUAGES.map((l) => (
+                      <option key={l.code} value={l.code}>{l.full}</option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+
+              <div className="card p-5 rounded-2xl bg-black/[0.02] border-transparent">
+                <h3 className="font-semibold text-sm mb-4">{t("alerts_header") || "Alerts"}</h3>
+                <div className="space-y-4">
+                  <label className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Push Notifications</span>
+                    <input type="checkbox" className="rounded text-[#c8e44a] focus:ring-[#c8e44a]" defaultChecked />
+                  </label>
+                  <label className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Email Alerts</span>
+                    <input type="checkbox" className="rounded text-[#c8e44a] focus:ring-[#c8e44a]" defaultChecked />
+                  </label>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-8 flex justify-end gap-3 pt-6 border-t border-black/5">
+              <button onClick={() => setSettingsOpen(false)} className="px-4 py-2 text-sm font-semibold text-muted-foreground hover:bg-black/5 rounded-full transition">Close</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
