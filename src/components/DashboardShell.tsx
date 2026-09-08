@@ -56,16 +56,16 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 
   const navItems = isManagerOrAdmin
     ? [
-        { to: "/app/admin",   label: "Admin Console & Users", icon: Shield, exact: false },
-        { to: "/app/manager", label: "Manager Hub & Radar",   icon: ShieldAlert, exact: false },
+        { to: "/app/admin",   label: t("nav_admin", "Admin Console & Users"), icon: Shield, exact: false },
+        { to: "/app/manager", label: t("nav_manager", "Manager Hub & Radar"),   icon: ShieldAlert, exact: false },
       ]
     : [
-        { to: "/app",          label: "Dashboard",   icon: LayoutDashboard, exact: true },
-        { to: "/app/iot",      label: t("nav_iot"),   icon: Cpu },
-        { to: "/app/disease",  label: "AI Insights",  icon: ScanLine },
-        { to: "/app/crops",    label: "Crop Planner", icon: Sprout },
-        { to: "/app/weather",  label: t("nav_weather"), icon: CloudSun },
-        { to: "/app/market",   label: t("nav_market"),  icon: TrendingUp },
+        { to: "/app",          label: t("nav_dashboard", "Dashboard"),   icon: LayoutDashboard, exact: true },
+        { to: "/app/iot",      label: t("nav_iot", "IoT Monitoring"),   icon: Cpu },
+        { to: "/app/disease",  label: t("nav_disease", "AI Insights"),  icon: ScanLine },
+        { to: "/app/crops",    label: t("nav_crops", "Crop Planner"), icon: Sprout },
+        { to: "/app/weather",  label: t("nav_weather", "Weather Intelligence"), icon: CloudSun },
+        { to: "/app/market",   label: t("nav_market", "Market Demand"),  icon: TrendingUp },
       ];
 
   const isActive = (to: string, exact?: boolean) =>
@@ -124,7 +124,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-1">
           <p className="px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#7a7a72]">
-            {isManagerOrAdmin ? "Management Console" : "Workspace"}
+            {isManagerOrAdmin ? t("management_console", "Management Console") : t("workspace", "Workspace")}
           </p>
           {navItems.map((item) => {
             const active = isActive(item.to, "exact" in item ? item.exact : false);
@@ -167,7 +167,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             </span>
             <div className="min-w-0 flex-1">
               <p className="truncate text-[13px] font-semibold text-[#1a1a18]">{user?.name ?? "Farmer"}</p>
-              <p className="truncate text-[11px] text-[#7a7a72]">Settings & Preferences</p>
+              <p className="truncate text-[11px] text-[#7a7a72]">{t("settings_preferences", "Settings & Preferences")}</p>
             </div>
             <Settings className="h-4 w-4 text-[#7a7a72]" />
           </div>

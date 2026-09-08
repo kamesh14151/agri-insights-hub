@@ -198,7 +198,7 @@ const BG = () => (
    Main wrapper — owns both open states, ensures mutual exclusivity
 ═══════════════════════════════════════════════════════════════════════ */
 export function FloatingWidgets() {
-  const { lang: appLang } = useI18n();
+  const { lang: appLang, setLang: setAppLang } = useI18n();
   const ask = useServerFn(chatWithOpenRouter);
 
   /* open/minimized state for each widget */
@@ -206,9 +206,26 @@ export function FloatingWidgets() {
   const [chatMinimized, setChatMinimized] = useState(false);
   const [voiceOpen,     setVoiceOpen]     = useState(false);
 
-  /* ── Language state (DEFAULT: ENGLISH) ── */
-  const [selectedLang, setSelectedLang] = useState(AI_LANGUAGES[0]!); // Default English
+  /* ── Language state (DEFAULT: matched from appLang or English) ── */
+  const initialLang = AI_LANGUAGES.find(l => l.appLang === appLang) || AI_LANGUAGES[0]!;
+  const [selectedLang, setSelectedLang] = useState(initialLang);
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
+
+  /* Synchronize with app-wide language switching */
+  useEffect(() => {
+    const matched = AI_LANGUAGES.find(l => l.appLang === appLang);
+    if (matched && matched.code !== selectedLang.code) {
+      setSelectedLang(matched);
+      langRef.current = matched;
+      setChatMsgs(prev => {
+        if (prev.length <= 1) {
+          const nextLoc = LOCALIZED_DATA[matched.name] || LOCALIZED_DATA.English;
+          return [{ role: "assistant", content: nextLoc.welcome }];
+        }
+        return prev;
+      });
+    }
+  }, [appLang]);
 
   const loc = LOCALIZED_DATA[selectedLang.name] || LOCALIZED_DATA.English;
 
@@ -251,6 +268,9 @@ export function FloatingWidgets() {
     setSelectedLang(langObj);
     langRef.current = langObj;
     setLangDropdownOpen(false);
+    if (langObj.appLang) {
+      setAppLang(langObj.appLang as any);
+    }
 
     // If chat only has initial welcome message, adapt it
     setChatMsgs(prev => {

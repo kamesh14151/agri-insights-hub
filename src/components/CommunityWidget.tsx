@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Users, X, Send, Loader2, MessageSquare, Heart, Wifi, Radio } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
+import { useI18n } from "@/lib/i18n";
 import { toast } from "sonner";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 
@@ -27,6 +28,7 @@ export function CommunityWidget() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const channelRef = useRef<RealtimeChannel | null>(null);
   const { user } = useAuth();
+  const { t } = useI18n();
 
   const currentUserId = user?.id || (user?.email ? `usr_${user.email.replace(/[^a-zA-Z0-9]/g, '_')}` : "");
 
@@ -297,7 +299,7 @@ export function CommunityWidget() {
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <h2 className="text-[15px] font-bold tracking-tight">Farmer's Network</h2>
+              <h2 className="text-[15px] font-bold tracking-tight">{t("community_title", "Farmer's Network")}</h2>
               <span className="flex items-center gap-1 rounded-full bg-white/20 px-1.5 py-0.2 text-[9px] font-semibold text-emerald-100">
                 <Radio className="h-2.5 w-2.5 text-emerald-200 animate-pulse" /> WS
               </span>
@@ -331,7 +333,7 @@ export function CommunityWidget() {
         ) : messages.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center text-center px-4 opacity-60">
             <MessageSquare className="h-10 w-10 text-slate-400 mb-3" />
-            <p className="text-sm font-semibold text-slate-600">No messages yet</p>
+            <p className="text-sm font-semibold text-slate-600">{t("no_messages_yet", "No messages yet")}</p>
             <p className="text-[11px] text-slate-500 mt-1">
               Send a message to start the instant WebSocket conversation!
             </p>
@@ -399,7 +401,7 @@ export function CommunityWidget() {
                 handleSend(e);
               }
             }}
-            placeholder="Type a message..."
+            placeholder={t("type_message", "Type a message...")}
             className="flex-1 max-h-32 min-h-[44px] rounded-2xl border-none bg-white px-4 py-3 text-[13px] shadow-sm outline-none resize-none focus:ring-1 focus:ring-emerald-500"
             rows={1}
           />

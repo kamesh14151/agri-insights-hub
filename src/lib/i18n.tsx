@@ -29,7 +29,11 @@ const STRINGS: Record<Lang, Dict> = {
     nav_settings: "Settings",
     nav_admin: "Admin Console",
     nav_admin_dash: "Admin Overview",
+    nav_manager: "Manager Hub",
     nav_marketplace_audit: "Marketplace Audits",
+    management_console: "Management Console",
+    workspace: "Workspace",
+    settings_preferences: "Settings & Preferences",
 
     // Landing / App general
     nav_features: "Features",
@@ -63,6 +67,12 @@ const STRINGS: Record<Lang, Dict> = {
     search_placeholder: "Search anything…",
 
     // Dashboard Home
+    data_driven_growth: "Data Driven Growth",
+    good_morning: "Good morning",
+    good_afternoon: "Good afternoon",
+    good_evening: "Good evening",
+    share: "Share",
+    research: "Research",
     soil_moisture: "Soil moisture",
     field_temp: "Field temp",
     scans_week: "Scans this week",
@@ -71,6 +81,23 @@ const STRINGS: Record<Lang, Dict> = {
     action_needed: "2 need action",
     month_increase: "+2.1% this month",
     temp_note: "+1.8° vs yesterday",
+    optimal: "Optimal",
+    observe: "Observe",
+    action: "Action",
+    soil_intelligence: "Soil Intelligence",
+    predicted_soc: "Predicted SOC increase: $4–$124 per year",
+    soc_potential: "potential: 5–90 tons CO2-eq/hectare/year",
+    field_nitrogen: "Field Nitrogen Index",
+    nitrogen_optimal: "Nitrogen & chlorophyll within 94% optimal zone",
+    soil_temp_10cm: "Soil Temperature (10cm)",
+    temp_depth_note: "Optimal root-zone temperature for active nutrient uptake",
+    active_nodes: "Active Nodes",
+    online_reporting: "All LoRa nodes online and reporting",
+    condition_overview: "Condition Overview",
+    crop_growth_timeline: "Crop Growth Timeline",
+    ai_assistant: "AI Assistant",
+    analyze: "Analyze",
+    source: "Source",
 
     // Quick Actions
     quick_actions: "Quick actions",
@@ -96,6 +123,10 @@ const STRINGS: Record<Lang, Dict> = {
     system_analytics_desc: "Review platform usage, trades and pricing data",
     global_settings: "Global Settings",
     global_settings_desc: "Configure system constraints and configurations",
+    review_telemetry: "Review telemetry",
+    nodes_reporting_detail: "3 field nodes reporting",
+    crop_stress_detail: "Scan for crop stress",
+    soil_matched_detail: "Soil-matched recommendations",
 
     // Activity
     recent_activity: "Recent Activity",
@@ -108,7 +139,6 @@ const STRINGS: Record<Lang, Dict> = {
     admin_summary: "Administrative Summary",
     buyer_guarantees: "Consumer Buyer Guarantees",
     buyer_guarantees_desc: "Your payments are held securely via Razorpay until delivery confirmation. Full refund in case of product damage or delivery failure.",
-
     browse_marketplace: "Browse marketplace",
 
     // Settings
@@ -162,12 +192,17 @@ const STRINGS: Record<Lang, Dict> = {
     weather_rain: "Rainfall (24h)",
     weather_uv: "UV Index",
 
-    // Chat
+    // Chat & Community
     chat_title: "Ask Agri AI",
     chat_placeholder: "Ask about crops, pests, soil…",
     chat_send: "Send",
     chat_typing: "Agri AI is thinking…",
     chat_open: "Ask AI",
+    community_title: "Farmer's Network",
+    community_sub: "Live Community Chat",
+    type_message: "Type a message...",
+    no_messages_yet: "No messages yet",
+    send_btn: "Send",
     toast_uploaded: "Image uploaded",
     toast_analyzed: "Analysis complete",
     toast_drawn: "Land area saved",
@@ -188,7 +223,11 @@ const STRINGS: Record<Lang, Dict> = {
     nav_settings: "सेटिंग्स",
     nav_admin: "एडमिन कंसोल",
     nav_admin_dash: "प्रशासन अवलोकन",
+    nav_manager: "मैनेजर हब",
     nav_marketplace_audit: "मंडी ऑडिट",
+    management_console: "प्रबंधन कंसोल",
+    workspace: "कार्यक्षेत्र",
+    settings_preferences: "सेटिंग्स और प्राथमिकताएं",
 
     // Landing / App general
     nav_features: "विशेषताएँ",
@@ -222,6 +261,12 @@ const STRINGS: Record<Lang, Dict> = {
     search_placeholder: "कुछ भी खोजें…",
 
     // Dashboard Home
+    data_driven_growth: "डेटा आधारित कृषि विकास",
+    good_morning: "सुप्रभात",
+    good_afternoon: "नमस्कार",
+    good_evening: "शुभ संध्या",
+    share: "साझा करें",
+    research: "शोध",
     soil_moisture: "मिट्टी की नमी",
     field_temp: "खेत का तापमान",
     scans_week: "इस सप्ताह स्कैन",
@@ -230,6 +275,23 @@ const STRINGS: Record<Lang, Dict> = {
     action_needed: "2 पर ध्यान दें",
     month_increase: "+2.1% इस महीने",
     temp_note: "+1.8° कल की तुलना में",
+    optimal: "उत्तम",
+    observe: "निगरानी",
+    action: "कार्रवाई",
+    soil_intelligence: "मिट्टी बुद्धिमत्ता",
+    predicted_soc: "अनुमानित SOC वृद्धि: $4–$124 प्रति वर्ष",
+    soc_potential: "क्षमता: 5–90 टन CO2-eq/हेक्टेयर/वर्ष",
+    field_nitrogen: "खेत नाइट्रोजन सूचकांक",
+    nitrogen_optimal: "नाइट्रोजन और क्लोरोफिल 94% उत्तम क्षेत्र में",
+    soil_temp_10cm: "मिट्टी का तापमान (10cm)",
+    temp_depth_note: "पोषक तत्वों के अवशोषण के लिए उत्तम तापमान",
+    active_nodes: "सक्रिय नोड्स",
+    online_reporting: "सभी LoRa नोड्स ऑनलाइन और सक्रिय",
+    condition_overview: "खेत स्थिति अवलोकन",
+    crop_growth_timeline: "फसल विकास समयरेखा",
+    ai_assistant: "AI सहायक",
+    analyze: "विश्लेषण",
+    source: "स्रोत",
 
     // Quick Actions
     quick_actions: "त्वरित क्रियाएँ",
@@ -255,6 +317,10 @@ const STRINGS: Record<Lang, Dict> = {
     system_analytics_desc: "उपयोग और मूल्य डेटा की समीक्षा करें",
     global_settings: "वैश्विक सेटिंग्स",
     global_settings_desc: "सिस्टम कॉन्फ़िगरेशन प्रबंधित करें",
+    review_telemetry: "टेलीमेट्री समीक्षा",
+    nodes_reporting_detail: "3 फील्ड नोड्स डेटा भेज रहे हैं",
+    crop_stress_detail: "फसल तनाव और रोग जांचें",
+    soil_matched_detail: "मिट्टी अनुसार सही फसलें",
 
     // Activity
     recent_activity: "हाल की गतिविधि",
@@ -320,12 +386,17 @@ const STRINGS: Record<Lang, Dict> = {
     weather_rain: "वर्षा (24घं)",
     weather_uv: "यूवी सूचकांक",
 
-    // Chat
+    // Chat & Community
     chat_title: "एग्री AI से पूछें",
     chat_placeholder: "फसल, कीट, मिट्टी के बारे में पूछें…",
     chat_send: "भेजें",
     chat_typing: "एग्री AI सोच रहा है…",
     chat_open: "AI से पूछें",
+    community_title: "किसान नेटवर्क",
+    community_sub: "लाइव किसान चैट",
+    type_message: "संदेश लिखें...",
+    no_messages_yet: "अभी तक कोई संदेश नहीं",
+    send_btn: "भेजें",
     toast_uploaded: "छवि अपलोड हो गई",
     toast_analyzed: "विश्लेषण पूर्ण",
     toast_drawn: "भूमि क्षेत्र सहेजा गया",
@@ -346,7 +417,11 @@ const STRINGS: Record<Lang, Dict> = {
     nav_settings: "ਸੈਟਿੰਗਾਂ",
     nav_admin: "ਐਡਮਿਨ ਕੰਸੋਲ",
     nav_admin_dash: "ਐਡਮਿਨ ਝਲਕ",
+    nav_manager: "ਮੈਨੇਜਰ ਹੱਬ",
     nav_marketplace_audit: "ਮੰਡੀ ਆਡਿਟ",
+    management_console: "ਪ੍ਰਬੰਧਨ ਕੰਸੋਲ",
+    workspace: "ਕਾਰਜ ਖੇਤਰ",
+    settings_preferences: "ਸੈਟਿੰਗਾਂ ਅਤੇ ਤਰਜੀਹਾਂ",
 
     // Landing / General
     nav_features: "ਫੀਚਰ",
@@ -380,6 +455,12 @@ const STRINGS: Record<Lang, Dict> = {
     search_placeholder: "ਖੋਜ ਕਰੋ…",
 
     // Dashboard Home
+    data_driven_growth: "ਡਾਟਾ ਆਧਾਰਿਤ ਖੇਤੀ ਵਿਕਾਸ",
+    good_morning: "ਸ਼ੁਭ ਸਵੇਰ",
+    good_afternoon: "ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ",
+    good_evening: "ਸ਼ੁਭ ਸ਼ਾਮ",
+    share: "ਸਾਂਝਾ ਕਰੋ",
+    research: "ਖੋਜ",
     soil_moisture: "ਮਿੱਟੀ ਦੀ ਨਮੀ",
     field_temp: "ਖੇਤ ਦਾ ਤਾਪਮਾਨ",
     scans_week: "ਇਸ ਹਫ਼ਤੇ ਸਕੈਨ",
@@ -388,6 +469,23 @@ const STRINGS: Record<Lang, Dict> = {
     action_needed: "2 ਧਿਆਨ ਮੰਗਦੇ ਹਨ",
     month_increase: "+2.1% ਇਸ ਮਹੀਨੇ",
     temp_note: "+1.8° ਕੱਲ੍ਹ ਨਾਲੋਂ",
+    optimal: "ਉੱਤਮ",
+    observe: "ਨਿਗਰਾਨੀ",
+    action: "ਕਾਰਵਾਈ",
+    soil_intelligence: "ਮਿੱਟੀ ਬੁੱਧੀਮਤਾ",
+    predicted_soc: "ਅਨੁਮਾਨਿਤ SOC ਵਾਧਾ: $4–$124 ਪ੍ਰਤੀ ਸਾਲ",
+    soc_potential: "ਸਮਰੱਥਾ: 5–90 ਟਨ CO2-eq/ਹੈਕਟੇਅਰ/ਸਾਲ",
+    field_nitrogen: "ਖੇਤ ਨਾਈਟ੍ਰੋਜਨ ਸੂਚਕਾਂਕ",
+    nitrogen_optimal: "ਨਾਈਟ੍ਰੋਜਨ 94% ਉੱਤਮ ਜ਼ੋਨ ਵਿੱਚ ਹੈ",
+    soil_temp_10cm: "ਮਿੱਟੀ ਦਾ ਤਾਪਮਾਨ (10cm)",
+    temp_depth_note: "ਪੌਸ਼ਟਿਕ ਤੱਤਾਂ ਲਈ ਉੱਤਮ ਤਾਪਮਾਨ",
+    active_nodes: "ਕਿਰਿਆਸ਼ੀਲ ਨੋਡਸ",
+    online_reporting: "ਸਾਰੇ LoRa ਨੋਡਸ ਆਨਲਾਈਨ ਹਨ",
+    condition_overview: "ਖੇਤ ਸਥਿਤੀ ਸੰਖੇਪ",
+    crop_growth_timeline: "ਫਸਲ ਵਿਕਾਸ ਸਮਾਂਰੇਖਾ",
+    ai_assistant: "AI ਸਹਾਇਕ",
+    analyze: "ਵਿਸ਼ਲੇਸ਼ਣ",
+    source: "ਸਰੋਤ",
 
     // Quick Actions
     quick_actions: "ਤੁਰੰਤ ਕਾਰਵਾਈਆਂ",
@@ -413,6 +511,10 @@ const STRINGS: Record<Lang, Dict> = {
     system_analytics_desc: "ਵਰਤੋਂ ਅਤੇ ਕੀਮਤ ਡੇਟਾ ਦੀ ਜਾਂਚ",
     global_settings: "ਗਲੋਬਲ ਸੈਟਿੰਗਾਂ",
     global_settings_desc: "ਸਿਸਟਮ ਕੌਂਫਿਗਰੇਸ਼ਨ ਪ੍ਰਬੰਧਿਤ ਕਰੋ",
+    review_telemetry: "ਟੈਲੀਮੈਟਰੀ ਸਮੀਖਿਆ",
+    nodes_reporting_detail: "3 ਫੀਲਡ ਨੋਡਸ ਡਾਟਾ ਭੇਜ ਰਹੇ ਹਨ",
+    crop_stress_detail: "ਫਸਲ ਤਣਾਅ ਸਕੈਨ ਕਰੋ",
+    soil_matched_detail: "ਮਿੱਟੀ ਅਨੁਸਾਰ ਸਿਫ਼ਾਰਸ਼ਾਂ",
 
     // Activity & Settings
     recent_activity: "ਹਾਲੀਆ ਗਤੀਵਿਧੀ",
@@ -475,6 +577,11 @@ const STRINGS: Record<Lang, Dict> = {
     chat_send: "ਭੇਜੋ",
     chat_typing: "ਐਗਰੀ AI ਸੋਚ ਰਿਹਾ ਹੈ…",
     chat_open: "AI ਨੂੰ ਪੁੱਛੋ",
+    community_title: "ਕਿਸਾਨ ਨੈੱਟਵਰਕ",
+    community_sub: "ਲਾਈਵ ਕਿਸਾਨ ਚੈਟ",
+    type_message: "ਸੁਨੇਹਾ ਲਿਖੋ...",
+    no_messages_yet: "ਅਜੇ ਕੋਈ ਸੁਨੇਹਾ ਨਹੀਂ",
+    send_btn: "ਭੇਜੋ",
     toast_uploaded: "ਚਿੱਤਰ ਅਪਲੋਡ ਹੋ ਗਿਆ",
     toast_analyzed: "ਵਿਸ਼ਲੇਸ਼ਣ ਪੂਰਾ",
     toast_drawn: "ਜ਼ਮੀਨ ਸੰਭਾਲੀ ਗਈ",
@@ -495,7 +602,11 @@ const STRINGS: Record<Lang, Dict> = {
     nav_settings: "அமைப்புகள்",
     nav_admin: "நிர்வாக மையம்",
     nav_admin_dash: "நிர்வாக கண்ணோட்டம்",
+    nav_manager: "மேலாளர் மையம்",
     nav_marketplace_audit: "சந்தை தணிக்கை",
+    management_console: "நிர்வாக மையம்",
+    workspace: "பணியிடம்",
+    settings_preferences: "அமைப்புகள் மற்றும் விருப்பங்கள்",
 
     // Landing / General
     nav_features: "அம்சங்கள்",
@@ -529,6 +640,12 @@ const STRINGS: Record<Lang, Dict> = {
     search_placeholder: "தேடுங்கள்…",
 
     // Dashboard Home
+    data_driven_growth: "தரவு அடிப்படையிலான விவசாய வளர்ச்சி",
+    good_morning: "காலை வணக்கம்",
+    good_afternoon: "மதிய வணக்கம்",
+    good_evening: "மாலை வணக்கம்",
+    share: "பகிர்",
+    research: "ஆராய்ச்சி",
     soil_moisture: "மண் ஈரப்பதம்",
     field_temp: "வயல் வெப்பநிலை",
     scans_week: "இந்த வார ஸ்கேன்கள்",
@@ -537,6 +654,23 @@ const STRINGS: Record<Lang, Dict> = {
     action_needed: "2 கவனம் தேவை",
     month_increase: "+2.1% இந்த மாதம்",
     temp_note: "+1.8° நேற்றுடன் ஒப்பிடும்போது",
+    optimal: "சிறப்பானது",
+    observe: "கண்காணி",
+    action: "நடவடிக்கை",
+    soil_intelligence: "மண் நுண்ணறிவு",
+    predicted_soc: "மதிப்பிடப்பட்ட SOC உயர்வு: $4–$124/ஆண்டு",
+    soc_potential: "திறன்: 5–90 டன் CO2-eq/ஹெக்டேர்/ஆண்டு",
+    field_nitrogen: "வயல் நைட்ரஜன் குறியீடு",
+    nitrogen_optimal: "நைட்ரஜன் & பச்சையம் 94% உகந்த மண்டலத்தில் உள்ளது",
+    soil_temp_10cm: "மண் வெப்பநிலை (10cm)",
+    temp_depth_note: "வேர் வளர்ச்சிக்கு உகந்த வேர் மண்டல வெப்பநிலை",
+    active_nodes: "செயலில் உள்ள நோடுகள்",
+    online_reporting: "அனைத்து LoRa நோடுகளும் இணைக்கப்பட்டுள்ளன",
+    condition_overview: "வயல் நிலை கண்ணோட்டம்",
+    crop_growth_timeline: "பயிர் வளர்ச்சி காலவரிசை",
+    ai_assistant: "AI உதவியாளர்",
+    analyze: "பகுப்பாய்வு",
+    source: "மூலம்",
 
     // Quick Actions
     quick_actions: "விரைவு செயல்கள்",
@@ -562,6 +696,10 @@ const STRINGS: Record<Lang, Dict> = {
     system_analytics_desc: "தள பயன்பாடு மற்றும் விலை தரவுகளை மதிப்பாய்வு செய்க",
     global_settings: "பொது அமைப்புகள்",
     global_settings_desc: "கணினி உள்ளமைவுகளை நிர்வகிக்கவும்",
+    review_telemetry: "சென்சார் தரவை ஆய்வு செய்க",
+    nodes_reporting_detail: "3 வயல் சென்சார்கள் அறிக்கை செய்கின்றன",
+    crop_stress_detail: "பயிர் பாதிப்பை ஸ்கேன் செய்க",
+    soil_matched_detail: "மண்ணுக்கு ஏற்ற பயிர் பரிந்துரைகள்",
 
     // Activity & Settings
     recent_activity: "சமீபத்திய செயல்பாடு",
@@ -624,6 +762,11 @@ const STRINGS: Record<Lang, Dict> = {
     chat_send: "அனுப்பு",
     chat_typing: "அக்ரி AI யோசிக்கிறது…",
     chat_open: "AI கேள்",
+    community_title: "விவசாயிகள் நெட்வொர்க்",
+    community_sub: "நேரடி விவசாய அரட்டை",
+    type_message: "செய்தியை தட்டச்சு செய்க...",
+    no_messages_yet: "இன்னும் செய்திகள் இல்லை",
+    send_btn: "அனுப்பு",
     toast_uploaded: "படம் பதிவேற்றப்பட்டது",
     toast_analyzed: "பகுப்பாய்வு முடிந்தது",
     toast_drawn: "நிலம் சேமிக்கப்பட்டது",
@@ -644,7 +787,11 @@ const STRINGS: Record<Lang, Dict> = {
     nav_settings: "సెట్టింగ్‌లు",
     nav_admin: "అడ్మిన్ కన్సోల్",
     nav_admin_dash: "అడ్మిన్ అవలోకనం",
+    nav_manager: "మేనేజర్ హబ్",
     nav_marketplace_audit: "మార్కెట్ ఆడిట్స్",
+    management_console: "నిర్వహణ కన్సోల్",
+    workspace: "కార్యక్షేత్రం",
+    settings_preferences: "సెట్టింగ్‌లు & ప్రాధాన్యతలు",
 
     // Landing / General
     nav_features: "ఫీచర్లు",
@@ -678,6 +825,12 @@ const STRINGS: Record<Lang, Dict> = {
     search_placeholder: "వెతకండి…",
 
     // Dashboard Home
+    data_driven_growth: "డేటా ఆధారిత వ్యవసాయ వృద్ధి",
+    good_morning: "శుభోదయం",
+    good_afternoon: "నమస్కారం",
+    good_evening: "శుభ సాయంత్రం",
+    share: "భాగస్వామ్యం",
+    research: "పరిశోధన",
     soil_moisture: "నేల తేమ",
     field_temp: "పొలం ఉష్ణోగ్రత",
     scans_week: "ఈ వారం స్కాన్లు",
@@ -686,6 +839,23 @@ const STRINGS: Record<Lang, Dict> = {
     action_needed: "2 శ్రద్ధ అవసరం",
     month_increase: "+2.1% ఈ నెల",
     temp_note: "+1.8° నిన్నటి కంటే",
+    optimal: "ఉత్తమం",
+    observe: "పరిశీలించండి",
+    action: "చర్య",
+    soil_intelligence: "నేల ఇంటెలిజెన్స్",
+    predicted_soc: "అంచనా వేసిన SOC పెరుగుదల: $4–$124/సం.",
+    soc_potential: "సామర్థ్యం: 5–90 టన్నుల CO2-eq/హెక్టారు/సం.",
+    field_nitrogen: "నైట్రోజన్ సూచిక",
+    nitrogen_optimal: "నైట్రోజన్ & క్లోరోఫిల్ 94% సరైన పరిధిలో ఉన్నాయి",
+    soil_temp_10cm: "నేల ఉష్ణోగ్రత (10cm)",
+    temp_depth_note: "పోషకాల శోషణకు ఉత్తమ ఉష్ణోగ్రత",
+    active_nodes: "యాక్టివ్ నోడ్స్",
+    online_reporting: "అన్ని LoRa నోడ్స్ ఆన్‌లైన్‌లో ఉన్నాయి",
+    condition_overview: "పరిస్థితి అవలోకనం",
+    crop_growth_timeline: "పంట పెరుగుదల కాలక్రమం",
+    ai_assistant: "AI అసిస్టెంట్",
+    analyze: "విశ్లేషించు",
+    source: "మూలం",
 
     // Quick Actions
     quick_actions: "త్వరిత చర్యలు",
@@ -711,6 +881,10 @@ const STRINGS: Record<Lang, Dict> = {
     system_analytics_desc: "ఉపయోగం మరియు ధర డేటాను సమీక్షించండి",
     global_settings: "గ్లోబల్ సెట్టింగ్‌లు",
     global_settings_desc: "సిస్టమ్ కాన్ఫిగరేషన్‌లను నిర్వహించండి",
+    review_telemetry: "టెలిమెట్రీని సమీక్షించండి",
+    nodes_reporting_detail: "3 ఫీల్డ్ నోడ్స్ డేటాను అందిస్తున్నాయి",
+    crop_stress_detail: "పంట ఒత్తిడిని స్కాన్ చేయండి",
+    soil_matched_detail: "నేలకు సరిపడే పంట ఎంపికలు",
 
     // Activity & Settings
     recent_activity: "ఇటీవలి కార్యాచరణ",
@@ -773,6 +947,11 @@ const STRINGS: Record<Lang, Dict> = {
     chat_send: "పంపండి",
     chat_typing: "అగ్రి AI ఆలోచిస్తోంది…",
     chat_open: "AI ని అడగండి",
+    community_title: "రైతుల నెట్‌వర్క్",
+    community_sub: "లైవ్ రైతుల చాట్",
+    type_message: "సందేశాన్ని టైప్ చేయండి...",
+    no_messages_yet: "ఇంకా సందేశాలు లేవు",
+    send_btn: "పంపండి",
     toast_uploaded: "చిత్రం అప్‌లోడ్ అయింది",
     toast_analyzed: "విశ్లేషణ పూర్తయింది",
     toast_drawn: "భూమి సేవ్ అయింది",
@@ -793,7 +972,11 @@ const STRINGS: Record<Lang, Dict> = {
     nav_settings: "सेटिंग्ज",
     nav_admin: "अ‍ॅडमिन कन्सोल",
     nav_admin_dash: "प्रशासन विहंगावलोकन",
+    nav_manager: "मॅनेजर हब",
     nav_marketplace_audit: "मार्केटप्लेस ऑडिट",
+    management_console: "व्यवस्थापन कन्सोल",
+    workspace: "कार्यक्षेत्र",
+    settings_preferences: "सेटिंग्ज आणि प्राधान्ये",
 
     // Landing / General
     nav_features: "वैशिष्ट्ये",
@@ -827,6 +1010,12 @@ const STRINGS: Record<Lang, Dict> = {
     search_placeholder: "शोधा…",
 
     // Dashboard Home
+    data_driven_growth: "डेटा आधारित कृषी विकास",
+    good_morning: "शुभ प्रभात",
+    good_afternoon: "शुभ दुपार",
+    good_evening: "शुभ संध्याकाळ",
+    share: "शेअर करा",
+    research: "संशोधन",
     soil_moisture: "मातीतील ओलावा",
     field_temp: "शेताचे तापमान",
     scans_week: "या आठवड्यातील स्कॅन",
@@ -835,6 +1024,23 @@ const STRINGS: Record<Lang, Dict> = {
     action_needed: "2 लक्ष आवश्यक",
     month_increase: "+2.1% या महिन्यात",
     temp_note: "+1.8° कालच्या तुलनेत",
+    optimal: "उत्तम",
+    observe: "निरीक्षण",
+    action: "कृती",
+    soil_intelligence: "माती बुद्धिमत्ता",
+    predicted_soc: "अंदाजित SOC वाढ: $4–$124 प्रति वर्ष",
+    soc_potential: "क्षमता: 5–90 टन CO2-eq/हेक्टर/वर्ष",
+    field_nitrogen: "शेतातील नायट्रोजन निर्देशांक",
+    nitrogen_optimal: "नायट्रोजन 94% उत्तम क्षेत्रात आहे",
+    soil_temp_10cm: "मातीचे तापमान (10cm)",
+    temp_depth_note: "पोषक द्रव्ये शोषणासाठी उत्तम तापमान",
+    active_nodes: "सक्रिय नोड्स",
+    online_reporting: "सर्व LoRa नोड्स ऑनलाइन आहेत",
+    condition_overview: "स्थिती विहंगावलोकन",
+    crop_growth_timeline: "पीक वाढ टाइमलाइन",
+    ai_assistant: "AI सहाय्यक",
+    analyze: "विश्लेषण",
+    source: "स्रोत",
 
     // Quick Actions
     quick_actions: "जलद कृती",
@@ -860,6 +1066,10 @@ const STRINGS: Record<Lang, Dict> = {
     system_analytics_desc: "वापर आणि किंमत डेटा तपासा",
     global_settings: "ग्लोबल सेटिंग्ज",
     global_settings_desc: "सिस्टम कॉन्फिगरेशन व्यवस्थापित करा",
+    review_telemetry: "टेलीमेट्री तपासा",
+    nodes_reporting_detail: "3 फील्ड नोड्स डेटा पाठवत आहेत",
+    crop_stress_detail: "पीक ताण स्कॅन करा",
+    soil_matched_detail: "मातीनुसार पीक शिफारसी",
 
     // Activity & Settings
     recent_activity: "अलीकडील क्रियाकलाप",
@@ -922,6 +1132,11 @@ const STRINGS: Record<Lang, Dict> = {
     chat_send: "पाठवा",
     chat_typing: "अॅग्री AI विचार करत आहे…",
     chat_open: "AI ला विचारा",
+    community_title: "शेतकरी नेटवर्क",
+    community_sub: "थेट शेतकरी चॅट",
+    type_message: "संदेश टाइप करा...",
+    no_messages_yet: "अद्याप कोणतेही संदेश नाहीत",
+    send_btn: "पाठवा",
     toast_uploaded: "प्रतिमा अपलोड झाली",
     toast_analyzed: "विश्लेषण पूर्ण",
     toast_drawn: "जमीन जतन केली",
@@ -932,7 +1147,7 @@ const STRINGS: Record<Lang, Dict> = {
 type Ctx = {
   lang: Lang;
   setLang: (l: Lang) => void;
-  t: (k: string) => string;
+  t: (k: string, defaultVal?: string) => string;
   fullName: string;
 };
 
@@ -963,8 +1178,8 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const t = (k: string) => {
-    return STRINGS[lang]?.[k] ?? STRINGS.en?.[k] ?? k;
+  const t = (k: string, defaultVal?: string) => {
+    return STRINGS[lang]?.[k] ?? STRINGS.en?.[k] ?? defaultVal ?? k;
   };
 
   const fullName = LANGUAGES.find((l) => l.code === lang)?.full ?? "English";

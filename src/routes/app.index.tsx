@@ -12,6 +12,7 @@ import {
 import { Panel } from "@/components/DashboardShell";
 import { IOT_TIMESERIES } from "@/lib/mock";
 import { useAuth } from "@/lib/auth";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/app/")({
   head: () => ({ meta: [{ title: "Dashboard — Agrisynapse" }] }),
@@ -88,6 +89,7 @@ const soilData = [
 /* ── Dashboard ────────────────────────────────────────────────────────────── */
 function DashboardHome() {
   const { user } = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -103,7 +105,7 @@ function DashboardHome() {
   const name = user?.name?.split(" ")[0] ?? "there";
   const now = new Date();
   const hour = now.getHours();
-  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  const greeting = hour < 12 ? t("good_morning", "Good morning") : hour < 17 ? t("good_afternoon", "Good afternoon") : t("good_evening", "Good evening");
 
   return (
     <div className="space-y-4 animate-float-up pb-10">
@@ -112,7 +114,7 @@ function DashboardHome() {
       <div className="flex items-end justify-between gap-4 mb-1">
         <div>
           <p className="text-[11px] font-medium text-[#7a7a72] mb-1">
-            {user?.role === "manager" || user?.role === "admin" ? `${user.role.toUpperCase()} OVERSIGHT` : "Data Driven Growth"}
+            {user?.role === "manager" || user?.role === "admin" ? `${user.role.toUpperCase()} OVERSIGHT` : t("data_driven_growth", "Data Driven Growth")}
           </p>
           <h1 className="text-[28px] sm:text-[32px] font-bold tracking-[-0.04em] text-[#1a1a18]">
             {greeting}, {name}.
@@ -120,10 +122,10 @@ function DashboardHome() {
         </div>
         <div className="flex items-center gap-2">
           <button className="btn-primary inline-flex items-center gap-1.5 px-4 py-2 text-[12.5px]">
-            <span>↑</span> Share
+            <span>↑</span> {t("share", "Share")}
           </button>
           <button className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[12.5px] bg-white/70 border border-black/[0.08] text-[#7a7a72] hover:bg-white transition">
-            ✦ Research
+            ✦ {t("research", "Research")}
           </button>
           <button className="grid h-8 w-8 place-items-center rounded-full bg-white/70 border border-black/[0.08] text-[#7a7a72] hover:bg-white transition">
             <ExternalLink className="h-3.5 w-3.5" />
@@ -180,7 +182,7 @@ function DashboardHome() {
               <span className="grid h-6 w-6 place-items-center rounded-lg bg-[#1a1a18]">
                 <Sparkles className="h-3 w-3 text-white" />
               </span>
-              <span className="text-[13px] font-semibold text-[#1a1a18]">AI Assistant</span>
+              <span className="text-[13px] font-semibold text-[#1a1a18]">{t("ai_assistant", "AI Assistant")}</span>
             </div>
             <span className="text-[#7a7a72]">⋯</span>
           </div>
@@ -202,10 +204,10 @@ function DashboardHome() {
 
           <div className="flex items-center justify-between pt-2 border-t border-black/[0.06]">
             <Link to="/app/disease" className="text-[11px] text-[#7a7a72] hover:text-[#1a1a18] transition flex items-center gap-1">
-              + Source
+              + {t("source", "Source")}
             </Link>
             <Link to="/app/disease" className="text-[11px] font-medium text-[#1a1a18] hover:opacity-75 flex items-center gap-1">
-              Analyze <ArrowUpRight className="h-3 w-3" />
+              {t("analyze", "Analyze")} <ArrowUpRight className="h-3 w-3" />
             </Link>
           </div>
         </div>
@@ -214,9 +216,9 @@ function DashboardHome() {
         <div className="card p-5 lg:col-span-5">
           <div className="flex items-start justify-between mb-1">
             <div>
-              <h2 className="text-[13px] font-semibold text-[#1a1a18]">Soil Intelligence</h2>
-              <p className="text-[11px] text-[#7a7a72] mt-0.5">Predicted SOC increase: $4–$124 per year</p>
-              <p className="text-[11px] text-[#7a7a72]">potential: 5–90 tons CO2-eq/hectare/year</p>
+              <h2 className="text-[13px] font-semibold text-[#1a1a18]">{t("soil_intelligence", "Soil Intelligence")}</h2>
+              <p className="text-[11px] text-[#7a7a72] mt-0.5">{t("predicted_soc", "Predicted SOC increase: $4–$124 per year")}</p>
+              <p className="text-[11px] text-[#7a7a72]">{t("soc_potential", "potential: 5–90 tons CO2-eq/hectare/year")}</p>
             </div>
             <button className="text-[#7a7a72] hover:text-[#1a1a18] transition">
               <ArrowUpRight className="h-4 w-4" />
@@ -444,7 +446,7 @@ function DashboardHome() {
 
       {/* Row 4: Priority signals + actions */}
       <div className="grid gap-3 lg:grid-cols-[1fr_1.2fr]">
-        <Panel title="Priority Signals">
+        <Panel title={t("recent_alerts", "Priority Signals")}>
           <div className="space-y-0">
             {[
               ["North Block moisture",  "Irrigate within 90 minutes",         "warn"],
@@ -468,9 +470,13 @@ function DashboardHome() {
           </div>
         </Panel>
 
-        <Panel title="Continue Working">
+        <Panel title={t("quick_actions", "Continue Working")}>
           <div className="grid gap-2.5 sm:grid-cols-3">
-            {actions.map((action) => (
+            {[
+              { to: "/app/iot"     as const, label: t("review_telemetry", "Review telemetry"),   detail: t("nodes_reporting_detail", "3 field nodes reporting"),       icon: Droplets },
+              { to: "/app/disease" as const, label: t("analyse_plant", "Analyse a plant"),    detail: t("crop_stress_detail", "Scan for crop stress"),           icon: ScanLine },
+              { to: "/app/crops"   as const, label: t("plan_next_crop", "Plan the next crop"), detail: t("soil_matched_detail", "Soil-matched recommendations"),   icon: Leaf },
+            ].map((action) => (
               <Link key={action.to} to={action.to}
                 className="group rounded-[14px] border border-black/[0.07] bg-[rgba(245,246,240,0.7)] p-4 hover:bg-white hover:border-[#c8e44a]/40 hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-all duration-200">
                 <span className="icon-wrap grid h-7 w-7 place-items-center rounded-[8px]">
