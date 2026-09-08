@@ -430,23 +430,23 @@ export function PlantAnalysis() {
           <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-black/[0.04] border border-black/[0.06] mb-1.5">
             <span className="h-1.5 w-1.5 rounded-full bg-[#b8d940] animate-pulse" />
             <span className="text-[11px] font-semibold tracking-wide uppercase text-[#55554f]">
-              Advanced Multimodal AI Vision
+              {t("multimodal_ai_vision", "Advanced Multimodal AI Vision")}
             </span>
           </div>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#1a1a18]">
-            Plant Pathology & Pest Diagnostic Suite
+            {t("pathology_suite_title", "Plant Pathology & Pest Diagnostic Suite")}
           </h2>
           <p className="text-xs sm:text-sm text-[#7a7a72] mt-0.5">
-            Live camera viewfinder or instant file upload for precision crop diagnosis & dosages.
+            {t("pathology_suite_sub", "Live camera viewfinder or instant file upload for precision crop diagnosis & dosages.")}
           </p>
         </div>
 
         {/* Mode Switcher Pill */}
         <div className="inline-flex p-1 rounded-full bg-black/[0.05] border border-black/[0.08] shadow-inner">
           {[
-            { id: "camera", label: "Live Camera", icon: Camera },
-            { id: "upload", label: "Upload Photo", icon: Upload },
-            { id: "samples", label: "Leaf Library", icon: Sparkles },
+            { id: "camera", label: t("live_camera", "Live Camera"), icon: Camera },
+            { id: "upload", label: t("upload_photo", "Upload Photo"), icon: Upload },
+            { id: "samples", label: t("leaf_library", "Leaf Library"), icon: Sparkles },
           ].map((mode) => {
             const Icon = mode.icon;
             const isActive = activeTab === mode.id;
@@ -495,10 +495,10 @@ export function PlantAnalysis() {
                   <div className="flex items-center gap-2">
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-md text-white text-[11px] font-medium border border-white/10">
                       <span className="h-1.5 w-1.5 rounded-full bg-rose-500 animate-ping" />
-                      Live Viewfinder
+                      {t("live_viewfinder", "Live Viewfinder")}
                     </span>
                     <span className="text-white/60 text-xs hidden sm:inline">
-                      {facingMode === "environment" ? "Main Camera (Rear)" : "FaceTime (Front)"}
+                      {facingMode === "environment" ? t("main_camera", "Main Camera (Rear)") : t("facetime_camera", "FaceTime (Front)")}
                     </span>
                   </div>
 
@@ -577,7 +577,7 @@ export function PlantAnalysis() {
                           onClick={() => setActiveTab("upload")}
                           className="px-4 py-2 rounded-full bg-white/20 text-white text-xs font-semibold hover:bg-white/30 transition"
                         >
-                          Switch to File Upload
+                          {t("upload_photo", "Switch to File Upload")}
                         </button>
                       </div>
                     </div>
@@ -594,7 +594,7 @@ export function PlantAnalysis() {
                     <div className="h-10 w-10 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center">
                       <Upload className="h-4 w-4" />
                     </div>
-                    <span className="text-[10px] mt-1">Upload</span>
+                    <span className="text-[10px] mt-1">{t("upload_photo", "Upload")}</span>
                   </button>
 
                   {/* iOS Style Shutter Button */}
@@ -619,7 +619,7 @@ export function PlantAnalysis() {
                     <div className="h-10 w-10 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center">
                       <Sparkles className="h-4 w-4 text-[#b8d940]" />
                     </div>
-                    <span className="text-[10px] mt-1">Samples</span>
+                    <span className="text-[10px] mt-1">{t("leaf_library", "Samples")}</span>
                   </button>
                 </div>
               </div>
@@ -638,10 +638,10 @@ export function PlantAnalysis() {
                   <Upload className="h-7 w-7 text-[#1a1a18]" />
                 </div>
                 <h3 className="text-lg font-bold text-[#1a1a18]">
-                  Select or Drag & Drop Affected Leaf Photo
+                  {t("select_leaf_photo", "Select or Drag & Drop Affected Leaf Photo")}
                 </h3>
                 <p className="text-xs sm:text-sm text-[#7a7a72] max-w-md mx-auto mt-1 mb-6">
-                  Supports High-Res JPG, PNG, WebP or HEIC up to 15MB. Our multimodal AI analyzes leaf patterns in high detail.
+                  {t("upload_support_note", "Supports High-Res JPG, PNG, WebP or HEIC up to 15MB. Our multimodal AI analyzes leaf patterns in high detail.")}
                 </p>
                 <div className="flex items-center justify-center gap-3">
                   <button
@@ -649,14 +649,14 @@ export function PlantAnalysis() {
                     className="btn-primary inline-flex items-center gap-2 px-6 py-2.5 text-xs font-semibold"
                   >
                     <Upload className="h-4 w-4" />
-                    Browse Photos
+                    {t("browse_photos", "Browse Photos")}
                   </button>
                   <button
                     onClick={() => setActiveTab("samples")}
                     className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-black/[0.05] border border-black/[0.08] text-xs font-medium text-[#7a7a72] hover:bg-black/[0.08] transition"
                   >
                     <Sparkles className="h-3.5 w-3.5 text-[#b8d940]" />
-                    Try Preset Leaf
+                    {t("try_preset_leaf", "Try Preset Leaf")}
                   </button>
                 </div>
               </div>
@@ -666,9 +666,9 @@ export function PlantAnalysis() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-semibold uppercase tracking-wider text-[#7a7a72]">
-                    Curated Pathology Leaf Presets
+                    {t("curated_presets", "Curated Pathology Leaf Presets")}
                   </p>
-                  <span className="text-xs text-[#7a7a72]">Tap any leaf for instant diagnostic demonstration</span>
+                  <span className="text-xs text-[#7a7a72]">{t("tap_for_demo", "Tap any leaf for instant diagnostic demonstration")}</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {SAMPLE_PRESETS.map((sample) => (
@@ -711,7 +711,7 @@ export function PlantAnalysis() {
                   className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-black/[0.05] border border-black/[0.08] text-xs font-semibold text-[#1a1a18] hover:bg-black/[0.08] transition"
                 >
                   <RotateCcw className="h-3.5 w-3.5" />
-                  New Scan
+                  {t("new_scan", "New Scan")}
                 </button>
                 {result && (
                   <button
@@ -723,7 +723,7 @@ export function PlantAnalysis() {
                     }`}
                   >
                     {isSpeaking ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
-                    <span>{isSpeaking ? "Pause Narration" : "Listen (Voice Readout)"}</span>
+                    <span>{isSpeaking ? t("pause_narration", "Pause Narration") : t("listen_voice", "Listen (Voice Readout)")}</span>
                   </button>
                 )}
               </div>
@@ -734,7 +734,7 @@ export function PlantAnalysis() {
                   className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white border border-black/[0.08] text-xs font-medium text-[#7a7a72] hover:text-[#1a1a18] transition"
                 >
                   <Printer className="h-3.5 w-3.5" />
-                  <span>Print Report</span>
+                  <span>{t("print_report", "Print Report")}</span>
                 </button>
               )}
             </div>
@@ -760,7 +760,7 @@ export function PlantAnalysis() {
 
                   {/* Image Overlay Pill */}
                   <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between p-2.5 rounded-xl bg-black/60 backdrop-blur-md text-white border border-white/10">
-                    <span className="text-[11px] font-medium truncate">Specimen Analyzed</span>
+                    <span className="text-[11px] font-medium truncate">{t("specimen_analyzed", "Specimen Analyzed")}</span>
                     <span className="text-[10px] text-white/70">
                       {result?.category || "Processing..."}
                     </span>
@@ -779,12 +779,12 @@ export function PlantAnalysis() {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between mb-0.5">
                         <span className="text-[11px] font-semibold text-[#1a1a18] uppercase tracking-wider">
-                          Voice Audio Summary
+                          {t("voice_audio_summary", "Voice Audio Summary")}
                         </span>
                         {isSpeaking && (
                           <span className="flex items-center gap-1 text-[10px] text-emerald-600 font-semibold">
                             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping" />
-                            Speaking
+                            {t("speaking", "Speaking")}
                           </span>
                         )}
                       </div>
@@ -807,7 +807,7 @@ export function PlantAnalysis() {
                       </div>
                     </div>
                     <h3 className="text-base font-bold text-[#1a1a18]">
-                      Consulting Vision AI Model...
+                      {t("consulting_vision_ai", "Consulting Vision AI Model...")}
                     </h3>
                     <p className="text-xs text-[#7a7a72] mt-2 max-w-sm transition-all duration-300">
                       {analysisStep}
@@ -831,7 +831,7 @@ export function PlantAnalysis() {
                             <span
                               className={`text-[10px] px-2.5 py-0.5 rounded-full font-semibold border ${severityColor}`}
                             >
-                              {result.severity} Severity
+                              {result.severity} {t("severity_label", "Severity")}
                             </span>
                           </div>
                           <h3 className="text-2xl font-bold tracking-tight text-[#1a1a18]">
@@ -865,7 +865,7 @@ export function PlantAnalysis() {
                             </span>
                           </div>
                           <span className="text-[9px] uppercase tracking-wider text-[#7a7a72] mt-0.5">
-                            Confidence
+                            {t("confidence", "Confidence")}
                           </span>
                         </div>
                       </div>
@@ -875,9 +875,9 @@ export function PlantAnalysis() {
                         <div className="flex items-center gap-2.5 p-3 rounded-xl bg-black/[0.03]">
                           <Bug className="h-4 w-4 text-amber-600 shrink-0" />
                           <div className="min-w-0">
-                            <p className="text-[10px] text-[#7a7a72] font-medium">Pest / Vector Detected</p>
+                            <p className="text-[10px] text-[#7a7a72] font-medium">{t("pest_vector_detected", "Pest / Vector Detected")}</p>
                             <p className="text-xs font-semibold text-[#1a1a18] truncate">
-                              {result.pestIdentified || "No active insect vectors"}
+                              {result.pestIdentified || t("no_active_vectors", "No active insect vectors")}
                             </p>
                           </div>
                         </div>
@@ -885,7 +885,7 @@ export function PlantAnalysis() {
                         <div className="flex items-center gap-2.5 p-3 rounded-xl bg-black/[0.03]">
                           <Layers className="h-4 w-4 text-emerald-600 shrink-0" />
                           <div className="min-w-0">
-                            <p className="text-[10px] text-[#7a7a72] font-medium">Pathology Classification</p>
+                            <p className="text-[10px] text-[#7a7a72] font-medium">{t("pathology_classification", "Pathology Classification")}</p>
                             <p className="text-xs font-semibold text-[#1a1a18] truncate">
                               {result.category || "Crop Foliar Disorder"}
                             </p>
@@ -895,7 +895,7 @@ export function PlantAnalysis() {
 
                       {result.prognosis && (
                         <p className="text-xs text-[#555] bg-black/[0.02] p-3 rounded-xl border border-black/[0.04]">
-                          <strong className="text-[#1a1a18]">Clinical Prognosis:</strong> {result.prognosis}
+                          <strong className="text-[#1a1a18]">{t("clinical_prognosis", "Clinical Prognosis")}:</strong> {result.prognosis}
                         </p>
                       )}
                     </div>
@@ -903,10 +903,10 @@ export function PlantAnalysis() {
                     {/* Cupertino Segmented Tabs for Treatment & Details */}
                     <div className="inline-flex p-1 rounded-full bg-black/[0.04] border border-black/[0.06] w-full justify-between">
                       {[
-                        { id: "overview", label: "Symptoms", icon: Info },
-                        { id: "organic", label: "Organic Cures", icon: Sprout },
-                        { id: "chemical", label: "Chemical & Dosage", icon: FlaskConical },
-                        { id: "prevention", label: "Prevention", icon: ShieldCheck },
+                        { id: "overview", label: t("symptoms_tab", "Symptoms"), icon: Info },
+                        { id: "organic", label: t("organic_cures_tab", "Organic Cures"), icon: Sprout },
+                        { id: "chemical", label: t("chemical_dosage_tab", "Chemical & Dosage"), icon: FlaskConical },
+                        { id: "prevention", label: t("prevention_tab", "Prevention"), icon: ShieldCheck },
                       ].map((tab) => {
                         const Icon = tab.icon;
                         const isCurrent = resultSection === tab.id;
@@ -932,7 +932,7 @@ export function PlantAnalysis() {
                       <div className="card p-5 rounded-[22px] space-y-3 animate-fade-in">
                         <h4 className="text-xs font-bold uppercase tracking-wider text-[#7a7a72] flex items-center gap-1.5">
                           <Info className="h-3.5 w-3.5 text-[#b8d940]" />
-                          Diagnostic Symptoms & Affected Tissue
+                          {t("symptoms_tissue_header", "Diagnostic Symptoms & Affected Tissue")}
                         </h4>
                         <ul className="space-y-2">
                           {(result.symptoms || ["Visual lesions consistent with disease identification"]).map(
@@ -946,7 +946,7 @@ export function PlantAnalysis() {
                         </ul>
                         {result.affectedParts && result.affectedParts.length > 0 && (
                           <div className="pt-2 border-t border-black/[0.05] flex items-center gap-1.5 flex-wrap">
-                            <span className="text-[11px] text-[#7a7a72]">Affected Anatomy:</span>
+                            <span className="text-[11px] text-[#7a7a72]">{t("affected_anatomy", "Affected Anatomy:")}</span>
                             {result.affectedParts.map((part) => (
                               <span
                                 key={part}
@@ -966,10 +966,10 @@ export function PlantAnalysis() {
                         <div className="flex items-center justify-between">
                           <h4 className="text-xs font-bold uppercase tracking-wider text-[#3d5a00] flex items-center gap-1.5">
                             <Sprout className="h-3.5 w-3.5 text-[#b8d940]" />
-                            Organic & Biological Curing Solutions
+                            {t("organic_biological_header", "Organic & Biological Curing Solutions")}
                           </h4>
                           <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-semibold">
-                            Eco-Friendly
+                            {t("eco_friendly", "Eco-Friendly")}
                           </span>
                         </div>
                         <ul className="space-y-2.5">
@@ -994,10 +994,10 @@ export function PlantAnalysis() {
                         <div className="flex items-center justify-between">
                           <h4 className="text-xs font-bold uppercase tracking-wider text-rose-800 flex items-center gap-1.5">
                             <FlaskConical className="h-3.5 w-3.5 text-rose-600" />
-                            Targeted Chemical Treatments & Active Dosages
+                            {t("targeted_chemical_header", "Targeted Chemical Treatments & Active Dosages")}
                           </h4>
                           <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 font-semibold">
-                            Prescription Grade
+                            {t("prescription_grade", "Prescription Grade")}
                           </span>
                         </div>
 
@@ -1011,7 +1011,7 @@ export function PlantAnalysis() {
                                 <div className="flex items-center justify-between flex-wrap gap-1">
                                   <h5 className="text-xs font-bold text-[#1a1a18]">{med.medicineName}</h5>
                                   <span className="text-[11px] font-semibold text-[#3d5a00] bg-[#b8d940]/20 px-2 py-0.5 rounded-md">
-                                    Dosage: {med.dosage}
+                                    {t("dosage_label", "Dosage:")} {med.dosage}
                                   </span>
                                 </div>
                                 <p className="text-[11px] text-[#666] mt-1.5 leading-relaxed">
@@ -1033,7 +1033,7 @@ export function PlantAnalysis() {
 
                         {result.recoveryTimeline && (
                           <p className="text-[11px] text-[#7a7a72] pt-2 border-t border-black/[0.05]">
-                            ⏱️ Expected recovery timeline: <strong>{result.recoveryTimeline}</strong>
+                            ⏱️ {t("expected_recovery_timeline", "Expected recovery timeline:")} <strong>{result.recoveryTimeline}</strong>
                           </p>
                         )}
                       </div>
@@ -1044,7 +1044,7 @@ export function PlantAnalysis() {
                       <div className="card p-5 rounded-[22px] space-y-3 animate-fade-in">
                         <h4 className="text-xs font-bold uppercase tracking-wider text-[#1a1a18] flex items-center gap-1.5">
                           <ShieldCheck className="h-3.5 w-3.5 text-[#b8d940]" />
-                          Cultural Sanitation & Preventative Protocol
+                          {t("cultural_sanitation_header", "Cultural Sanitation & Preventative Protocol")}
                         </h4>
                         <ul className="space-y-2">
                           {(
@@ -1063,7 +1063,7 @@ export function PlantAnalysis() {
 
                         {result.irrigationAdvisory && (
                           <div className="p-3 rounded-xl bg-blue-50/60 border border-blue-100 text-xs text-blue-900">
-                            <strong>Irrigation Note:</strong> {result.irrigationAdvisory}
+                            <strong>{t("irrigation_note_label", "Irrigation Note:")}</strong> {result.irrigationAdvisory}
                           </div>
                         )}
                       </div>
@@ -1074,7 +1074,7 @@ export function PlantAnalysis() {
                       <div className="flex items-center gap-2">
                         <MessageSquare className="h-4 w-4 text-[#b8d940]" />
                         <h4 className="text-xs font-bold text-[#1a1a18]">
-                          Ask Agri AI about this Scan
+                          {t("ask_about_scan_title", "Ask Agri AI about this Scan")}
                         </h4>
                       </div>
 
@@ -1091,7 +1091,7 @@ export function PlantAnalysis() {
                               }`}
                             >
                               <strong className="block text-[10px] font-semibold opacity-75 mb-0.5">
-                                {msg.role === "user" ? "You" : "Agri AI Pathologist"}
+                                {msg.role === "user" ? t("you", "You") : t("agri_ai_pathologist", "Agri AI Pathologist")}
                               </strong>
                               {msg.text}
                             </div>
@@ -1104,7 +1104,7 @@ export function PlantAnalysis() {
                           type="text"
                           value={question}
                           onChange={(e) => setQuestion(e.target.value)}
-                          placeholder="e.g. Can I spray if rain is expected tonight?"
+                          placeholder={t("ask_scan_placeholder", "e.g. Can I spray if rain is expected tonight?")}
                           className="flex-1 px-3.5 py-2 text-xs rounded-xl bg-black/[0.04] border border-black/[0.08] focus:outline-none focus:ring-1 focus:ring-[#b8d940]"
                         />
                         <button

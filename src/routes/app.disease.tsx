@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageIntro, Panel } from "@/components/DashboardShell";
 import { PlantAnalysis } from "@/components/PlantAnalysis";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/app/disease")({
   head: () => ({
@@ -14,38 +15,38 @@ export const Route = createFileRoute("/app/disease")({
   component: DiseasePage,
 });
 
-const TIPS = [
-  "Shoot in daylight, avoid harsh shadows on the lesion.",
-  "Fill the frame with one affected leaf, not the whole plant.",
-  "Include both upper and lower leaf surfaces when possible.",
-  "Re-scan 7 days after treatment to confirm recovery.",
-];
-
 function DiseasePage() {
+  const { t } = useI18n();
+
   return (
     <>
       <PageIntro
         index="02 / Diagnose"
-        eyebrow="Computer vision pathology"
-        title="Photograph the leaf. Read the verdict."
-        subtitle="Our vision model names the crop and the disease, rates severity and returns a treatment and prevention plan in your language."
+        eyebrow={t("multimodal_ai_vision", "Computer vision pathology")}
+        title={t("pathology_suite_title", "Photograph the leaf. Read the verdict.")}
+        subtitle={t("pathology_suite_sub", "Our vision model names the crop and the disease, rates severity and returns a treatment and prevention plan in your language.")}
       />
       <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <div className="rounded-2xl border border-border bg-card overflow-hidden">
           <PlantAnalysis />
         </div>
         <div className="space-y-6">
-          <Panel title="How to get an accurate scan">
+          <Panel title={t("how_accurate_scan", "How to get an accurate scan")}>
             <ol className="space-y-3 text-sm text-muted-foreground">
-              {TIPS.map((tip, i) => (
-                <li key={tip} className="flex gap-3">
+              {[
+                t("tip_1", "Shoot in daylight, avoid harsh shadows on the lesion."),
+                t("tip_2", "Fill the frame with one affected leaf, not the whole plant."),
+                t("tip_3", "Include both upper and lower leaf surfaces when possible."),
+                t("tip_4", "Re-scan 7 days after treatment to confirm recovery."),
+              ].map((tip, i) => (
+                <li key={i} className="flex gap-3">
                   <span className="font-serif text-primary">{String(i + 1).padStart(2, "0")}</span>
                   <span className="leading-relaxed">{tip}</span>
                 </li>
               ))}
             </ol>
           </Panel>
-          <Panel title="Common this season">
+          <Panel title={t("common_this_season", "Common this season")}>
             <ul className="space-y-3 text-sm">
               {[
                 ["Rice blast", "Paddy · high humidity"],

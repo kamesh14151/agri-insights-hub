@@ -5,7 +5,7 @@ import {
   Radar, RadarChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from "recharts";
 import { Battery, CheckCircle2, Droplets, Gauge, Loader2, RefreshCw, Thermometer, Wifi, Info, Zap } from "lucide-react";
-import { PageIntro, Panel } from "@/components/DashboardShell";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/app/iot")({
   head: () => ({
@@ -65,14 +65,7 @@ function normaliseTelemetry(payload: unknown): Telemetry {
   };
 }
 
-function statusFor(reading: Telemetry) {
-  if (reading.moisture < 30) return { label: "Irrigation needed", color: "text-rose-600 bg-rose-500/10 border-rose-500/20" };
-  if (reading.ph && (reading.ph < 5.5 || reading.ph > 7.5)) return { label: "pH attention", color: "text-amber-600 bg-amber-500/10 border-amber-500/20" };
-  return { label: "Soil in range", color: "text-emerald-600 bg-emerald-500/10 border-emerald-500/20" };
-}
-
 function MetricCard({ icon: Icon, label, value, unit, colorClass = "text-[#1a1a18]" }: { icon: typeof Gauge; label: string; value: number | string; unit: string; colorClass?: string }) {
-  // Format the number to 1 decimal place to prevent overlapping
   const formattedValue = typeof value === "number" ? value.toFixed(1) : value;
   
   return (
@@ -92,6 +85,7 @@ function MetricCard({ icon: Icon, label, value, unit, colorClass = "text-[#1a1a1
 }
 
 function IotPage() {
+  const { t } = useI18n();
   const [telemetry, setTelemetry] = useState<Telemetry | null>(null);
   const [history, setHistory] = useState<Reading[]>([]);
   const [connected, setConnected] = useState(false);
@@ -147,17 +141,34 @@ function IotPage() {
   }, [connected]);
 
   const currentTelemetry = telemetry ?? emptyTelemetry;
-  const status = statusFor(currentTelemetry);
+  
+  const status = useMemo(() => {
+    if (currentTelemetry.moisture < 30) {
+      return { label: t("irrigation_needed", "Irrigation needed"), color: "text-rose-600 bg-rose-500/10 border-rose-500/20" };
+    }
+    if (currentTelemetry.ph && (currentTelemetry.ph < 5.5 || currentTelemetry.ph > 7.5)) {
+      return { label: t("ph_attention", "pH attention"), color: "text-amber-600 bg-amber-500/10 border-amber-500/20" };
+    }
+    return { label: t("soil_in_range", "Soil in range"), color: "text-emerald-600 bg-emerald-500/10 border-emerald-500/20" };
+  }, [currentTelemetry, t]);
+
   const nutrients = useMemo(() => [
-    { name: "Nitrogen", value: currentTelemetry.nitrogen }, { name: "Phosphorus", value: currentTelemetry.phosphorus }, { name: "Potassium", value: currentTelemetry.potassium },
-  ], [currentTelemetry]);
+    { name: t("nitrogen", "Nitrogen"), value: currentTelemetry.nitrogen },
+    { name: t("phosphorus", "Phosphorus"), value: currentTelemetry.phosphorus },
+    { name: t("potassium", "Potassium"), value: currentTelemetry.potassium },
+  ], [currentTelemetry, t]);
+
   const soilProfile = useMemo(() => [
-    { metric: "Moisture", value: Math.min(100, currentTelemetry.moisture) },
-    { metric: "pH balance", value: Math.min(100, Math.max(0, (1 - Math.abs(currentTelemetry.ph - 6.5) / 6.5) * 100)) },
-    { metric: "Nitrogen", value: Math.min(100, currentTelemetry.nitrogen) },
-    { metric: "Phosphorus", value: Math.min(100, currentTelemetry.phosphorus) },
-    { metric: "Potassium", value: Math.min(100, currentTelemetry.potassium) },
-  ], [currentTelemetry]);
+    { metric: t("moisture", "Moisture"), value: Math.min(100, currentTelemetry.moisture) },
+    { metric: t("ph_balance", "pH balance"), value: Math.min(100, Math.max(0, (1 - Math.abs(currentTelemetry.ph - 6.5) / 6.5) * 100)) },
+    { metric: t("nitrogen", "Nitrogen"), value: Math.min(100, currentTelemetry.nitrogen) },
+    { metric: t("phosphorus", "Phosphorus"), value: Math.min(100, currentTelemetry.phosphorus) },
+    { metric: t("potassium", "Potassium"), value: Math.min(100, currentTelemetry.potassium) },
+  ], [currentTelemetry, t]);
+
+  const nodeDisplayName = currentTelemetry.name === "Mock Soil Node (Demo)"
+    ? t("mock_node_demo", "Mock Soil Node (Demo)")
+    : (currentTelemetry.name || t("mock_node_demo", "Mock Soil Node (Demo)"));
 
   return (
     <div className="w-full overflow-x-hidden bg-gradient-to-br from-green-50 via-emerald-50/50 to-blue-50/30 min-h-full">
@@ -169,22 +180,24 @@ function IotPage() {
             <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-black/[0.04] border border-black/[0.06] mb-1.5 backdrop-blur-md">
               <span className={`h-1.5 w-1.5 rounded-full animate-pulse ${connected ? "bg-emerald-500" : "bg-amber-500"}`} />
               <span className="text-[11px] font-semibold tracking-wide uppercase text-[#555]">
-                IoT Telemetry
+                {t("iot_telemetry", "IoT Telemetry")}
               </span>
             </div>
             <h2 className="text-xl sm:text-3xl font-bold tracking-tight text-[#1a1a18]">
-              Soil Hardware Nodes
+              {t("soil_hardware_nodes", "Soil Hardware Nodes")}
             </h2>
             <p className="text-xs sm:text-sm mt-0.5 text-[#7a7a72]">
-              Live, hyper-local soil readings streamed directly from the field.
+              {t("live_soil_stream", "Live, hyper-local soil readings streamed directly from the field.")}
             </p>
           </div>
           
           {/* Connection Status & Refresh */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-            <div className={`px-4 py-2 rounded-full backdrop-blur-md border text-xs font-semibold flex items-center gap-2 bg-white/70 border-black/10 text-black`}>
+            <div className="px-4 py-2 rounded-full backdrop-blur-md border text-xs font-semibold flex items-center gap-2 bg-white/70 border-black/10 text-black">
               <Wifi className={`w-3.5 h-3.5 ${connected ? "text-emerald-500" : "text-black/40"}`} />
-              {connected ? (IOT_ENDPOINT ? `Connected · ${IOT_POLL_SECONDS}s` : `Mock Mode · ${IOT_POLL_SECONDS}s`) : loading ? "Connecting..." : "Not configured"}
+              {connected 
+                ? (IOT_ENDPOINT ? `${t("connected", "Connected")} · ${IOT_POLL_SECONDS}s` : `${t("mock_mode", "Mock Mode")} · ${IOT_POLL_SECONDS}s`) 
+                : (loading ? t("connecting", "Connecting...") : t("not_configured", "Not configured"))}
             </div>
             
             <button 
@@ -193,7 +206,7 @@ function IotPage() {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition backdrop-blur-md bg-[#1a1a18] text-white hover:bg-black/80 disabled:opacity-50"
             >
               <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
-              Refresh
+              {t("refresh", "Refresh")}
             </button>
           </div>
         </div>
@@ -209,7 +222,7 @@ function IotPage() {
         {!telemetry ? (
           <div className="flex flex-col items-center justify-center py-20 bg-white/40 rounded-[32px] border border-black/5 backdrop-blur-xl">
             <Loader2 className="w-8 h-8 animate-spin mb-4 text-black/30" />
-            <p className="text-black/60 font-medium">Establishing hardware handshake...</p>
+            <p className="text-black/60 font-medium">{t("establishing_handshake", "Establishing hardware handshake...")}</p>
           </div>
         ) : (
           <div className="space-y-6 animate-fade-in">
@@ -218,10 +231,10 @@ function IotPage() {
               <div>
                 <h2 className="font-bold text-2xl text-[#1a1a18] flex items-center gap-2">
                   <Zap className="w-5 h-5 text-emerald-500" />
-                  {telemetry.name}
+                  {nodeDisplayName}
                 </h2>
                 <p className="mt-1 text-xs font-medium text-[#7a7a72]">
-                  Sync Timestamp: {new Date(telemetry.timestamp).toLocaleString()}
+                  {t("sync_timestamp", "Sync Timestamp")}: {new Date(telemetry.timestamp).toLocaleString()}
                 </p>
               </div>
               <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-bold uppercase border ${status.color}`}>
@@ -232,11 +245,38 @@ function IotPage() {
 
             {/* ── Metric Cards ── */}
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-              <MetricCard icon={Droplets} label="Soil Moisture" value={telemetry.moisture} unit="%" colorClass={telemetry.moisture < 30 ? "text-rose-600" : "text-[#1a1a18]"} />
-              <MetricCard icon={Thermometer} label="Temperature" value={telemetry.temperature} unit="°C" />
-              <MetricCard icon={Gauge} label="Soil pH" value={telemetry.ph || "—"} unit="" colorClass={(telemetry.ph < 5.5 || telemetry.ph > 7.5) ? "text-amber-600" : "text-[#1a1a18]"} />
-              <MetricCard icon={Gauge} label="Humidity" value={telemetry.humidity} unit="% RH" />
-              <MetricCard icon={Battery} label="Battery" value={telemetry.battery} unit="%" />
+              <MetricCard 
+                icon={Droplets} 
+                label={t("soil_moisture", "Soil Moisture")} 
+                value={telemetry.moisture} 
+                unit="%" 
+                colorClass={telemetry.moisture < 30 ? "text-rose-600" : "text-[#1a1a18]"} 
+              />
+              <MetricCard 
+                icon={Thermometer} 
+                label={t("temperature", "Temperature")} 
+                value={telemetry.temperature} 
+                unit="°C" 
+              />
+              <MetricCard 
+                icon={Gauge} 
+                label={t("soil_ph", "Soil pH")} 
+                value={telemetry.ph || "—"} 
+                unit="" 
+                colorClass={(telemetry.ph < 5.5 || telemetry.ph > 7.5) ? "text-amber-600" : "text-[#1a1a18]"} 
+              />
+              <MetricCard 
+                icon={Gauge} 
+                label={t("humidity", "Humidity")} 
+                value={telemetry.humidity} 
+                unit="% RH" 
+              />
+              <MetricCard 
+                icon={Battery} 
+                label={t("battery", "Battery")} 
+                value={telemetry.battery} 
+                unit="%" 
+              />
             </div>
 
             {/* ── Charts ── */}
@@ -244,7 +284,7 @@ function IotPage() {
               
               {/* Trend Chart */}
               <div className="p-6 rounded-[32px] backdrop-blur-xl bg-white/70 border border-black/5 flex flex-col">
-                <h3 className="font-bold text-[#1a1a18] mb-6">Live Telemetry Trend</h3>
+                <h3 className="font-bold text-[#1a1a18] mb-6">{t("live_telemetry_trend", "Live Telemetry Trend")}</h3>
                 <div className="h-[290px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={history}>
@@ -253,9 +293,9 @@ function IotPage() {
                       <YAxis tick={{ fontSize: 11, fill: "rgba(0,0,0,0.4)" }} axisLine={false} tickLine={false} width={32} />
                       <Tooltip contentStyle={{ background: "white", border: "none", borderRadius: 16, fontSize: 12, boxShadow: "0 10px 30px rgba(0,0,0,0.08)" }} />
                       <Legend wrapperStyle={{ fontSize: 12, paddingTop: 10 }} />
-                      <Line type="monotone" dataKey="moisture" name="Moisture %" stroke="#10b981" strokeWidth={3} dot={false} activeDot={{ r: 6 }} />
-                      <Line type="monotone" dataKey="temperature" name="Temp °C" stroke="#f43f5e" strokeWidth={3} dot={false} />
-                      <Line type="monotone" dataKey="humidity" name="Humidity %" stroke="#3b82f6" strokeWidth={3} dot={false} />
+                      <Line type="monotone" dataKey="moisture" name={`${t("moisture", "Moisture")} %`} stroke="#10b981" strokeWidth={3} dot={false} activeDot={{ r: 6 }} />
+                      <Line type="monotone" dataKey="temperature" name={`${t("temperature", "Temperature")} °C`} stroke="#f43f5e" strokeWidth={3} dot={false} />
+                      <Line type="monotone" dataKey="humidity" name={`${t("humidity", "Humidity")} %`} stroke="#3b82f6" strokeWidth={3} dot={false} />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
@@ -263,8 +303,8 @@ function IotPage() {
 
               {/* NPK Pie */}
               <div className="p-6 rounded-[32px] backdrop-blur-xl bg-white/70 border border-black/5 flex flex-col">
-                <h3 className="font-bold text-[#1a1a18] mb-2">Macronutrient Balance (NPK)</h3>
-                <p className="text-xs text-[#7a7a72] mb-4">Values shown in the unit reported by your hardware sensor.</p>
+                <h3 className="font-bold text-[#1a1a18] mb-2">{t("macronutrient_balance", "Macronutrient Balance (NPK)")}</h3>
+                <p className="text-xs text-[#7a7a72] mb-4">{t("sensor_unit_note", "Values shown in the unit reported by your hardware sensor.")}</p>
                 <div className="h-[270px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -280,7 +320,7 @@ function IotPage() {
 
               {/* NPK Bar */}
               <div className="p-6 rounded-[32px] backdrop-blur-xl bg-white/70 border border-black/5 flex flex-col">
-                <h3 className="font-bold text-[#1a1a18] mb-6">NPK Absolute Comparison</h3>
+                <h3 className="font-bold text-[#1a1a18] mb-6">{t("npk_comparison", "NPK Absolute Comparison")}</h3>
                 <div className="h-[270px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={nutrients}>
@@ -298,12 +338,12 @@ function IotPage() {
 
               {/* Radar Chart */}
               <div className="p-6 rounded-[32px] backdrop-blur-xl bg-white/70 border border-black/5 flex flex-col">
-                <h3 className="font-bold text-[#1a1a18] mb-6">Comprehensive Soil Health Profile</h3>
+                <h3 className="font-bold text-[#1a1a18] mb-6">{t("soil_health_profile", "Comprehensive Soil Health Profile")}</h3>
                 <div className="h-[270px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <RadarChart data={soilProfile}>
                       <Tooltip contentStyle={{ background: "white", border: "none", borderRadius: 16, fontSize: 12, boxShadow: "0 10px 30px rgba(0,0,0,0.08)" }} formatter={(val: number) => val.toFixed(1)} />
-                      <Radar name="Soil health" dataKey="value" stroke="#10b981" fill="#10b981" fillOpacity={0.25} />
+                      <Radar name={t("soil_intelligence", "Soil Health")} dataKey="value" stroke="#10b981" fill="#10b981" fillOpacity={0.25} />
                     </RadarChart>
                   </ResponsiveContainer>
                 </div>
@@ -319,3 +359,4 @@ function IotPage() {
     </div>
   );
 }
+
